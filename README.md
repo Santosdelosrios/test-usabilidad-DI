@@ -9,6 +9,10 @@ Prototipo navegable para el test de usabilidad de Diseño de Futuros (UTDT): una
 - Para que el tutor converse libremente, pegar en la preparación una clave gratuita de Gemini (https://aistudio.google.com/apikey). La clave queda guardada solo en ese navegador: no está en este repositorio.
 - La cámara solo se usa para saber si el participante tiene puestas las gafas: no guarda ni envía imágenes.
 
+## Guión del test
+
+El guión para moderar las sesiones (objetivo, hipótesis, preparación, intro, preguntas, escenario, proyectos y planilla del observador) está en [`guion.md`](guion.md).
+
 ## Compilarlo
 
 Hace falta [Node.js](https://nodejs.org) 18 o más nuevo.
