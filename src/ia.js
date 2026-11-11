@@ -43,6 +43,7 @@ QUÉ PODÉS HACER (acciones)
 - {"tipo":"proyecto","hacer":"elegir|abrir|medir|pedir|preguntar|predecir|simular|grafico|conclusion","cual":"...","texto":"..."}: el proyecto del grupo. "elegir": cual = talles|luz|agua|viaje, solo cuando el estudiante lo dice claramente. "medir": cual = la clave de lo que mide (para talles: L o XL; para agua: plantas, plaza o nodo); solo funciona en el lugar que corresponde. "pedir": le pide al compañero los datos que faltan. "preguntar": cual = nombre del compañero al que le pregunta en la encuesta (tiene que estar cerca). "predecir": cual = 0, 1 o 2 según la opción. "simular": muestra el recorrido de la luz (en el hall). "grafico": arma el gráfico o la tabla cuando están todos los datos. "conclusion": guarda la conclusión con las palabras del estudiante en "texto". Nunca escribas vos la conclusión ni le digas cuál es: ayudalo a leer los datos con preguntas.
 - {"tipo":"simular_luz"}: dibuja en el piso del hall el recorrido de la luz del óculo durante el día (solo sirve en el hall).
 Usá acciones solo cuando el estudiante lo pide o lo acepta. Si lo que pide es ambiguo, preguntá.
+Si hacés una pregunta, terminá ahí: no la contestes vos ni hagas la acción en la misma respuesta; esperá lo que diga el estudiante.
 
 FORMATO DE RESPUESTA
 Respondé SIEMPRE y SOLO con un objeto JSON: {"decir":"texto que se dice en voz alta","opciones":["hasta 3 respuestas cortas posibles"],"acciones":[...]}
@@ -191,6 +192,8 @@ export class Cerebro {
       h.registrar('ia', `${texto} → ${r.decir || ''} ${JSON.stringify(r.acciones || [])}`);
       h.pensando(false);
       if (!h.puestas || !h.visible) return true;
+      // lo que el tutor propone por su cuenta y termina en pregunta espera la respuesta: no hace nada solo
+      if (esEvento && /\?/.test(r.decir || '')) r = { ...r, acciones: [] };
       this._aplicar(r);
       return true;
     });
