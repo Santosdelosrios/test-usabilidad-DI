@@ -4,7 +4,7 @@ Diseño de Futuros (UTDT) · TUTOR 2040 · rama `tareas-ia`
 
 Este test evalúa una sola cosa: el tutor de IA que explica y ayuda a aprender. El participante no recorre la escuela: está sentado en su mesa del aula-taller, con las gafas puestas, y hace seis tareas cortas. Es un modo aparte del test de mundo libre (que está en [`guion.md`](guion.md)) y se elige en la misma pantalla de preparación.
 
-Es **autoguiado**: la persona lo hace sola, sin moderador. Lee las instrucciones, sigue las consignas que aparecen en pantalla, pasa de tarea sin que nadie intervenga y al final descarga los resultados. Si alguien la acompaña, tiene un panel de respaldo escondido (Shift + M).
+Es **autoguiado**: la persona lo hace sola, sin moderador. Lee las instrucciones, sigue las consignas que aparecen en pantalla, pasa de tarea sin que nadie intervenga y al final ve un agradecimiento. La persona no ve ninguna descarga: los resultados se bajan desde un panel escondido (Shift + M), que también sirve de respaldo si alguien la acompaña.
 
 Las respuestas del tutor están escritas de antemano: no usa la IA real ni la clave de Gemini. Así todos los participantes ven lo mismo y el test no depende de la conexión con el modelo.
 
@@ -30,7 +30,7 @@ La pantalla de preparación es la misma del test de mundo libre (ver [`guion.md`
 1. **Instrucciones.** Aparece una pantalla «Antes de empezar» que explica en cinco puntos qué va a hacer: 6 tareas cortas, la consigna arriba, cómo hablarle al tutor (según la voz que haya en ese navegador), cómo mirar (según la mirada esté activada o no), que las tareas pasan solas y que no hay respuestas buenas ni malas. Con «Empezar» o Enter arranca la tarea 1 y empieza a correr su tiempo.
 2. **Cada tarea.** Arriba hay una tarjeta blanca con el número de tarea, el escenario y la consigna. No muestra el nombre de la tarea, para no dar pistas. Cuando cambia de tarea, la tarjeta se anima para que se note.
 3. **Pasar de tarea.** Cuando la tarea termina, la tarjeta muestra «✓ Listo · sigue en 4» y a los cuatro segundos pasa sola a la siguiente (con «Siguiente →» se adelanta). Si la persona se traba, puede tocar «Pasar a la siguiente» en la tarjeta o decir «siguiente tarea»: la tarea queda anotada como salteada.
-4. **Fin.** Después de la tarea 6 aparece «¡Terminaste las 6 tareas!» con el botón «Descargar resultados».
+4. **Fin.** Después de la tarea 6 aparece «¡Terminaste las 6 tareas!» con un agradecimiento. No se le pide nada más.
 
 Cuándo se considera terminada cada tarea para pasar a la siguiente está en cada tarea, abajo («Pasa a la siguiente»). Es un poco más exigente que el éxito: por ejemplo, en la tarea 1 alcanza con abrir la explicación para cumplirla, pero pasa a la siguiente recién cuando la explicación termina.
 
@@ -155,7 +155,7 @@ Las teclas de siempre siguen igual: G pone o saca las gafas, H pasa al modo revi
 
 ## Resultados
 
-El botón **«Descargar resultados»** de la pantalla final (también está en el panel de respaldo) baja dos archivos con el nombre del participante y la fecha. Conviene descargarlos antes de cerrar o recargar la página: no se guardan en otro lado.
+Al terminar, quien organizó la prueba abre el panel con **Shift + M** y toca **«Descargar resultados»**: baja dos archivos con el nombre del participante y la fecha. Hay que descargarlos antes de cerrar o recargar la página, porque no se guardan en otro lado.
 
 - **CSV** (separado por punto y coma, se abre en Excel o en Google Sheets): una fila por tarea con el estado automático, el detalle, si la salteó, la marca del moderador (si alguien acompañó), los intentos, el tiempo hasta cumplirla y el tiempo total, las pistas, las sugerencias (mostradas, aceptadas, descartadas y retenidas por el foco), los controles y preguntas del corazón, y cuántas frases entendió y cuántas no. Abajo, una tabla por ejercicio y la lista de frases de voz con el segundo y la tarea.
 - **JSON** con todo lo anterior y además el registro crudo de eventos, segundo a segundo.

@@ -183,11 +183,10 @@ export class TareasIA {
     this.empezar(1);
   }
 
+  // cierre: solo el agradecimiento (los resultados se bajan desde el panel escondido, Shift + M)
   _final() {
     this.el.pantalla.innerHTML = `<div class="caja"><div class="k">TUTOR 2040 · Prueba de las gafas</div><h1>¡Terminaste las <em>6 tareas</em>!</h1>
-      <p>Gracias por probar las gafas. Para guardar lo que pasó en la prueba, descargá los resultados.</p>
-      <div class="botones"><button type="button" class="prim" data-m="descargar">Descargar resultados</button><button type="button" data-m="json">Solo JSON</button></div>
-      <p class="nota">Se bajan dos archivos (CSV y JSON) con el nombre y la fecha. Si el navegador bloquea el segundo, usá «Solo JSON».</p></div>`;
+      <p>Gracias por probar las gafas.</p></div>`;
     this.el.pantalla.hidden = false;
   }
 
