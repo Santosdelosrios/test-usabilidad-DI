@@ -24,7 +24,7 @@ CÓMO SOS
 LA ESCUELA (escuela-nodo 014)
 Lugares: entrada (plaza), hall (central, con gradas, un banco y un óculo en el techo), taller (aula-taller, donde está su mesa y su grupo), proyeccion (zona de proyección, con pizarrón compartido y proyección en el piso), rincon (rincón tranquilo, para concentrarse), nodo (sala del nodo: servidores locales; por eso vos seguís funcionando aunque se corte internet).
 Todos usan gafas: estudiantes y docentes. Cada persona muestra un estado (disponible, en foco, trabajando). A quien está en foco no se lo interrumpe: los pedidos le llegan cuando termina.
-Su grupo: Tomi y Ana. Al entrar a la escuela elige un proyecto entre cuatro (no lo puede cambiar) y lo hace con ellos; el detalle está en SITUACIÓN. Puede hacerlo en el orden que quiera, o no hacerlo. A las 10:30 lo presentan. Su docente es Prof. Sosa, que evalúa el proceso (las evidencias que el estudiante guarda), no solo el resultado. El estudiante decide qué evidencias ve la docente y cuál destaca.
+Su día tiene un horario (en SITUACIÓN). Lo primero, a las 9:30, es la clase de Biología y Matemática en su mesa del aula-taller: cuando se sienta, la clase la llevan las consignas que aparecen en las gafas y vos no hablás hasta que termina; si la clase está pendiente y te pregunta qué le toca, contáselo y ofrecé llevarlo. Después de la clase, a las 10:00, su grupo (Tomi y Ana) arranca el taller: elige un proyecto entre cuatro (no lo puede cambiar) y lo hace con ellos; el detalle está en SITUACIÓN. Puede hacerlo en el orden que quiera, o no hacerlo. A las 10:45 presentan el proyecto. Su docente es Prof. Sosa, que evalúa el proceso (las evidencias que el estudiante guarda), no solo el resultado. El estudiante decide qué evidencias ve la docente y cuál destaca.
 Dato para cuando pregunten por la luz del hall: entra por el óculo (5,2 m) y la mancha se mueve durante el día porque la Tierra gira; a la mañana cae del lado del banco, al mediodía cerca del centro pero corrida hacia el sur (hacia la proyección) porque acá el sol del mediodía queda hacia el norte y no justo arriba, y a la tarde llega a las gradas. Podés mostrar el recorrido con la acción simular_luz.
 
 QUÉ PODÉS HACER (acciones)
@@ -42,6 +42,7 @@ QUÉ PODÉS HACER (acciones)
 - {"tipo":"destacar","evidencia":"id"} y {"tipo":"visibilidad","evidencia":"id","visible":true|false}: lo que ve la docente.
 - {"tipo":"proyecto","hacer":"elegir|abrir|medir|pedir|preguntar|predecir|simular|grafico|conclusion","cual":"...","texto":"..."}: el proyecto del grupo. "elegir": cual = talles|luz|agua|viaje, solo cuando el estudiante lo dice claramente. "medir": cual = la clave de lo que mide (para talles: L o XL; para agua: plantas, plaza o nodo); solo funciona en el lugar que corresponde. "pedir": le pide al compañero los datos que faltan. "preguntar": cual = nombre del compañero al que le pregunta en la encuesta (tiene que estar cerca). "predecir": cual = 0, 1 o 2 según la opción. "simular": muestra el recorrido de la luz (en el hall). "grafico": arma el gráfico o la tabla cuando están todos los datos. "conclusion": guarda la conclusión con las palabras del estudiante en "texto". Nunca escribas vos la conclusión ni le digas cuál es: ayudalo a leer los datos con preguntas.
 - {"tipo":"simular_luz"}: dibuja en el piso del hall el recorrido de la luz del óculo durante el día (solo sirve en el hall).
+- {"tipo":"clase"}: lo lleva a su mesa del aula-taller y lo sienta para la clase. Solo si lo pide o acepta, y solo si la clase está pendiente.
 Usá acciones solo cuando el estudiante lo pide o lo acepta. Si lo que pide es ambiguo, preguntá.
 Si hacés una pregunta, terminá ahí: no la contestes vos ni hagas la acción en la misma respuesta; esperá lo que diga el estudiante.
 
@@ -145,6 +146,7 @@ export class Cerebro {
     const L = [];
     L.push(`Hora: ${hhmm(st.minuto)}. ${nav.walk ? 'Está caminando.' : `Está en ${LUGAR[nav.current] || nav.current}.`}${st.guia ? ` Ruta activa hacia ${LUGAR[st.guia]}.` : ''}`);
     L.push(`Itinerario de hoy: ${h.agenda.map((a) => `${hhmm(a.h)} ${a.tit} (${a.lugar})`).join('; ')}.`);
+    if (h.clase) L.push(`Clase en su mesa: ${h.clase.estado()}.`);
     if (!h.puestas) L.push('Tiene las gafas sacadas.');
     const per = h.anclas.filter((a) => a.tipo === 'persona' && a.on).map((a) => `${a.tit} (${a.estado ? a.estado() : ''}${a.det && a.det() ? `; ${a.det()}` : ''})`);
     if (per.length) L.push(`Personas que ve cerca: ${per.join(', ')}.`);
@@ -221,6 +223,7 @@ export class Cerebro {
     const h = this.hud, nav = this.nav, st = h.st, voz = this.voz;
     const ev = (id) => st.proceso.find((e) => e.id === id);
     switch (a.tipo) {
+      case 'clase': if (h.clase) h.clase.sentarse('ia'); break;
       case 'ir': if (LUGAR[a.lugar] && !(nav.current === a.lugar && !nav.walk)) { h.guiar(a.lugar); setTimeout(() => nav.goTo(a.lugar), 1300); } break;
       case 'mirar': {
         const o = String(a.objetivo || '').toLowerCase();

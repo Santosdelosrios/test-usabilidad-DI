@@ -134,7 +134,7 @@ export function instalarProyectos(HUD) {
       if (st.proy.id) return this.aviso('El proyecto ya está elegido: no se puede cambiar.', 'Proyecto', true);
       st.proy.id = id;
       this.registrar('proyecto', `elegir ${id}`);
-      this.agenda[1].tit = `Taller · ${d.nombre.toLowerCase()}`;
+      this.agenda.find((a) => a.proy).tit = `Taller · ${d.nombre.toLowerCase()}`;
       this._hoyPill();
       this._proyAnclas(d);
       this.aviso(`Elegiste «${d.nombre}». Lo hacés con Tomi y Ana.`, 'Proyecto', true);
@@ -256,7 +256,7 @@ export function instalarProyectos(HUD) {
           + PROYECTOS.map((x) => `<button class="btn tarjeta" data-dwell="1.6" data-a="proy:elegir|${x.id}"><small>${x.tema} · ${x.donde}</small><b>${x.nombre}</b><span>${x.corto}</span></button>`).join('');
       }
       let h = `<h3>${d.nombre}</h3><div class="sub"><span>${d.tema} · con Tomi y Ana</span><span>${this.proyAvance()} de ${this.proyTotal()}</span></div>`;
-      h += `<div class="encargo"><div class="cap">El encargo</div>${d.encargo.map((t) => `<p>${t}</p>`).join('')}<p>A las 10:30 lo presentan en la zona de proyección.</p><div class="acciones"><button class="btn" data-a="proy:explicar">Que el tutor me lo explique</button></div></div>`;
+      h += `<div class="encargo"><div class="cap">El encargo</div>${d.encargo.map((t) => `<p>${t}</p>`).join('')}<p>A las 10:45 lo presentan en la zona de proyección.</p><div class="acciones"><button class="btn" data-a="proy:explicar">Que el tutor me lo explique</button></div></div>`;
       d.pasos.forEach((paso, i) => {
         const hecho = this._pasoHecho(paso);
         h += `<div class="bloque"><div class="cap">${i + 1} · ${paso.tit}</div>`;

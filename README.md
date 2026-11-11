@@ -11,11 +11,11 @@ Prototipo navegable para el test de usabilidad de Diseño de Futuros (UTDT): una
 
 ## Guión del test
 
-El guión que lee el moderador está en [`guion.md`](guion.md): una sola sesión de unos 55 minutos con dos bloques, primero el mundo libre (A) y después el test de tareas (B), con objetivo, hipótesis, preparación, intro, preguntas, cambio de bloque y planillas del observador. La referencia detallada del bloque B está en [`guion-tareas-ia.md`](guion-tareas-ia.md).
+El guión que lee el moderador está en [`guion.md`](guion.md): una sesión de unos 50 minutos con objetivo, hipótesis, preparación, intro, preguntas, escenario con el horario del día (la clase en la mesa primero), proyectos y planillas del observador. La referencia detallada de la clase está en [`guion-tareas-ia.md`](guion-tareas-ia.md).
 
-## Test de tareas · IA que explica
+## La clase en la mesa (tutor que explica)
 
-Es un segundo modo, para evaluar solo al tutor que explica y ayuda a aprender. Se abre desde la pantalla de preparación con el botón «Test de tareas · IA que explica». El participante empieza sentado en su mesa del aula-taller y hace seis tareas: pedir que le expliquen el corazón (aparece en 3D sobre la mesa), moverse dentro de la explicación, repreguntar, resolver una ecuación con pistas, responder a una sugerencia del tutor y silenciarlo. El tutor de este modo tiene las respuestas escritas de antemano: no usa la clave de Gemini. Es autoguiado: la persona lee las instrucciones, cada tarea pasa sola a la siguiente cuando se cumple (o la saltea si se traba) y al final ve un agradecimiento. Los resultados se guardan solos en el navegador mientras se hace la prueba (aunque se cierre la pestaña) y se descargan desde un panel escondido (Shift + M) o desde «Resultados guardados» en la pantalla de preparación, que también junta a todos los participantes en un solo CSV. El panel además marca las tareas, toma tiempos y tiene teclas de respaldo (Shift + tecla) por si alguien acompaña. En las sesiones va como bloque B del guión unificado ([`guion.md`](guion.md)); el detalle de cada tarea, las frases de voz y las teclas están en [`guion-tareas-ia.md`](guion-tareas-ia.md).
+Es lo primero del día en el recorrido libre: a las 9:30 el tutor le ofrece al participante sentarse en su mesa del aula-taller (o lo lleva hasta ahí). Sentado, hace seis consignas cortas: pedir que le expliquen el corazón (aparece en 3D sobre la mesa), moverse dentro de la explicación, repreguntar, resolver una ecuación con pistas, responder a una sugerencia del tutor y silenciarlo. Durante la clase el reloj de la escuela espera y el tutor tiene las respuestas escritas de antemano (no usa Gemini); al terminar, se levanta y sigue el recorrido. F8 la empieza en cualquier momento. Los resultados de la clase se guardan solos en el navegador (aunque se cierre la pestaña) y se descargan desde un panel escondido (Shift + M) o desde «Resultados guardados» en la pantalla de preparación, que también junta a todos los participantes en un solo CSV. El detalle de cada consigna, las frases de voz y las teclas están en [`guion-tareas-ia.md`](guion-tareas-ia.md).
 
 ## Compilarlo
 
@@ -51,6 +51,6 @@ Lo que se publica en el link es el `index.html` de la raíz, en las ramas `main`
 | `src/camara.js` | Detección de gafas puestas o sacadas con la cámara |
 | `src/oculo.js` | Recorrido de la luz del sol por el hall |
 | `src/tipos.js`, `ui.js`, `tareas.js` | Tipografías, modo revisión (tecla H) y restos de la versión guiada |
-| `src/tareas-ia.js`, `corazon.js`, `ejercicio.js` | Test de tareas · IA que explica: las seis tareas y el panel del moderador, el corazón en 3D y el ejercicio con pistas |
+| `src/tareas-ia.js`, `corazon.js`, `ejercicio.js` | La clase en la mesa: sentarse, las seis consignas, el panel del moderador y la vuelta al recorrido; el corazón en 3D y el ejercicio con pistas |
 
-Teclas del moderador durante el test: F2 mensaje de Santi, F3 mensaje de Prof. Sosa, F4 corta o devuelve internet, G pone o saca las gafas, H modo revisión. En el test de tareas, las teclas del moderador van con Shift (la lista está en su panel y en `guion-tareas-ia.md`).
+Teclas del moderador durante el test: F2 mensaje de Santi, F3 mensaje de Prof. Sosa, F4 corta o devuelve internet, F8 empieza la clase en la mesa, G pone o saca las gafas, H modo revisión. Durante la clase, las teclas del moderador van con Shift (la lista está en su panel y en `guion-tareas-ia.md`).

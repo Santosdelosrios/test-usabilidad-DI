@@ -245,41 +245,35 @@ async function start() {
     document.body.classList.add('libre');
     hud.libre = true;
     hud.proyFijo = proyFijo || null;
+    // la clase es una parada más del día: se arma ahora y empieza cuando se sienta en su mesa
+    tareasIA = new TareasIA({ hud, nav, scene, camera, world, enMundo: true });
+    hud.clase = tareasIA;
+    hud.oirAntes = (d) => tareasIA.oirMundo(d);
     if (conCamara && cam.estado === 'sin') setTimeout(() => hud.quitarGafas(), 400);
     voz.encender();
   }
   $('intro-prueba').addEventListener('click', empezar);
-  // Test de tareas · IA que explica: sentado en su mesa, con un tutor guionado (no usa la clave de Gemini)
+  // la clase en su mesa (9:30, lo primero del día): seis consignas cortas con el tutor que explica (tareas-ia.js)
   let tareasIA = null;
-  function empezarTareasIA() {
-    if (intro.hidden) return;
-    intro.hidden = true;
-    ui.hideHint();
-    hud.setNombre($('prep-nombre').value);
-    hud.setMirada(mirar);
-    const conCamara = cam.activa && !!cam.modelo;
-    if (cam.activa) $('cam-oculta').appendChild($('prep-video'));
-    hud.setCamara(conCamara);
-    if (cam.activa && !conCamara) cam.apagar();
-    chip.hidden = !conCamara;
-    tareasIA = new TareasIA({ hud, nav, scene, camera, world });
-    tareasIA.empezarSesion();
-    setModo('prueba');
-    if (conCamara && cam.estado === 'sin') setTimeout(() => hud.quitarGafas(), 400);
-    voz.encender();
-  }
-  $('intro-tareas-ia').addEventListener('click', empezarTareasIA);
-  // resultados del test de tareas que quedaron guardados en este navegador (aunque se haya cerrado la pestaña)
+  // resultados de la clase que quedaron guardados en este navegador (aunque se haya cerrado la pestaña)
   instalarGuardadas($('moderador'));
   {
     const n = sesionesGuardadas().length, b = $('intro-resultados');
-    if (n) { b.hidden = false; b.textContent = `Resultados guardados del test de tareas · ${n}`; }
+    if (n) { b.hidden = false; b.textContent = `Resultados guardados de la clase · ${n}`; }
     b.addEventListener('click', () => abrirGuardadas($('moderador')));
   }
   $('intro-libre').addEventListener('click', () => { intro.hidden = true; setModo('revision'); });
+  // F8 (moderador): empieza la clase ahora, en su mesa (por si no llega solo o se acaba el tiempo)
+  window.addEventListener('keydown', (e) => {
+    if (e.code !== 'F8' || !intro.hidden || !tareasIA || !tareasIA.pendiente()) return;
+    e.preventDefault();
+    hud.registrar('moderador', 'F8 empezar la clase');
+    tareasIA.sentarse('tecla', { instant: true });
+  });
   window.addEventListener('keydown', (e) => {
     if (e.code !== 'Enter' && e.code !== 'NumpadEnter') return;
     if (!intro.hidden) { e.preventDefault(); empezar(); return; }
+    // (Enter también da «Empezar» en la clase y pasa de consigna cuando la tarjeta lo ofrece)
     // el moderador pasa a la tarea siguiente con Enter
     const sig = $('t-sig');
     if (modo === 'prueba' && sig && !sig.hidden && sig.offsetParent) { e.preventDefault(); sig.click(); }

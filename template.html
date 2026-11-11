@@ -102,9 +102,22 @@ html, body { margin: 0; height: 100%; background: var(--negro); overflow: hidden
 #hud-marca svg { width: 30px; height: 18px; }
 #hud-marca small { font-family: var(--mono); font-stretch: 100%; font-size: 10px; letter-spacing: calc(.2em * var(--esp-m)); color: rgba(236,235,231,.6); }
 #hud.apagado #hud-marca { opacity: .45; }
-#hud-hoy { position: absolute; top: 70px; left: 36px; display: flex; align-items: center; gap: 10px; padding: 7px 11px; font-size: 10.5px; letter-spacing: calc(.14em * var(--esp-m)); text-transform: uppercase; }
+/* el horario del día: siempre a la vista, con lo que toca ahora marcado */
+#hud-hoy { position: absolute; top: 70px; left: 36px; width: 300px; display: flex; flex-direction: column; align-items: stretch; gap: 7px; padding: 9px 12px 10px; font-size: 10.5px; letter-spacing: calc(.14em * var(--esp-m)); text-transform: uppercase; text-align: left; }
+#hud-hoy .cab { display: flex; align-items: center; gap: 10px; }
+#hud-hoy .cab span { color: rgba(236,235,231,.55); }
 #hud-hoy em { font-style: normal; color: var(--naranja); }
 #hud-hoy b { font-weight: 500; color: #fff; }
+#hud-horario { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; text-transform: none; letter-spacing: .02em; font-size: 11.5px; line-height: 1.35; }
+#hud-horario li { display: grid; grid-template-columns: 38px 1fr; gap: 8px; padding: 3px 0 3px 8px; border-left: 2px solid rgba(236,235,231,.12); color: rgba(236,235,231,.82); }
+#hud-horario .h { font-family: var(--mono); font-size: 10.5px; color: rgba(236,235,231,.55); padding-top: 1px; }
+#hud-horario small { display: block; margin-top: 1px; font-size: 9.5px; letter-spacing: calc(.12em * var(--esp-m)); text-transform: uppercase; color: var(--naranja); }
+#hud-horario li.ahora { border-left-color: var(--naranja); color: #fff; }
+#hud-horario li.ahora .h { color: var(--naranja); }
+#hud-horario li.hecha { color: rgba(236,235,231,.4); }
+#hud-horario li.hecha .t::after { content: ' ✓'; color: rgba(236,235,231,.6); }
+#hud-horario li.pend .t::after { content: ' · sin hacer'; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: rgba(236,235,231,.55); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 #hud-hoy.pulso { animation: pulso 1.4s ease-in-out 3; }
 @keyframes pulso { 50% { border-color: var(--naranja); box-shadow: 0 0 0 4px rgba(232,116,59,.18); } }
 #hud-estado { position: absolute; top: 28px; right: 36px; display: flex; align-items: center; gap: 8px; font-size: 10.5px; letter-spacing: calc(.16em * var(--esp-m)); text-transform: uppercase; }
@@ -673,7 +686,7 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
   <div id="hud-mira"></div>
   <div id="hud-mira-et">E · pellizcar</div>
   <div id="hud-marca"><svg viewBox="0 0 30 18" aria-hidden="true"><path d="M1 3 L16 9 L1 15 M1 9 H24" fill="none" stroke="#ecebe7" stroke-width="1.6"/><circle cx="27" cy="9" r="2.4" fill="#e8743b"/></svg>TUTOR<small id="hud-quien">4° B</small></div>
-  <button id="hud-hoy" class="vidrio" type="button"><em>Hoy</em><span id="hud-hoy-txt">Ruta del día</span></button>
+  <button id="hud-hoy" class="vidrio" type="button" aria-label="Horario del día"><span class="cab"><em>Hoy</em><span>Martes · horario del día</span></span><ol id="hud-horario"></ol><span id="hud-hoy-txt" class="sr">Horario del día</span></button>
   <div id="hud-foco" class="vidrio" hidden>Foco <b id="hud-foco-t">00:00</b><span id="hud-foco-av"></span></div>
   <div id="hud-estado">
     <button id="hud-conexion" class="vidrio buscando" type="button"><i class="pt"></i><span>Buscando nodo…</span></button>
@@ -765,10 +778,9 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
     </div></div>
     <div class="botones">
       <button type="button" class="prim" id="intro-prueba">Empezar el test · Enter</button>
-      <button type="button" id="intro-tareas-ia">Test de tareas · IA que explica</button>
       <button type="button" id="intro-libre">Explorar el mundo (revisión)</button>
     </div>
-    <p class="nota"><b>Test de tareas · IA que explica:</b> autoguiado. El participante empieza sentado en su mesa del aula-taller, lee las instrucciones y hace 6 tareas solo, con un tutor de respuestas guionadas (no usa la clave de Gemini). Los resultados se guardan solos en este navegador mientras hace la prueba, aunque se cierre la pestaña: se descargan con Shift + M o desde acá. <button type="button" id="intro-resultados" class="enlace" hidden>Resultados guardados</button></p>
+    <p class="nota"><b>Clase en la mesa:</b> a las 9:55 del itinerario el tutor le ofrece sentarse en su mesa del aula-taller. Ahí hace 6 consignas cortas con un tutor de respuestas guionadas, mientras el reloj de la escuela espera; al terminar, se levanta y sigue el recorrido. F8 empieza la clase en cualquier momento. Los resultados de la clase se guardan solos en este navegador, aunque se cierre la pestaña: se descargan con Shift + M o desde acá. <button type="button" id="intro-resultados" class="enlace" hidden>Resultados guardados</button></p>
   </div>
 </div>
 <div id="cam-oculta"></div>

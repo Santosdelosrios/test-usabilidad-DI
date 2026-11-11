@@ -105,8 +105,11 @@ const TECLAS = [
 ];
 
 export class TareasIA {
-  constructor({ hud, nav, scene, camera, world }) {
+  // enMundo: la clase es lo primero del día en el recorrido libre (9:30 en el horario); al terminar, vuelve al recorrido
+  constructor({ hud, nav, scene, camera, world, enMundo = false }) {
     this.hud = hud; this.nav = nav; this.camera = camera;
+    this.enMundo = enMundo;
+    this.hecha = false;
     this.S = world && world.sistema;
     this.corazon = new Corazon({ hud, scene, camera, pos: SOBRE_MESA });
     this.ej = new Ejercicio({ hud });
@@ -135,7 +138,7 @@ export class TareasIA {
   }
 
   // ── arranque: sentado en la mesa, con las gafas puestas ──
-  empezarSesion() {
+  empezarSesion({ enMundo = false } = {}) {
     const h = this.hud, nav = this.nav;
     this.activa = true;
     this.t0 = performance.now();
@@ -168,7 +171,100 @@ export class TareasIA {
     nav.yaw = SENTADO.yaw * D; nav.pitch = SENTADO.pitch * D;
     nav.vy = nav.vp = 0; nav.settle = null;
     // es autoguiado: el panel del moderador queda escondido (se abre con Shift + M si alguien acompaña)
-    this._bienvenida();
+    if (!enMundo) { this._bienvenida(); return; }
+    // en el recorrido no hay pantalla de instrucciones: ya sabe usar las gafas; arranca la clase
+    h.proponer(`Arranca la clase${h._coma()}. Las consignas te aparecen arriba; si te trabás en una, podés pasar a la siguiente.`);
+    this.comenzar();
+  }
+
+  // ── la clase dentro del recorrido libre ──
+  pendiente() { return this.enMundo && !this.activa && !this.hecha; }
+  estado() { return this.hecha ? 'terminada' : this.activa ? 'en curso' : 'pendiente (todavía no se sentó)'; }
+
+  // es la hora (o llegó al aula-taller después de la hora): le ofrece sentarse, sin obligarlo
+  ofrecer(motivo = 'hora') {
+    if (!this.pendiente()) return;
+    const h = this.hud, nav = this.nav;
+    const aca = !nav.walk && nav.current === 'taller';
+    h.registrar('clase', `ofrecida:${motivo}`);
+    const hora = h.st.minuto >= 9 * 60 + 30 ? 'Es la hora de la clase' : 'A las 9:30 empieza la clase';
+    if (aca) h.proponer(`${hora}${h._coma()}: Biología y Matemática, acá en tu mesa. ¿Te sentás?`, [['Sentarme', () => this.sentarse('boton')], ['En un rato', null]]);
+    else h.proponer(`${hora}: Biología y Matemática, en tu mesa del aula-taller.`, [['Llevame', () => this.sentarse('boton')], ['Ya voy', null]]);
+  }
+
+  // se sienta en su mesa; si no está en el aula-taller, lo lleva caminando y se sienta al llegar
+  sentarse(origen = 'boton', { instant = false } = {}) {
+    if (!this.pendiente()) return;
+    const h = this.hud, nav = this.nav;
+    h.registrar('clase', `sentarse:${origen}`);
+    if (instant || (!nav.walk && nav.current === 'taller')) { this.alLlegar = false; this.empezarClase(); return; }
+    this.alLlegar = true;
+    h.guiar('taller');
+    setTimeout(() => { if (this.alLlegar && nav.current !== 'taller') nav.goTo('taller'); }, 900);
+  }
+
+  // pedidos de voz para sentarse (van antes que la IA)
+  oirMundo(d) {
+    if (!this.pendiente()) return null;
+    if (/\b(sentarme|sentemonos|nos sentamos|empeza(r|mos)? (con )?la clase|empecemos (con )?la clase|arranca(r|mos)? (con )?la clase|arranquemos (con )?la clase|vamos a (la )?clase|ir a (la )?clase|llevame a (la )?clase|quiero (ir a )?(la )?clase)\b/.test(d)
+      || /\bme siento( en (mi|la) mesa)?$/.test(d)) return () => this.sentarse('voz');
+    return null;
+  }
+
+  empezarClase() {
+    if (!this.pendiente()) return;
+    const h = this.hud;
+    const mesa = h.anclas.find((a) => a.id === 'mesa');
+    this._previo = { alAbrirTutor: h.alAbrirTutor, sugerencias: h.aj.sugerencias, pausas: h.aj.pausas, pistaVoz: h.pistaVoz, mesaMax: mesa ? mesa.max : null };
+    if (h.voz && h.voz._callarTutor) h.voz._callarTutor();
+    h.cerrarPanel(); h.cerrarLanzador(); h.cerrarTutor(true);
+    h.propuesta = null; h.cola = []; h.pendiente = null;
+    if (h.st.guia) h.guiar(null);
+    if (h.st.foco) h.setFoco(false);
+    // la clase dura lo que tarde: el reloj de la escuela espera
+    h.relojPausado = true;
+    this.horaInicio = h.st.minuto;
+    this.empezarSesion({ enMundo: true });
+  }
+
+  // terminó la clase: se levanta, vuelve todo como estaba y sigue el recorrido
+  _salirDeClase() {
+    const h = this.hud, nav = this.nav, p = this._previo || {};
+    this._guardarYa();
+    this.hecha = true;
+    this.activa = false;
+    if (this.corazon.abierto) this.corazon.cerrar('fin', true);
+    this.ej.espontaneas = false;
+    this.ej.ocultar();
+    if (h.st.foco) h.setFoco(false);
+    h.cerrarTutor(true);
+    h.guionado = false;
+    h.oirExtra = null; h.interrumpe = null; h.noEntendiExtra = null;
+    h.alAbrirTutor = p.alAbrirTutor || null;
+    h.aj.sugerencias = p.sugerencias; h.aj.pausas = p.pausas; h.pistaVoz = p.pistaVoz;
+    const mesa = h.anclas.find((a) => a.id === 'mesa');
+    if (mesa && p.mesaMax != null) mesa.max = p.mesaMax;
+    if (this.S) { if (this.S.pilasMesa) this.S.pilasMesa.visible = true; this.S.mesaClase = null; }
+    h.hoyFijo = null;
+    document.body.classList.remove('tareas-ia');
+    this.el.card.hidden = true;
+    this.el.pantalla.hidden = true;
+    // de pie otra vez, en el aula-taller
+    nav.fijo = false;
+    nav.walk = null;
+    nav.current = null;
+    nav.goTo('taller', { instant: true });
+    // el reloj sigue: la clase llevó al menos hasta las 10:00, cuando arranca el taller
+    h.relojPausado = false;
+    h.st.minuto = Math.max(h.st.minuto, 10 * 60);
+    h.st.claseHecha = true;
+    h._hoyPill();
+    h.registrar('clase', 'terminada');
+    // sigue el taller: elige el proyecto (si todavía no lo eligió) o vuelve a él
+    if (!h.st.proy.id) h._elegirProyecto('Terminó la clase de Biología y Matemática en su mesa y se levantó.', `Terminó la clase${h._coma()}. `);
+    else if (h.ia) h.cerebro.evento('Terminó la clase de Biología y Matemática en su mesa y se levantó. Contale en una frase que sigue su proyecto con Tomi y Ana, que presentan a las 10:45, sin apurarlo.');
+    else h.proponer(`Terminó la clase${h._coma()}. Seguís con tu proyecto: a las 10:45 lo presentan en la zona de proyección.`, [['Ver mi día', () => h.panel('hoy', true)], ['Dale', null]]);
+    h.cambio();
   }
 
   // ── pantallas de la persona: instrucciones al empezar y cierre ──
@@ -332,6 +428,7 @@ export class TareasIA {
     c.card.classList.remove('lograda');
     c.card.classList.add('fin');
     this.hud.registrar('tarea', 'fin');
+    if (this.enMundo) { this._pintar(); this._salirDeClase(); return; }
     this._final();
     this._guardarYa();
     this._pintar();
@@ -416,6 +513,8 @@ export class TareasIA {
 
   // ── cuadro a cuadro ──
   update(dt, t) {
+    // lo estaba llevando a su mesa: al llegar al aula-taller se sienta
+    if (this.alLlegar && !this.nav.walk && this.nav.current === 'taller') { this.alLlegar = false; this.empezarClase(); }
     if (!this.activa) return;
     const h = this.hud;
     this.corazon.update(dt, t);
@@ -490,7 +589,8 @@ export class TareasIA {
 
   // ── teclas del moderador ──
   _tecla(e) {
-    if (!this.activa || !e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
+    // después de la clase sigue andando Shift + M (para bajar los resultados)
+    if (!(this.activa || (this.hecha && e.code === 'KeyM')) || !e.shiftKey || e.ctrlKey || e.altKey || e.metaKey) return;
     if (e.target && /input|textarea|select/i.test(e.target.tagName)) return;
     const k = TECLAS.find((x) => x[0] === e.code);
     if (!k) return;
@@ -593,7 +693,8 @@ export class TareasIA {
     return {
       participante: nombre,
       fecha: `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')} ${String(f.getHours()).padStart(2, '0')}:${String(f.getMinutes()).padStart(2, '0')}`,
-      modo: 'Tareas · IA que explica',
+      modo: this.enMundo ? 'Clase en la mesa (dentro del recorrido)' : 'Tareas · IA que explica',
+      hora_inicio_clase: this.horaInicio != null ? `${Math.floor(this.horaInicio / 60)}:${String(Math.floor(this.horaInicio % 60)).padStart(2, '0')}` : null,
       terminada: !!this.fin,
       duracion_s: Math.round((performance.now() - this.t0) / 1000),
       ajustes: { voz: voz ? voz.modo : null, voz_del_tutor: voz ? voz.hablaTutor : null, mirada: this.hud.ojos.habilitada, camara: !!this.hud.camaraActiva },

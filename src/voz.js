@@ -426,6 +426,16 @@ export class Voz {
     };
     const d = limpiar(texto);
     this.dirigido = dirigido || debil;
+    // pedidos del recorrido que se resuelven acá mismo, con o sin IA (por ejemplo, sentarse para la clase)
+    const antes = h.puestas && h.oirAntes ? h.oirAntes(d) : null;
+    if (antes) {
+      this.registro.push({ t: h.st ? h.st.minuto : 0, dijo: texto, hizo: true });
+      h.registrar('voz', texto);
+      this._mostrar(texto, false, 'ok');
+      this.abrirVentana(6);
+      antes();
+      return true;
+    }
     if (h.ia) return this._oirIA(texto, d, dirigido || debil);
     const r = this._interpretar(d, texto) || alternativas.slice(1).map((a) => this._interpretar(limpiar(a), a)).find(Boolean);
     this.registro.push({ t: h.st ? h.st.minuto : 0, dijo: texto, hizo: !!r });
@@ -565,7 +575,7 @@ export class Voz {
     // 8 · compartir algo (qué + a quién)
     if (/\b(manda|mandar|mandale|mandarle|envia|enviar|enviale|comparti|compartir|compartile|mostra|mostrar|mostrale|pasale|pasa|pone en|subi|proyecta)\b/.test(d)) {
       const item = /\b(grafico|stock|barras)\b/.test(d) ? 'graf' : /\b(luz|oculo|sol|lo que aprendi|lo que descubri|lo que guarde)\b/.test(d) ? 'oc' : /\bperchero\b/.test(d) ? 'e1' : /\b(foto|captura)\b/.test(d) ? ((st.proceso.filter((e) => e.tag === 'Captura').pop() || {}).id || null) : null;
-      const dest = /\bpizarr/.test(d) ? 'pizarron' : /\bpiso\b/.test(d) ? 'piso' : /\bsanti/.test(d) ? 'santi' : /\btomi/.test(d) ? 'tomi' : (/\b(clase|todos|grupo)\b/.test(d) && st.minuto >= 615 ? 'pizarron' : null);
+      const dest = /\bpizarr/.test(d) ? 'pizarron' : /\bpiso\b/.test(d) ? 'piso' : /\bsanti/.test(d) ? 'santi' : /\btomi/.test(d) ? 'tomi' : (/\b(clase|todos|grupo)\b/.test(d) && st.minuto >= 635 ? 'pizarron' : null);
       if (item && dest) return () => { h.comp = { item, destino: dest }; h.enviar(); };
       if (item || dest || /\b(comparti|compartir)\b/.test(d)) return () => { h.comp = { item: item || null, destino: dest || null }; h.panel('compartir', true); };
     }

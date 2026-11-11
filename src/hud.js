@@ -12,8 +12,10 @@ const EN = { entrada: 'la entrada', hall: 'el hall', taller: 'el aula-taller', p
 
 const AGENDA = [
   { h: 9 * 60 + 20, tit: 'Llegada', lugar: 'Escuela-nodo', dest: null },
-  { h: 9 * 60 + 30, tit: 'Taller · proyecto del grupo', lugar: 'Aula-taller', dest: 'taller' },
-  { h: 10 * 60 + 30, tit: 'Presentación al grupo', lugar: 'Zona de proyección', dest: 'proyeccion' },
+  // lo primero del día: la clase en su mesa, seis consignas cortas con el tutor que explica (tareas-ia.js)
+  { h: 9 * 60 + 30, tit: 'Clase en tu mesa · Biología y Matemática', lugar: 'Aula-taller · tu mesa', dest: 'taller', clase: true },
+  { h: 10 * 60, tit: 'Taller · proyecto del grupo', lugar: 'Aula-taller', dest: 'taller', proy: true },
+  { h: 10 * 60 + 45, tit: 'Presentación al grupo', lugar: 'Zona de proyección', dest: 'proyeccion' },
   { h: 11 * 60 + 15, tit: 'Bloque de foco', lugar: 'Rincón tranquilo', dest: 'rincon' },
   { h: 12 * 60, tit: 'Visita técnica', lugar: 'Sala del nodo', dest: 'nodo' },
 ];
@@ -75,7 +77,7 @@ export class HUD {
     this.guia.mesh.visible = false;
     const $ = (id) => document.getElementById(id);
     this.el = {
-      hud: $('hud'), anclas: $('hud-anclas'), mira: $('hud-mira'), miraEt: $('hud-mira-et'), hoy: $('hud-hoy'), hoyTxt: $('hud-hoy-txt'),
+      hud: $('hud'), anclas: $('hud-anclas'), mira: $('hud-mira'), miraEt: $('hud-mira-et'), hoy: $('hud-hoy'), hoyTxt: $('hud-hoy-txt'), horario: $('hud-horario'),
       foco: $('hud-foco'), focoT: $('hud-foco-t'), focoAv: $('hud-foco-av'), conexion: $('hud-conexion'), seguimiento: $('hud-seguimiento'),
       hora: $('hud-hora'), avisos: $('hud-avisos'), panel: $('hud-panel'), tutor: $('hud-tutor'), tutorTxt: $('hud-tutor-txt'),
       opciones: $('hud-opciones'), onda: $('hud-onda'), dock: $('hud-dock'),
@@ -106,7 +108,7 @@ export class HUD {
 
   reset() {
     this.tutorUsado = false;
-    AGENDA[1].tit = 'Taller · proyecto del grupo';
+    AGENDA.find((a) => a.proy).tit = 'Taller · proyecto del grupo';
     if (this.anclas) {
       this.anclas.filter((a) => a.id.startsWith('pm-')).forEach((a) => a.el.remove());
       this.anclas = this.anclas.filter((a) => !a.id.startsWith('pm-'));
@@ -179,19 +181,31 @@ export class HUD {
     this.cambio();
   }
 
-  // al entrar: se elige el proyecto (una sola vez)
+  // al entrar: lo primero del día es la clase; el proyecto se elige después
   _bienvenida() {
+    if (this.st.conectada && this.clase && this.clase.pendiente()) return this._saludoClase();
+    this._elegirProyecto();
+  }
+
+  _saludoClase() {
+    if (this.ia) return this.cerebro.evento('Acaba de entrar a la escuela y las gafas se conectaron. Lo primero del día es la clase de Biología y Matemática en su mesa del aula-taller, a las 9:30; después, a las 10:00, arranca un proyecto con Tomi y Ana. Saludalo en una frase, contale qué tiene primero y ofrecé llevarlo a su mesa, sin llevarlo todavía.');
+    this.proponer(`Buen día${this._coma()}. Lo primero es la clase de Biología y Matemática, a las 9:30 en tu mesa del aula-taller.`, [['Llevame', () => this.clase.sentarse('saludo')], ['Ver mi día', () => this.panel('hoy', true)]], 'saludo');
+  }
+
+  // el proyecto del taller: se elige una sola vez (después de la clase)
+  // introIA: qué pasó (para el tutor con IA); introTxt: cómo arranca la frase del tutor guionado
+  _elegirProyecto(introIA, introTxt) {
     if (!this.st.conectada || this.st.proy.id) return this._saludo();
     if (this.proyFijo) { this.proyElegir(this.proyFijo); return; }
     this.panel('proyecto', true);
-    if (this.ia) this.cerebro.evento('Acaba de entrar a la escuela y las gafas se conectaron. Hoy su grupo arranca un proyecto nuevo y tiene en pantalla cuatro para elegir. Saludalo e invitalo a elegir en una frase; no elijas por él.');
-    else this.proponer(`Buen día${this._coma()}. Hoy tu grupo arranca un proyecto nuevo: elegí uno de los cuatro.`);
+    if (this.ia) this.cerebro.evento(`${introIA || 'Acaba de entrar a la escuela y las gafas se conectaron.'} Ahora su grupo arranca un proyecto nuevo con Tomi y Ana, y tiene en pantalla cuatro para elegir. Invitalo a elegir en una frase; no elijas por él.`);
+    else this.proponer(`${introTxt || `Buen día${this._coma()}. `}Ahora tu grupo arranca un proyecto nuevo con Tomi y Ana: elegí uno de los cuatro.`);
   }
 
   _saludo() {
     if (this.ia) return this.cerebro.evento('Acaba de entrar a la escuela y las gafas se conectaron al nodo. Saludalo en una frase y contale qué tiene primero en su itinerario, sin llevarlo todavía.');
-    if (!this.st.conectada || this.st.guia || this.nav.current === 'taller' || this.st.minuto > 9 * 60 + 32) return this._reposo();
-    this.proponer(`Buen día${this._coma()}. Arrancás con el taller de tu proyecto, a las 9:30.`, [['Llevame', () => this.guiar('taller')], ['Ver mi día', () => this.panel('hoy', true)]], 'saludo');
+    if (!this.st.conectada || this.st.guia || this.nav.current === 'taller') return this._reposo();
+    this.proponer(`Seguís con el taller de tu proyecto, en el aula-taller. A las 10:45 lo presentan.`, [['Llevame', () => this.guiar('taller')], ['Ver mi día', () => this.panel('hoy', true)]], 'saludo');
   }
 
   setLocal(on) {
@@ -260,6 +274,8 @@ export class HUD {
     if (this.cola) this.cola = this.cola.filter((q) => !q.lugar || q.lugar === stop.id);
     if (this.propuesta && this.propuesta.lugar && this.propuesta.lugar !== stop.id) { this.propuesta = null; this._siguiente(); }
     setTimeout(() => this._sugerirLugar(stop.id), 1400);
+    // ya es la hora de la clase y llegó al aula-taller: le ofrece sentarse
+    if (stop.id === 'taller' && this.st.conectada && this.clase && this.clase.pendiente()) setTimeout(() => this.clase.ofrecer('llegada'), 1600);
     if (this.st.guia && stop.id === this.st.guia) {
       if (!this.ia) this.proponer(`Llegaste ${('a ' + EN[stop.id]).replace(/^a el /, 'al ')}.`);
       this.st.guia = null;
@@ -319,10 +335,22 @@ export class HUD {
     this.decir(`¿En qué te ayudo${this._coma()}?`, ops.slice(0, 5));
   }
 
+  // lo próximo del itinerario (la clase, una vez hecha, ya no cuenta)
+  _prox(m) {
+    const st = this.st;
+    const L = AGENDA.filter((a) => !(a.clase && st.claseHecha));
+    return L.find((a, i) => a.dest && (m < a.h || (L[i + 1] ? m < L[i + 1].h : true))) || L[L.length - 1];
+  }
+
   _queSigue() {
     const m = this.st.minuto;
-    const prox = AGENDA.find((a, i) => a.dest && (m < a.h || (AGENDA[i + 1] ? m < AGENDA[i + 1].h : true))) || AGENDA[AGENDA.length - 1];
+    const prox = this._prox(m);
     const verDia = ['Ver todo el día', () => { this.cerrarTutor(); this.panel('hoy', true); }];
+    // la clase: se sienta en su mesa (o lo lleva hasta ahí)
+    if (prox.clase && this.clase && this.clase.pendiente()) {
+      const aca = !this.nav.walk && this.nav.current === prox.dest;
+      return this.decir(`${aca ? 'Ahora' : `A las ${hhmm(prox.h)}`} tenés clase en tu mesa: Biología y Matemática${aca ? '' : `, en ${EN[prox.dest]}`}.`, [[aca ? 'Sentarme' : 'Llevame', () => { this.cerrarTutor(); this.clase.sentarse('tutor'); }], verDia]);
+    }
     if (!this.nav.walk && this.nav.current === prox.dest) return this.decir(`Ahora te toca ${prox.tit.toLowerCase()}, y ya estás en ${EN[prox.dest]}.`, [verDia, ['Gracias', () => this.cerrarTutor()]]);
     this.decir(`A las ${hhmm(prox.h)} tenés ${prox.tit.toLowerCase()}, en ${EN[prox.dest]}.`, [['Llevame', () => { this.cerrarTutor(); this.guiar(prox.dest); }], verDia]);
   }
@@ -436,8 +464,8 @@ export class HUD {
       h += `<h3>Hoy</h3><div class="sub"><span>Martes · ruta del día</span><span>${hhmm(st.minuto)}</span></div>`;
       AGENDA.forEach((a, i) => {
         const sig = AGENDA[i + 1];
-        const ahora = st.minuto >= a.h && (!sig || st.minuto < sig.h);
-        const hecha = (!a.dest && st.conectada) || (sig && st.minuto >= sig.h);
+        const ahora = !(a.clase && st.claseHecha) && st.minuto >= a.h && (!sig || st.minuto < sig.h);
+        const hecha = (a.clase && st.claseHecha) || (!a.dest && st.conectada) || (sig && st.minuto >= sig.h);
         const guiando = st.guia && st.guia === a.dest;
         h += `<div class="fila ${ahora ? 'ahora' : ''} ${hecha && !ahora ? 'hecha' : ''}"><span class="h">${hhmm(a.h)}</span><span class="t">${esc(a.tit)}<small class="${ahora ? 'nar' : ''}">${ahora ? 'Ahora · ' : ''}${esc(a.lugar)}</small></span>`
           + (a.dest ? `<span class="acciones"><button class="btn ${guiando ? 'on' : ''}" data-a="guiar:${a.dest}">${guiando ? 'Guiando' : 'Guiar'}</button></span>` : '<span></span>') + '</div>';
@@ -998,7 +1026,7 @@ export class HUD {
     const P = (txt, ops, clave) => this.proponer(txt, ops, clave, id);
     if (id === 'hall' && !st.oculoResuelto && !this.oculo.activo) this.proponerOculo();
     if (id === 'proyeccion') {
-      if (st.minuto >= 10 * 60 + 15 && st.compartido !== 'pizarron') {
+      if (st.minuto >= 10 * 60 + 35 && st.compartido !== 'pizarron') {
         P('Es la presentación de tu grupo. ¿Mostramos en el pizarrón el gráfico de stock que hicieron con Tomi y Ana?', [
           ['Mostrarlo', () => { this.comp = { item: 'graf', destino: 'pizarron' }; this.enviar(); }],
           ['Elegir otra cosa', () => { this.comp = { item: null, destino: 'pizarron' }; this.panel('compartir', true); }],
@@ -1092,11 +1120,28 @@ export class HUD {
     this.el.focoAv.textContent = n ? `${n} aviso${n > 1 ? 's' : ''} en espera` : 'Avisos en silencio';
   }
 
+  // el horario del día, siempre a la vista: lo que toca ahora, lo hecho y lo que sigue
   _hoyPill() {
-    const m = this.st.minuto;
-    const prox = AGENDA.find((a, i) => a.dest && (m < a.h || (AGENDA[i + 1] ? m < AGENDA[i + 1].h : true))) || AGENDA[AGENDA.length - 1];
+    const st = this.st, m = st.minuto;
+    const prox = this._prox(m);
     const txt = this.hoyFijo || `${prox.tit} · ${hhmm(prox.h)}`;
-    if (this.el.hoyTxt.textContent !== txt) this.el.hoyTxt.innerHTML = `<b>${esc(txt)}</b>`;
+    if (this.el.hoyTxt.textContent !== txt) this.el.hoyTxt.textContent = txt;
+    const L = AGENDA.filter((a) => a.dest);
+    const firma = `${Math.floor(m)}|${prox.tit}|${st.claseHecha ? 1 : 0}|${this.hoyFijo || ''}|${L.map((a) => a.tit).join('/')}`;
+    if (firma === this._firmaHorario) return;
+    this._firmaHorario = firma;
+    this.el.horario.innerHTML = L.map((a, i) => {
+      const sig = L[i + 1];
+      const ahora = a === prox;
+      const paso = sig ? m >= sig.h : false;
+      const hecha = a.clase ? !!st.claseHecha : !ahora && paso;
+      const pend = a.clase && !st.claseHecha && !ahora && paso;
+      const sub = !ahora ? '' : a.clase && this.hoyFijo ? `Ahora · ${this.hoyFijo}` : `${m < a.h ? 'Sigue' : 'Ahora'} · ${a.lugar}`;
+      return `<li class="${ahora ? 'ahora' : hecha ? 'hecha' : pend ? 'pend' : ''}"><span class="h">${hhmm(a.h)}</span><span class="t">${esc(a.tit)}${sub ? `<small>${esc(sub)}</small>` : ''}</span></li>`;
+    }).join('');
+    // los avisos van debajo del horario
+    const abajo = this.el.hoy.offsetTop + this.el.hoy.offsetHeight + 12;
+    if (abajo > 80) this.el.avisos.style.top = `${abajo}px`;
   }
 
   setHora(min) { this.st.minuto = min; this._hoyPill(); }
@@ -1111,15 +1156,18 @@ export class HUD {
       for (const a of this.anclas) if (a.on) { a.on = false; a.el.style.display = 'none'; }
       this.mirada = null;
       this.oculo.update(dt, t, false);
-      st.minuto += dt / 20;
+      if (!this.relojPausado) st.minuto += dt / 20;
       const u = this.acabado.uniforms.uFoco;
       u.value += (0 - u.value) * Math.min(1, dt * 3);
       return;
     }
     if (this.libre && st.conectada) {
-      if (!st.santiPregunta && st.minuto >= 9 * 60 + 42) this.preguntaSanti();
-      if (!st.evSosa && st.minuto >= 10 * 60 + 6) this.mensajeSosa();
-      if (!st.evPres && st.minuto >= 10 * 60 + 24) { st.evPres = true; this.aviso('En 5 minutos presenta tu grupo en la zona de proyección.', 'Itinerario'); if (this.ia) this.cerebro.evento('Faltan 5 minutos para la presentación de su grupo en la zona de proyección (10:30).'); }
+      if (!st.evClase && st.minuto >= 9 * 60 + 30 && this.clase) { st.evClase = true; this.clase.ofrecer('hora'); }
+      // si a las 10:05 no fue a la clase, el día sigue igual: arranca el taller (la clase queda pendiente, F8)
+      if (!st.evProy && st.minuto >= 10 * 60 + 5 && !st.proy.id) { st.evProy = true; this._elegirProyecto('Son las 10:05 y la clase quedó sin hacer.', 'Ya son las 10. '); }
+      if (!st.santiPregunta && st.minuto >= 10 * 60 + 8) this.preguntaSanti();
+      if (!st.evSosa && st.minuto >= 10 * 60 + 22) this.mensajeSosa();
+      if (!st.evPres && st.minuto >= 10 * 60 + 40) { st.evPres = true; this.aviso('En 5 minutos presenta tu grupo en la zona de proyección.', 'Horario'); if (this.ia) this.cerebro.evento('Faltan 5 minutos para la presentación de su grupo en la zona de proyección (10:45).'); }
     }
     this.ojos.setActiva(this.ojos.habilitada);
     this.ojos.update(dt);
@@ -1139,7 +1187,8 @@ export class HUD {
         if (this.buscando > 6 && !this.pistaDada) { this.pistaDada = true; this.aviso('Buscando nodo… Entrá a la escuela: las gafas se conectan en la puerta.', 'TUTOR', true); }
       }
     }
-    st.minuto += dt / 20;
+    // durante la clase el reloj de la escuela se detiene: la clase dura lo que tarde (ver tareas-ia.js)
+    if (!this.relojPausado) st.minuto += dt / 20;
     this.el.hora.textContent = hhmm(st.minuto);
     if (st.foco) { st.focoSeg += dt; st.focoTotal += dt; this.el.focoT.textContent = mmss(st.focoSeg); this._focoAv(); }
     this._hoyPill();

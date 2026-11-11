@@ -399,7 +399,7 @@ export function buildVida({ scene, world, camera }) {
   v2.enTramo = 70;
 
   // hall
-  add({ nombre: 'Santi', estado: 'Disponible', disponible: true, detalle: 'Recreo de proyecto', habla: ['¿Viste cómo se mueve la luz del techo?', '¿Vas a la presentación de las 10:30?'], fase: 0, modo: 'sentado', p: [-6.68, -5.0], asiento: 0.9, pies: 0.45, mira: Math.PI / 2 - 0.2, charla: true });
+  add({ nombre: 'Santi', estado: 'Disponible', disponible: true, detalle: 'Recreo de proyecto', habla: ['¿Viste cómo se mueve la luz del techo?', '¿Vas a la presentación de las 10:45?'], fase: 0, modo: 'sentado', p: [-6.68, -5.0], asiento: 0.9, pies: 0.45, mira: Math.PI / 2 - 0.2, charla: true });
   add({ nombre: 'Mica', estado: 'Disponible', disponible: true, detalle: 'Recreo de proyecto', habla: ['Sí, después del recreo. ¿Vos?', 'Pedile otra pista, a mí me sirvió.'], fase: 3, modo: 'sentado', p: [-5.88, -3.7], asiento: 0.45, pies: 0.006, mira: Math.PI / 2 - 0.5 });
   add({ modo: 'sentado', p: [-7.45, -2.4], asiento: 1.35, pies: 0.9, mira: Math.PI / 2 + 0.3 });
   add({ nombre: 'Lauti', estado: 'Hablando con su tutor', detalle: 'No molestar · 5 min', privado: true, habla: ['Conversación privada con su tutor'], modo: 'toca', p: [5.3, -4.4], mira: -Math.PI / 2 + 0.4 });
