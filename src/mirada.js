@@ -23,7 +23,8 @@ export class Mirada {
     this._pos();
     addEventListener('pointermove', (e) => {
       if (e.pointerType === 'touch') return;
-      this.mov += Math.hypot(e.clientX - this.x, e.clientY - this.y);
+      const d = Math.hypot(e.clientX - this.x, e.clientY - this.y);
+      this.mov += d; this.movTick = (this.movTick || 0) + d;
       this.x = e.clientX; this.y = e.clientY;
       this.hayPuntero = true;
       this.quieto = 0;
@@ -81,8 +82,9 @@ export class Mirada {
     if (t !== this.obj) {
       if (this.obj) this.obj.classList.remove('mirando');
       this.obj = t; this.p = 0;
-      // si algo aparece bajo una mirada quieta no se elige solo: hay que mover un poco los ojos hacia eso
-      this.req = this.quieto > 0.25;
+      // si algo aparece debajo de la mirada (un botón nuevo, una respuesta del tutor) no se elige solo:
+      // hay que mover los ojos hacia eso. Solo cuenta como elegido si fueron los ojos los que llegaron.
+      this.req = this.quieto > 0.25 || (this.movTick || 0) < 8;
       this.mov = 0;
       this.tObj = 0;
       if (t) t.classList.add('mirando');
@@ -91,7 +93,8 @@ export class Mirada {
     if (this.bloq && t !== this.bloq) this.bloq = null;
     this.enfriar -= dt;
     this.tObj = (this.tObj || 0) + dt;
-    const avanza = t && t !== this.bloq && !this.presionado && (!this.req || this.mov > 6) && this.enfriar <= 0;
+    this.movTick = 0;
+    const avanza = t && t !== this.bloq && !this.presionado && (!this.req || this.mov > 20) && this.enfriar <= 0;
     if (avanza) this.p += dt / ((parseFloat(t.dataset.dwell) || 1) * this.tiempo);
     else if (t !== this.bloq) this.p = Math.max(0, this.p - dt * 2);
     if (this.p >= 1) {

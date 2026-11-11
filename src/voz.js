@@ -169,9 +169,54 @@ export class Voz {
     this.silencioHasta = 0;
   }
 
-  _esEco(t) {
+  _esEco(t, estricto = false) {
     const u = this.ultimoDicho;
-    return !!u && performance.now() - u.t < 8000 && puntaje(t, u.txt) > 0.6 && palabras(t).length >= 3;
+    if (!u || performance.now() - u.t > 8000) return false;
+    return estricto ? puntaje(t, u.txt) > 0.85 && palabras(t).length >= 5 : puntaje(t, u.txt) > 0.6 && palabras(t).length >= 3;
+  }
+
+  // El micrófono también oye los parlantes: lo que dijeron el tutor o un compañero puede volver
+  // como si lo hubiera dicho la persona. Se guarda qué sonó y cuándo, para reconocer ese eco.
+  _sonando(item) {
+    const ahora = performance.now();
+    this.recientes = (this.recientes || []).filter((v) => v.t1 === Infinity || ahora - v.t1 < 20000);
+    const v = { txt: item.limpio, t0: ahora, t1: Infinity };
+    this.recientes.push(v);
+    return v;
+  }
+
+  // una frase que empezó a oírse mientras sonaba una voz (o apenas terminó) puede ser eco
+  _sospechosa(t0) {
+    return (this.recientes || []).some((v) => t0 >= v.t0 - 300 && t0 <= v.t1 + 1300);
+  }
+
+  // Quita el eco: null si todo lo oído es lo que acaba de sonar; si la persona habló pegado
+  // al final de la voz, devuelve solo su parte. El eco se reconoce porque repite lo que sonó
+  // en el mismo orden (con alguna palabra mal oída); lo que sigue después es de la persona.
+  _sinEco(t) {
+    const ws = norm(t).split(' ').filter(Boolean);
+    if (!ws.length) return null;
+    const igual = (w, x) => x === w || (w.length >= 4 && parecida(w, x));
+    let k = 0;
+    for (const v of this.recientes || []) {
+      const seq = norm(v.txt).split(' ').filter(Boolean);
+      let pos = -1, n = 0, i = 0;
+      const busca = (w) => {
+        const desde = pos < 0 ? 0 : pos + 1, hasta = pos < 0 ? seq.length : Math.min(seq.length, pos + 5);
+        for (let j = desde; j < hasta; j++) if (igual(w, seq[j])) return j;
+        return -1;
+      };
+      while (i < ws.length) {
+        let j = busca(ws[i]);
+        if (j >= 0) { pos = j; i++; n = i; continue; }
+        // una palabra mal oída en el medio del eco: si la siguiente sigue el orden, también es eco
+        if (pos >= 0 && i + 1 < ws.length && (j = busca(ws[i + 1])) >= 0) { pos = j; i += 2; n = i; continue; }
+        break;
+      }
+      k = Math.max(k, n);
+    }
+    if (!k) return t;
+    return k < ws.length ? ws.slice(k).join(' ') : null;
   }
 
   // ¿lo que se escuchó son palabras que el tutor acaba de decir? (comparación exacta, sirve para frases cortas)
@@ -191,12 +236,15 @@ export class Voz {
     rec.continuous = true;
     rec.interimResults = true;
     rec.maxAlternatives = 3;
-    rec.onstart = () => { this.escuchandoWeb = true; this._estado('escucha'); };
+    rec.onstart = () => { this.escuchandoWeb = true; this.vistos = new Map(); this._estado('escucha'); };
     rec.onresult = (e) => {
+      const vistos = (this.vistos = this.vistos || new Map());
       for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
-        const t = r[0].transcript;
+        let t = r[0].transcript;
+        if (!vistos.has(i)) vistos.set(i, performance.now()); // cuándo empezó a oírse esta frase
         if (this.probando) { this._mostrar(t, !r.isFinal); continue; }
+        let corto = false;
         if (this._tutorHablando()) {
           // mientras habla el tutor, solo cuenta si lo interrumpen llamándolo
           // (o, en el test de tareas, con un pedido corto como «pará» o «¿qué es eso?»)
@@ -204,10 +252,19 @@ export class Voz {
           const corta = !!this.hud.interrumpe && !this._ecoExacto(t) && this.hud.interrumpe(norm(t));
           if (!corta && (!ll || !ll.firme || this._esEco(t))) continue;
           this._callarTutor();
+          corto = true;
         }
-        if (this._esEco(t)) continue;
+        let alternativas = Array.from(r).map((x) => x.transcript);
+        if (!corto) {
+          if (this._sospechosa(vistos.get(i))) {
+            // empezó mientras sonaba una voz: lo que se repite de esa voz es eco, no la persona
+            const propio = this._sinEco(t);
+            if (propio == null) continue;
+            if (propio !== t) { t = propio; alternativas = [t]; }
+          } else if (this._esEco(t, true)) continue;
+        }
         if (!r.isFinal) { this._mostrar(t, true); continue; }
-        this._final(t, Array.from(r).map((x) => x.transcript));
+        this._final(t, alternativas);
       }
     };
     rec.onerror = (e) => {
@@ -321,11 +378,13 @@ export class Voz {
     this.hablando = true;
     this.hablandoDesde = performance.now();
     this.ultimoDicho = { txt: item.limpio, t: performance.now() };
+    const sonido = this._sonando(item);
     this._estado('habla');
     let listo = false;
     const fin = () => {
       if (listo) return;
       listo = true;
+      sonido.t1 = performance.now();
       this.actualVoz = null;
       this.hablando = false;
       this.silencioHasta = performance.now() + 700;
