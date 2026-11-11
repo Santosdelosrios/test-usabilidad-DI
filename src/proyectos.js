@@ -134,7 +134,8 @@ export function instalarProyectos(HUD) {
       if (st.proy.id) return this.aviso('El proyecto ya está elegido: no se puede cambiar.', 'Proyecto', true);
       st.proy.id = id;
       this.registrar('proyecto', `elegir ${id}`);
-      this.agenda.find((a) => a.proy).tit = `Taller · ${d.nombre.toLowerCase()}`;
+      const pa = this.agenda.find((a) => a.proy);
+      if (pa) pa.tit = `Taller · ${d.nombre.toLowerCase()}`;
       this._hoyPill();
       this._proyAnclas(d);
       this.aviso(`Elegiste «${d.nombre}». Lo hacés con Tomi y Ana.`, 'Proyecto', true);

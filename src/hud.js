@@ -108,7 +108,8 @@ export class HUD {
 
   reset() {
     this.tutorUsado = false;
-    AGENDA.find((a) => a.proy).tit = 'Taller · proyecto del grupo';
+    const proy = AGENDA.find((a) => a.proy);
+    if (proy) proy.tit = 'Taller · proyecto del grupo';
     if (this.anclas) {
       this.anclas.filter((a) => a.id.startsWith('pm-')).forEach((a) => a.el.remove());
       this.anclas = this.anclas.filter((a) => !a.id.startsWith('pm-'));
@@ -1021,7 +1022,7 @@ export class HUD {
   _sugerirLugar(id) {
     const st = this.st;
     if (this.nav.current !== id || this.nav.walk) return; // ya se fue de ahí
-    if (!this.aj.sugerencias || !this.puestas || !this.visible || !st.conectada || st.foco) return;
+    if (!this.aj.sugerencias || !this.puestas || !this.visible || !st.conectada || st.foco || this.soloClase) return;
     if (this.ia) { if (!st.sugeridas['ia-' + id]) { st.sugeridas['ia-' + id] = true; this.cerebro.evento(`Llegó a ${EN[id]} por primera vez hoy.`); } return; }
     const P = (txt, ops, clave) => this.proponer(txt, ops, clave, id);
     if (id === 'hall' && !st.oculoResuelto && !this.oculo.activo) this.proponerOculo();
@@ -1163,6 +1164,9 @@ export class HUD {
     }
     if (this.libre && st.conectada) {
       if (!st.evClase && st.minuto >= 9 * 60 + 30 && this.clase) { st.evClase = true; this.clase.ofrecer('hora'); }
+    }
+    // (por ahora el test es solo llegar y hacer la clase: el resto del día no corre)
+    if (this.libre && st.conectada && !this.soloClase) {
       // si a las 10:05 no fue a la clase, el día sigue igual: arranca el taller (la clase queda pendiente, F8)
       if (!st.evProy && st.minuto >= 10 * 60 + 5 && !st.proy.id) { st.evProy = true; this._elegirProyecto('Son las 10:05 y la clase quedó sin hacer.', 'Ya son las 10. '); }
       if (!st.santiPregunta && st.minuto >= 10 * 60 + 8) this.preguntaSanti();

@@ -248,6 +248,21 @@ async function start() {
     // la clase es una parada más del día: se arma ahora y empieza cuando se sienta en su mesa
     tareasIA = new TareasIA({ hud, nav, scene, camera, world, enMundo: true });
     hud.clase = tareasIA;
+    // por ahora el test es solo llegar a la escuela y hacer la clase (las 6 tareas).
+    // Con SOLO_CLASE = false vuelven el proyecto, los mensajes, la presentación y el resto del día.
+    const SOLO_CLASE = true;
+    if (SOLO_CLASE) {
+      hud.soloClase = true;
+      hud.agenda.splice(0, hud.agenda.length, ...hud.agenda.filter((a) => !a.dest || a.clase));
+      // mirar su mesa: sentarse para la clase
+      const mesa = hud.anclas.find((a) => a.id === 'mesa');
+      if (mesa) {
+        mesa.tit = 'Tu mesa';
+        mesa.det = () => (tareasIA.hecha ? 'Clase terminada' : 'Clase · Biología y Matemática · 9:30');
+        mesa.acc = [['Sentarme para la clase', () => tareasIA.sentarse('mesa')]];
+        hud._pintarAcc(mesa);
+      }
+    }
     hud.oirAntes = (d) => tareasIA.oirMundo(d);
     if (conCamara && cam.estado === 'sin') setTimeout(() => hud.quitarGafas(), 400);
     voz.encender();

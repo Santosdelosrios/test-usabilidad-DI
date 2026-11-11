@@ -524,7 +524,15 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
 .corazon-capa .et.c { flex-direction: column-reverse; gap: 4px; }
 .corazon-capa .et i { width: 6px; height: 6px; border-radius: 50%; background: rgba(236,235,231,.75); box-shadow: 0 0 0 3px rgba(11,12,14,.4); flex: none; }
 .corazon-capa .et span { padding: 3px 7px; background: rgba(11,12,14,.74); border: 1px solid rgba(236,235,231,.14); transition: border-color .25s, color .25s; }
+.corazon-capa .et[data-mirar] { pointer-events: auto; cursor: pointer; }
+.corazon-capa .et[data-mirar]:hover span, .corazon-capa .et.mirando span { border-color: var(--naranja); color: #fff; }
+.corazon-capa .et[data-mirar]:hover span::after, .corazon-capa .et.mirando span::after { content: ' · ¿qué es?'; color: var(--naranja); }
 .corazon-capa .et.on { color: #fff; z-index: 2; }
+#hud-cuaderno .elegir { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px; font-size: 12px; }
+#hud-cuaderno .elegir > span { width: 100%; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(27,29,33,.55); }
+#hud-cuaderno .elegir button, #hud-cuaderno .pie button { border: 1px solid rgba(27,29,33,.45); padding: 5px 9px; color: #1b1d21; }
+#hud-cuaderno .pie button { padding: 2px 6px; margin-left: 4px; }
+#hud-cuaderno .elegir button:hover, #hud-cuaderno .elegir button.mirando, #hud-cuaderno .pie button:hover, #hud-cuaderno .pie button.mirando { background: #1b1d21; color: #fff; }
 .corazon-capa .et.on i { background: var(--naranja); box-shadow: 0 0 0 3px rgba(232,116,59,.25); }
 .corazon-capa .et.on span { border-color: var(--naranja); font-size: 11px; padding: 4px 8px; }
 .corazon-capa .tag { position: absolute; left: 0; top: 0; font-size: 9px; letter-spacing: calc(.16em * var(--esp-m)); text-transform: uppercase; color: rgba(236,235,231,.5); white-space: nowrap; }
@@ -780,7 +788,7 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
       <button type="button" class="prim" id="intro-prueba">Empezar el test · Enter</button>
       <button type="button" id="intro-libre">Explorar el mundo (revisión)</button>
     </div>
-    <p class="nota"><b>Clase en la mesa:</b> a las 9:55 del itinerario el tutor le ofrece sentarse en su mesa del aula-taller. Ahí hace 6 consignas cortas con un tutor de respuestas guionadas, mientras el reloj de la escuela espera; al terminar, se levanta y sigue el recorrido. F8 empieza la clase en cualquier momento. Los resultados de la clase se guardan solos en este navegador, aunque se cierre la pestaña: se descargan con Shift + M o desde acá. <button type="button" id="intro-resultados" class="enlace" hidden>Resultados guardados</button></p>
+    <p class="nota"><b>El test:</b> llega a la escuela y, como primera actividad del día (9:30), se sienta en su mesa del aula-taller para la clase de Biología y Matemática: 6 consignas cortas con un tutor de respuestas guionadas, que se resuelven con la voz o con la mirada. Al terminar aparece el agradecimiento. F8 empieza la clase en cualquier momento. Los resultados de la clase se guardan solos en este navegador, aunque se cierre la pestaña: se descargan con Shift + M o desde acá. <button type="button" id="intro-resultados" class="enlace" hidden>Resultados guardados</button></p>
   </div>
 </div>
 <div id="cam-oculta"></div>

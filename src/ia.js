@@ -147,6 +147,7 @@ export class Cerebro {
     L.push(`Hora: ${hhmm(st.minuto)}. ${nav.walk ? 'Está caminando.' : `Está en ${LUGAR[nav.current] || nav.current}.`}${st.guia ? ` Ruta activa hacia ${LUGAR[st.guia]}.` : ''}`);
     L.push(`Itinerario de hoy: ${h.agenda.map((a) => `${hhmm(a.h)} ${a.tit} (${a.lugar})`).join('; ')}.`);
     if (h.clase) L.push(`Clase en su mesa: ${h.clase.estado()}.`);
+    if (h.soloClase) L.push('Hoy la prueba es solo llegar a la escuela y hacer la clase en su mesa. No hay proyecto, ni presentación, ni otras actividades: no los menciones ni los ofrezcas.');
     if (!h.puestas) L.push('Tiene las gafas sacadas.');
     const per = h.anclas.filter((a) => a.tipo === 'persona' && a.on).map((a) => `${a.tit} (${a.estado ? a.estado() : ''}${a.det && a.det() ? `; ${a.det()}` : ''})`);
     if (per.length) L.push(`Personas que ve cerca: ${per.join(', ')}.`);

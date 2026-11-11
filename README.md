@@ -13,6 +13,8 @@ Prototipo navegable para el test de usabilidad de Diseño de Futuros (UTDT): una
 
 El guión que lee el moderador está en [`guion.md`](guion.md): una sesión de unos 50 minutos con objetivo, hipótesis, preparación, intro, preguntas, escenario con el horario del día (la clase en la mesa primero), proyectos y planillas del observador. La referencia detallada de la clase está en [`guion-tareas-ia.md`](guion-tareas-ia.md).
 
+**Por ahora el test es solo llegar a la escuela y hacer la clase en la mesa (las 6 tareas).** El proyecto, los mensajes de los compañeros y la docente y la presentación están apagados (`SOLO_CLASE` en `src/main.js`). Lo que dice el moderador está en [`guion-moderador.md`](guion-moderador.md).
+
 ## La clase en la mesa (tutor que explica)
 
 Es lo primero del día en el recorrido libre: a las 9:30 el tutor le ofrece al participante sentarse en su mesa del aula-taller (o lo lleva hasta ahí). Sentado, hace seis consignas cortas: pedir que le expliquen el corazón (aparece en 3D sobre la mesa), moverse dentro de la explicación, repreguntar, resolver una ecuación con pistas, responder a una sugerencia del tutor y silenciarlo. Durante la clase el reloj de la escuela espera y el tutor tiene las respuestas escritas de antemano (no usa Gemini); al terminar, se levanta y sigue el recorrido. F8 la empieza en cualquier momento. Los resultados de la clase se guardan solos en el navegador (aunque se cierre la pestaña) y se descargan desde un panel escondido (Shift + M) o desde «Resultados guardados» en la pantalla de preparación, que también junta a todos los participantes en un solo CSV. El detalle de cada consigna, las frases de voz y las teclas están en [`guion-tareas-ia.md`](guion-tareas-ia.md).

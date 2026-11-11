@@ -152,7 +152,7 @@ export class TareasIA {
     h.interrumpe = (d) => this.interrumpe(d);
     h.noEntendiExtra = () => this.corazon.abierto && this.corazon.noEntendi();
     // mirar o llamar al tutor abre la escucha (como el tutor con IA), sin el menú del mundo libre
-    h.alAbrirTutor = () => { if (h.voz) h.voz.abrirVentana(10); h.proponer(`Te escucho${h._coma()}. Pedime lo que necesites.`); };
+    h.alAbrirTutor = () => this._menuTutor();
     h.aj.sugerencias = true;  // la tarea 5 necesita que el tutor pueda sugerir
     h.aj.pausas = false;      // sin recordatorios de pausa visual que se mezclen con las tareas
     // la pista de voz del tutor en reposo no habla de caminar: acá está sentado
@@ -175,6 +175,25 @@ export class TareasIA {
     // en el recorrido no hay pantalla de instrucciones: ya sabe usar las gafas; arranca la clase
     h.proponer(`Arranca la clase${h._coma()}. Las consignas te aparecen arriba; si te trabás en una, podés pasar a la siguiente.`);
     this.comenzar();
+  }
+
+  // mirar o llamar al tutor en clase: lo que se le puede pedir en ese momento, para elegir con la mirada
+  _menuTutor() {
+    const h = this.hud, cor = this.corazon, ej = this.ej;
+    if (h.voz) h.voz.abrirVentana(10);
+    const y = (f) => () => { h.cerrarTutor(true); f(); };
+    const ops = [];
+    if (ej.activo && ej.e && !ej.e.resuelto) {
+      ops.push(['Dame una pista', y(() => ej.pista('mirada'))]);
+      ops.push(['Decime la respuesta', y(() => ej.pedirRespuesta('mirada'))]);
+    } else if (cor.abierto) {
+      ops.push(['¿Por dónde entra la sangre?', y(() => cor.preguntar('entra', 'mirada'))]);
+      ops.push(['¿Y a dónde va después?', y(() => cor.preguntar('despues', 'mirada'))]);
+    } else if (!ej.activo) ops.push(['Explicame el tema de la clase', y(() => cor.abrir('mirada'))]);
+    ops.push(h.st.foco ? ['Ya podés hablar', y(() => this.foco(false, 'mirada'))] : ['No me interrumpas', y(() => this.foco(true, 'mirada'))]);
+    ops.push(['Nada, gracias', () => h.cerrarTutor()]);
+    h.registrar('tutor', 'abrir');
+    h.decir(`Te escucho${h._coma()}. ¿Qué necesitás?`, ops);
   }
 
   // ── la clase dentro del recorrido libre ──
@@ -428,7 +447,8 @@ export class TareasIA {
     c.card.classList.remove('lograda');
     c.card.classList.add('fin');
     this.hud.registrar('tarea', 'fin');
-    if (this.enMundo) { this._pintar(); this._salirDeClase(); return; }
+    if (this.enMundo && !this.hud.soloClase) { this._pintar(); this._salirDeClase(); return; }
+    if (this.enMundo) { this.hecha = true; this.hud.st.claseHecha = true; this.hud._hoyPill(); }
     this._final();
     this._guardarYa();
     this._pintar();

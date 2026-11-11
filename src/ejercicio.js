@@ -33,6 +33,14 @@ export class Ejercicio {
     this.el.className = 'zoom';
     this.el.hidden = true;
     document.getElementById('hud').appendChild(this.el);
+    // con la mirada (o el mouse): elegir el próximo paso o pedir una pista
+    this.el.addEventListener('click', (ev) => {
+      const b = ev.target.closest('[data-paso], [data-pista]');
+      if (!b || !this.activo) return;
+      if (b.dataset.pista != null) return this.pista('mirada');
+      const op = this._ops && this._ops[+b.dataset.paso];
+      if (op) op[1]();
+    });
     this.activo = false;
     this.espontaneas = false; // sugerencias que el tutor hace sin que se las pidan
     this.demora = 25;         // segundos sin avances antes de sugerir
@@ -303,7 +311,28 @@ export class Ejercicio {
     h += `<ol class="pasos">${e.lineas.map((l) => `<li class="${l.c}">${esc(l.txt)}</li>`).join('')}</ol>`;
     if (e.resuelto) h += `<div class="res">${e.comprobado ? 'Resuelto y comprobado' : 'Resuelto'} · x = ${e.x}</div>`;
     else if (e.ultimaPista) h += `<div class="pista"><b>Pista ${e.ultimaPista.n} de 3</b>${esc(e.ultimaPista.txt)}</div>`;
-    h += '<div class="pie">Decí en voz alta cada paso</div>';
+    if (!e.resuelto) {
+      this._ops = this._opcionesPaso();
+      h += `<div class="elegir"><span>Próximo paso</span>${this._ops.map(([t], i) => `<button type="button" data-dwell="1.3" data-paso="${i}">${esc(t)}</button>`).join('')}</div>`;
+      h += '<div class="pie">Decí cada paso en voz alta o elegilo con la mirada · <button type="button" data-dwell="1.3" data-pista>Pedir una pista</button></div>';
+    }
     this.el.innerHTML = h;
+  }
+
+  // las tres opciones del próximo paso: una correcta y dos que no (la correcta cambia de lugar)
+  _opcionesPaso() {
+    const e = this.e, { a, b, c, m, x } = e, B = Math.abs(b);
+    const sumar = b < 0, mal = (t) => [t, () => this._error(t, 'mirada', true)];
+    let ops, k;
+    if (!e.paso1 && !e.op1) {
+      ops = [[`${sumar ? 'Sumar' : 'Restar'} ${B} de los dos lados`, () => this._op1('mirada')], mal(`${sumar ? 'Restar' : 'Sumar'} ${B} de los dos lados`), [`Dividir por ${a} los dos lados`, () => this._op2('mirada')]]; k = 0;
+    } else if (!e.paso1) {
+      ops = [mal(`${a}x = ${c + b}`), [`${a}x = ${m}`, () => this._paso1('mirada')], mal(`x = ${m}`)]; k = 1;
+    } else if (!e.op2) {
+      ops = [mal(`Multiplicar por ${a} los dos lados`), mal(`Restar ${a} de los dos lados`), [`Dividir por ${a} los dos lados`, () => this._op2('mirada')]]; k = 2;
+    } else {
+      ops = [[`x = ${x}`, () => this._resolver('mirada')], mal(`x = ${m * a}`), mal(`x = ${m - a}`)]; k = 0;
+    }
+    return ops;
   }
 }

@@ -255,6 +255,9 @@ export class Corazon {
       const d = document.createElement('div');
       d.className = `et ${p.al}`;
       d.innerHTML = `<i></i><span>${p.nombre}</span>`;
+      // mirar (o tocar) una parte le pregunta al tutor qué es, sin hablar
+      const q = RESP[k] ? k : k === 'tri' ? 'valvulas' : null;
+      if (q) { d.dataset.mirar = '1'; d.dataset.dwell = '1.3'; d.addEventListener('click', () => this.preguntar(q, 'mirada')); }
       capa.appendChild(d);
       this.etiquetas.push({ el: d, v: V(p.et), al: p.al, k, solo: p.solo });
     }
