@@ -1,14 +1,18 @@
 # Guión del test de tareas · IA que explica
 
-Diseño de Futuros (UTDT) · TUTOR 2040 · rama `tareas-ia`
+Diseño de Futuros (UTDT) · TUTOR 2040 · versión del 11 de noviembre de 2026
 
-Este test evalúa una sola cosa: el tutor de IA que explica y ayuda a aprender. El participante no recorre la escuela: está sentado en su mesa del aula-taller, con las gafas puestas, y hace seis tareas cortas. Es un modo aparte del test de mundo libre (que está en [`guion.md`](guion.md)) y se elige en la misma pantalla de preparación.
+Este test evalúa una sola cosa: el tutor de IA que explica y ayuda a aprender. El participante no recorre la escuela: está sentado en su mesa del aula-taller, con las gafas puestas, y hace seis tareas cortas. Es un modo aparte del test de mundo libre (que está en [`guion.md`](guion.md)) y se elige en la misma pantalla de preparación, con el botón **«Test de tareas · IA que explica»**.
 
-Es **autoguiado**: la persona lo hace sola, sin moderador. Lee las instrucciones, sigue las consignas que aparecen en pantalla, pasa de tarea sin que nadie intervenga y al final ve un agradecimiento. La persona no ve ninguna descarga: los resultados se bajan desde un panel escondido (Shift + M), que también sirve de respaldo si alguien la acompaña.
+Las tareas son **autoguiadas**: la persona las hace sola, sin que nadie intervenga. Lee las instrucciones, sigue las consignas que aparecen en pantalla, pasa de tarea sola y al final ve un agradecimiento. Alrededor de las tareas hay una charla corta antes (intro y preguntas previas) y otra después (preguntas finales y cierre), como en cualquier test de usabilidad. Si nadie puede acompañar, las preguntas se mandan como formulario.
 
 Las respuestas del tutor están escritas de antemano: no usa la IA real ni la clave de Gemini. Así todos los participantes ven lo mismo y el test no depende de la conexión con el modelo.
 
-## Qué queremos aprender
+## Objetivo
+
+Queremos validar con estudiantes de secundaria si el tutor de las gafas sirve para **aprender algo que no entienden**: si se les ocurre pedirle una explicación, si pueden manejarla a su ritmo, si los ayuda a destrabarse sin resolverles el ejercicio y si pueden callarlo cuando quieren pensar solos.
+
+En concreto, queremos aprender:
 
 - **Pedir una explicación:** si se les ocurre pedirle al tutor que les explique algo, y con qué palabras.
 - **Moverse dentro de la explicación:** si encuentran cómo pausar, repetir, ir más despacio, girar o acercar, y qué prefieren (voz, botones, mirada).
@@ -17,26 +21,70 @@ Las respuestas del tutor están escritas de antemano: no usa la IA real ni la cl
 - **Sugerencias que no pidieron:** si las ven, si las aceptan o las descartan, y si las sienten ayuda o interrupción.
 - **Que el tutor no interrumpa:** si saben cómo silenciarlo un rato y cómo volver.
 
+Queda afuera todo lo social (compañeros, docente, pizarrón compartido) y la escuela como espacio: eso lo mide el test de mundo libre. Si un participante comenta sobre eso, se anota pero no se profundiza.
+
+## Hipótesis
+
+Cada hipótesis dice en qué tarea se ve y qué dato de los resultados la confirma o la descarta. Los datos salen del archivo de resultados (ver «Resultados», al final); lo cualitativo, de la planilla del observador o del formulario.
+
+| # | Creemos que… | Tarea | Cómo se confirma |
+| --- | --- | --- | --- |
+| H1 | La mayoría le pide la explicación al tutor por voz en menos de un minuto, sin buscar un menú. | 1 | `tiempo_hasta_logro_s` menor a 60 y `detalle_auto` «Lo pidió por voz». |
+| H2 | Para manejar la explicación prefieren hablar («pará», «repetí», «más despacio») antes que tocar los botones del costado. | 2 | En `controles_corazon`, más controles «(voz)» que «(boton)». |
+| H3 | Se animan a preguntar en el medio de la explicación y notan que retoma sola, sin pedírselo. | 3 | Tarea 3 en «ok» (no «parcial») y comentario en la pregunta final 3. |
+| H4 | Cuando se traban piden ayuda antes de los dos minutos. Al principio les molesta que no les den la respuesta, pero llegan al resultado con dos pistas o menos. | 4 | `tiempo_hasta_logro_s`, `pistas_pedidas` ≤ 2 y `pidio_la_respuesta`. |
+| H5 | Ven la sugerencia que no pidieron y la aceptan si están trabados; la sienten una ayuda, no una interrupción. | 5 | `sugerencias_aceptadas` frente a `sugerencias_descartadas`, y pregunta final 5. |
+| H6 | Saben callar al tutor por voz («no me interrumpas») sin buscar en menús, y entienden cómo volver a escucharlo. | 6 | Tarea 6 en «ok» con «por voz» en el detalle, y pregunta final 6. |
+
 ## Preparación
 
-La pantalla de preparación es la misma del test de mundo libre (ver [`guion.md`](guion.md)). La deja lista quien arma la prueba, o la misma persona:
+La pantalla de preparación es la misma del test de mundo libre (ver [`guion.md`](guion.md)). La deja lista quien arma la prueba:
 
-1. Escribir el nombre del participante: va en el archivo de resultados.
-2. Voz, mirada y cámara se configuran como siempre. La clave de Gemini no hace falta.
-3. Elegir **«Test de tareas · IA que explica»**.
+1. Abrir el link en **Chrome**, con micrófono. Si se puede, usar **auriculares**: con parlantes el micrófono también oye al tutor (el test descarta ese eco, pero con auriculares no hay nada que descartar).
+2. Escribir el nombre del participante: va en el archivo de resultados.
+3. Voz, mirada y cámara se configuran como siempre. La clave de Gemini no hace falta.
+4. Tener a mano la planilla del observador (al final) o el formulario con las preguntas.
+5. Cuando el participante esté sentado y haya terminado la intro y las preguntas previas, elegir **«Test de tareas · IA que explica»**.
+
+## Intro
+
+Quien acompaña lee este texto. Si la persona hace la prueba sola, se le manda escrito junto con el link.
+
+> ¡Gracias por venir! Me llamo [nombre]. Con mi grupo de Diseño de Futuros estamos imaginando cómo podría ser la escuela secundaria en 2040: unas gafas con un tutor de inteligencia artificial que te ayuda a aprender.
+>
+> Hoy queremos ver si ese tutor sirve de verdad cuando no entendés algo. No te evaluamos a vos: evaluamos las gafas. Si algo no sale, es un problema del diseño, no tuyo.
+>
+> Vas a hacer seis tareas cortas, de un par de minutos cada una. La consigna aparece arriba en la pantalla y, cuando terminás una, pasa sola a la siguiente. Yo no te voy a ayudar durante las tareas: hacé lo que harías si estuvieras solo. Si te trabás, podés pasar a la siguiente.
+>
+> Mientras lo hacés, decí en voz alta lo que pensás, aunque te parezca obvio. Al tutor le hablás empezando con «Tutor…».
+>
+> La prueba anota qué tareas cumpliste, cuánto tardaste y las frases que le dijiste al tutor, con tu nombre. Eso queda en esta compu y lo usamos solo nosotros para mejorar el diseño. [Si se graba:] ¿Puedo grabar la pantalla y el audio? Si en algún momento querés frenar, avisá y paramos.
+
+[Si se graba, iniciar la grabación.]
+
+## Preguntas previas
+
+Para romper el hielo y entender el perfil de cada participante. Son pocas, para no cansar antes de las tareas.
+
+1. ¿En qué año estás? ¿Qué materia te cuesta más?
+2. Cuando no entendés algo en clase, ¿qué hacés? ¿Le preguntás al profe, a un compañero, buscás un video?
+3. ¿Usás alguna inteligencia artificial, como ChatGPT o Gemini? ¿Para la escuela? ¿Para qué?
+4. Cuando alguien te explica algo, ¿preferís que te den la respuesta o que te den pistas para llegar solo?
 
 ## Cómo lo vive la persona
 
 1. **Instrucciones.** Aparece una pantalla «Antes de empezar» que explica en cinco puntos qué va a hacer: 6 tareas cortas, la consigna arriba, cómo hablarle al tutor (según la voz que haya en ese navegador), cómo mirar (según la mirada esté activada o no), que las tareas pasan solas y que no hay respuestas buenas ni malas. Con «Empezar» o Enter arranca la tarea 1 y empieza a correr su tiempo.
-2. **Cada tarea.** Arriba hay una tarjeta blanca con el número de tarea, el escenario y la consigna. No muestra el nombre de la tarea, para no dar pistas. Cuando cambia de tarea, la tarjeta se anima para que se note.
+2. **Cada tarea.** Arriba hay una tarjeta blanca con el número de tarea, el escenario y la consigna. No muestra el nombre de la tarea, para no dar pistas. Cuando cambia de tarea, la tarjeta se anima para que se note. La pantalla de la mesa y la pastilla «Hoy» muestran la materia: Biología (el corazón) en las tareas 1 a 3 y Matemática (ecuaciones) de la 4 a la 6.
 3. **Pasar de tarea.** Cuando la tarea termina, la tarjeta muestra «✓ Listo · sigue en 4» y a los cuatro segundos pasa sola a la siguiente (con «Siguiente →» se adelanta). Si la persona se traba, puede tocar «Pasar a la siguiente» en la tarjeta o decir «siguiente tarea»: la tarea queda anotada como salteada.
-4. **Fin.** Después de la tarea 6 aparece «¡Terminaste las 6 tareas!» con un agradecimiento. No se le pide nada más.
+4. **Fin.** Después de la tarea 6 aparece «¡Terminaste las 6 tareas!» con un agradecimiento. Ahí siguen las preguntas finales.
 
 Cuándo se considera terminada cada tarea para pasar a la siguiente está en cada tarea, abajo («Pasa a la siguiente»). Es un poco más exigente que el éxito: por ejemplo, en la tarea 1 alcanza con abrir la explicación para cumplirla, pero pasa a la siguiente recién cuando la explicación termina.
 
-## Si alguien acompaña (opcional)
+## Si alguien acompaña
 
-El panel del moderador sigue disponible, escondido: se abre y se cierra con **Shift + M**. Muestra las tareas con su escenario y su consigna, cuál está en curso, si se cumplió, los tiempos, las pistas, las frases de voz entendidas y no entendidas, las teclas y los botones de descarga. Desde ahí se puede marcar cada tarea a mano (sola, con empujón o no), saltar a cualquier tarea y, si el reconocimiento de voz falla, disparar con su tecla lo que la persona dijo (todas son Shift + tecla). Está en la misma pantalla que ve la persona: conviene abrirlo solo entre tareas o al final.
+Quien acompaña observa y anota en la planilla, sin ayudar durante las tareas. Si la persona pregunta algo, se le responde «¿Vos qué harías?» y se retoma en el cierre.
+
+El panel del moderador está escondido: se abre y se cierra con **Shift + M**. Muestra las tareas con su escenario y su consigna, cuál está en curso, si se cumplió, los tiempos, las pistas, las frases de voz entendidas y no entendidas, las teclas y los botones de descarga. Desde ahí se puede marcar cada tarea a mano (sola, con empujón o no), saltar a cualquier tarea y, si el reconocimiento de voz falla, disparar con su tecla lo que la persona dijo (todas son Shift + tecla). Está en la misma pantalla que ve la persona: conviene abrirlo solo entre tareas o al final.
 
 ## Las seis tareas
 
@@ -100,9 +148,43 @@ El panel del moderador sigue disponible, escondido: se abre y se cierra con **Sh
 - **Pasa a la siguiente:** cuando el foco lleva diez segundos activo (o cinco segundos después de apagar la iniciativa del tutor). Después aparece la pantalla final.
 - **Tecla de respaldo, si alguien acompaña:** Shift + F.
 
+## Preguntas finales
+
+Después de la pantalla final. Pedir ejemplos concretos de lo que vivieron. Si la persona hizo la prueba sola, van en el formulario.
+
+1. En una palabra, ¿cómo te sentiste con el tutor?
+2. ¿Se te ocurrió enseguida pedirle que te explique el corazón? ¿Qué esperabas que pasara?
+3. Cuando preguntaste qué era el ventrículo, ¿sentiste que perdías la explicación? ¿Te diste cuenta de que siguió donde estaba?
+4. En el ejercicio, ¿qué te pareció que no te diera la respuesta? ¿Las pistas te ayudaron o te frustraron?
+5. Cuando el tutor te sugirió algo sin que se lo pidieras, ¿lo sentiste como ayuda o como interrupción? ¿Por qué?
+6. ¿Cómo hiciste para que no te interrumpiera? ¿Sabrías cómo volver a escucharlo?
+7. ¿Preferís hablarle o tocar botones? ¿En qué momento te entendió mal?
+8. Comparado con preguntarle a un profe o buscar un video, ¿qué tiene de mejor y de peor?
+9. ¿Lo usarías para estudiar? ¿Para qué materia o tema?
+10. Del 1 al 5, ¿qué tan fácil fue usar el tutor? ¿Y qué tan útil te pareció para entender?
+
+## Cierre y registro
+
+> ¡Muchas gracias! Todo lo que nos contaste nos ayuda a mejorar el tutor. ¿Te quedó alguna duda de las que dejamos para el final?
+
+Si alguien observaba, ahora puede preguntar. Después, detener la grabación y descargar los resultados (ver abajo).
+
+**Planilla del observador** (una copia por participante). Anotar arriba: participante, edad, año, fecha, si usó auriculares o parlantes y si la mirada estaba activada. Los tiempos, pistas y frases ya los anota la prueba: la planilla es para lo que la prueba no ve.
+
+| Tarea | ¿Lo logró? (solo / con empujón / no) | Cómo lo hizo (voz, botón, mirada) | Frases textuales | Gestos o dudas |
+| --- | --- | --- | --- | --- |
+| 1 · Pedir una explicación | | | | |
+| 2 · Moverse dentro de la explicación | | | | |
+| 3 · Repreguntar | | | | |
+| 4 · Trabarse en un ejercicio | | | | |
+| 5 · Una sugerencia que no pidió | | | | |
+| 6 · Que el tutor no interrumpa | | | | |
+
+Anotar también las respuestas a la pregunta final 10 (los dos números del 1 al 5) y cualquier comentario sobre que el tutor no dé la respuesta. Si se usó el panel, la marca de cada tarea (sola, con empujón, no) queda también en el archivo de resultados.
+
 ## Frases de voz previstas
 
-El tutor entiende por palabras clave, sin tildes ni mayúsculas, y tolera variantes. No hace falta decir «Tutor» primero para los pedidos claros. Mientras el tutor habla, los pedidos cortos («pará», «¿qué es…?», «repetí», «no me interrumpas») lo cortan.
+El tutor entiende por palabras clave, sin tildes ni mayúsculas, y tolera variantes. No hace falta decir «Tutor» primero para los pedidos claros. Mientras el tutor habla, los pedidos cortos («pará», «¿qué es…?», «repetí», «no me interrumpas») lo cortan. Lo que el micrófono oye del propio tutor por los parlantes se descarta, para que no se conteste solo.
 
 | Para | Ejemplos |
 | --- | --- |
@@ -155,9 +237,16 @@ Las teclas de siempre siguen igual: G pone o saca las gafas, H pasa al modo revi
 
 ## Resultados
 
-Al terminar, quien organizó la prueba abre el panel con **Shift + M** y toca **«Descargar resultados»**: baja dos archivos con el nombre del participante y la fecha. Hay que descargarlos antes de cerrar o recargar la página, porque no se guardan en otro lado.
+**Se guardan solos.** Mientras la persona hace las tareas, la prueba guarda lo que va pasando en ese navegador, cada pocos segundos y también si se cierra o se recarga la pestaña. No hace falta descargar nada antes de cerrar.
 
-- **CSV** (separado por punto y coma, se abre en Excel o en Google Sheets): una fila por tarea con el estado automático, el detalle, si la salteó, la marca del moderador (si alguien acompañó), los intentos, el tiempo hasta cumplirla y el tiempo total, las pistas, las sugerencias (mostradas, aceptadas, descartadas y retenidas por el foco), los controles y preguntas del corazón, y cuántas frases entendió y cuántas no. Abajo, una tabla por ejercicio y la lista de frases de voz con el segundo y la tarea.
+Para bajarlos:
+
+- **Durante o al final de la sesión:** Shift + M abre el panel. «Descargar esta sesión» baja dos archivos con el nombre del participante y la fecha. Si Chrome bloquea la segunda descarga, «Solo JSON» baja únicamente el JSON.
+- **Después, o si se cerró la pestaña:** abrir el link de nuevo en la misma compu y el mismo navegador. En la pantalla de preparación aparece **«Resultados guardados del test de tareas»**, con la lista de sesiones: cada una se baja por separado y **«Descargar todas · un CSV»** junta a todos los participantes en una sola tabla, una fila por tarea y por participante.
+
+Las sesiones quedan solo en ese navegador de esa compu: si la prueba se hace en varias compus, hay que bajar los resultados de cada una. Si se borran los datos del navegador, se pierden.
+
+Qué traen los archivos:
+
+- **CSV** (separado por punto y coma, se abre en Excel o en Google Sheets): una fila por tarea con el participante, la fecha, si terminó la sesión, el estado automático, el detalle, si la salteó, la marca del moderador (si alguien acompañó), los intentos, el tiempo hasta cumplirla y el tiempo total, las pistas, las sugerencias (mostradas, aceptadas, descartadas y retenidas por el foco), los controles y preguntas del corazón, y cuántas frases entendió y cuántas no. Abajo, una tabla por ejercicio y la lista de frases de voz con el segundo y la tarea.
 - **JSON** con todo lo anterior y además el registro crudo de eventos, segundo a segundo.
-
-Si Chrome bloquea la segunda descarga, el botón «Solo JSON» baja únicamente el JSON.

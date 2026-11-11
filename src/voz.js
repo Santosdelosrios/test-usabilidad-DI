@@ -249,7 +249,8 @@ export class Voz {
           // mientras habla el tutor, solo cuenta si lo interrumpen llamándolo
           // (o, en el test de tareas, con un pedido corto como «pará» o «¿qué es eso?»)
           const ll = llamado(t);
-          const corta = !!this.hud.interrumpe && !this._ecoExacto(t) && this.hud.interrumpe(norm(t));
+          // (un pedido largo que repite lo que el tutor viene diciendo es su eco, no un pedido)
+          const corta = !!this.hud.interrumpe && !this._ecoExacto(t) && (palabras(t).length < 3 || this._sinEco(t) != null) && this.hud.interrumpe(norm(t));
           if (!corta && (!ll || !ll.firme || this._esEco(t))) continue;
           this._callarTutor();
           corto = true;

@@ -1074,7 +1074,7 @@ export class HUD {
   _hoyPill() {
     const m = this.st.minuto;
     const prox = AGENDA.find((a, i) => a.dest && (m < a.h || (AGENDA[i + 1] ? m < AGENDA[i + 1].h : true))) || AGENDA[AGENDA.length - 1];
-    const txt = `${prox.tit} · ${hhmm(prox.h)}`;
+    const txt = this.hoyFijo || `${prox.tit} · ${hhmm(prox.h)}`;
     if (this.el.hoyTxt.textContent !== txt) this.el.hoyTxt.innerHTML = `<b>${esc(txt)}</b>`;
   }
 

@@ -401,12 +401,17 @@ export function buildWorld(scene) {
   };
   {
     mesa(-17.6, 3.6); mesa(-11.8, 3.6); mesa(-17.6, -3.8); mesa(-11.8, -3.8);
-    // mesa de Lu: pilas de prendas por talle
+    // mesa de Lu: pilas de prendas por talle (en un grupo aparte: el test de tareas las saca de la mesa)
     const telas = [M.tela, M.telaClara, M.gris, M.telaArena];
+    const pilasMesa = new THREE.Group();
+    pilasMesa.name = 'pilas-mesa';
+    root.add(pilasMesa);
+    sistema.pilasMesa = pilasMesa;
     for (let k = 0; k < 4; k++) {
       const n = 2 + ((k * 7) % 4);
       for (let j = 0; j < n; j++) {
-        blk(-12.95 + k * 0.42, -12.63 + k * 0.42, 0.77 + j * 0.036, 0.803 + j * 0.036, 3.86, 4.11, telas[(k + j) % 4]);
+        const m = blk(-12.95 + k * 0.42, -12.63 + k * 0.42, 0.77 + j * 0.036, 0.803 + j * 0.036, 3.86, 4.11, telas[(k + j) % 4], { parent: pilasMesa });
+        m.userData.noFusionar = true;
       }
     }
     blk(-11.05, -10.75, 0.77, 0.78, 3.12, 3.34, M.grafito); // cuaderno

@@ -18,7 +18,7 @@ import { redibujarTextos } from './textures.js';
 import { Voz } from './voz.js';
 import { Camara } from './camara.js';
 import { Cerebro } from './ia.js';
-import { TareasIA } from './tareas-ia.js';
+import { TareasIA, sesionesGuardadas, instalarGuardadas, abrirGuardadas } from './tareas-ia.js';
 
 // Acabado de imagen: leve desaturación, sombras frías, viñeta y grano (como las fotos del moodboard)
 const Acabado = {
@@ -257,13 +257,20 @@ async function start() {
     hud.setCamara(conCamara);
     if (cam.activa && !conCamara) cam.apagar();
     chip.hidden = !conCamara;
-    tareasIA = new TareasIA({ hud, nav, scene, camera });
+    tareasIA = new TareasIA({ hud, nav, scene, camera, world });
     tareasIA.empezarSesion();
     setModo('prueba');
     if (conCamara && cam.estado === 'sin') setTimeout(() => hud.quitarGafas(), 400);
     voz.encender();
   }
   $('intro-tareas-ia').addEventListener('click', empezarTareasIA);
+  // resultados del test de tareas que quedaron guardados en este navegador (aunque se haya cerrado la pestaña)
+  instalarGuardadas($('moderador'));
+  {
+    const n = sesionesGuardadas().length, b = $('intro-resultados');
+    if (n) { b.hidden = false; b.textContent = `Resultados guardados del test de tareas · ${n}`; }
+    b.addEventListener('click', () => abrirGuardadas($('moderador')));
+  }
   $('intro-libre').addEventListener('click', () => { intro.hidden = true; setModo('revision'); });
   window.addEventListener('keydown', (e) => {
     if (e.code !== 'Enter' && e.code !== 'NumpadEnter') return;

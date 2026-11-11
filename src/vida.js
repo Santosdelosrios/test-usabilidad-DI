@@ -214,6 +214,37 @@ function dibujarMesa(g, W, H, d, t) {
   g.beginPath(); g.arc(cx, 120 + Math.cos(t * 1.1) * 6, 14 + 2 * Math.sin(t * 4), 0, Math.PI * 2); g.stroke();
 }
 
+// mesa del test de tareas: la materia de la clase, en vez del proyecto de talles
+function dibujarMesaClase(g, W, H, t, clase) {
+  const bio = clase === 'bio';
+  fondoMesa(g, W, H);
+  g.strokeStyle = 'rgba(236,235,231,0.55)';
+  g.lineWidth = 1.5;
+  g.strokeRect(6, 6, W - 12, H - 12);
+  g.font = MONO(15);
+  g.fillStyle = 'rgba(236,235,231,0.8)';
+  letras(g, bio ? 'BIOLOGÍA · 4° B' : 'MATEMÁTICA · 4° B', 22, 34, 2);
+  g.fillStyle = NARANJA;
+  g.globalAlpha = 0.55 + 0.45 * Math.sin(t * 3);
+  g.beginPath(); g.arc(W - 30, 29, 5, 0, Math.PI * 2); g.fill();
+  g.globalAlpha = 1;
+  estirar(g, 'expanded');
+  encajar(g, bio ? 'EL CORAZÓN' : 'ECUACIONES', 54, W - 48);
+  g.fillStyle = '#ecebe7';
+  g.fillText(bio ? 'EL CORAZÓN' : 'ECUACIONES', 22, 112);
+  estirar(g, 'normal');
+  g.font = MONO(13);
+  g.fillStyle = bio ? NARANJA : 'rgba(236,235,231,0.75)';
+  letras(g, bio ? 'SISTEMA CIRCULATORIO' : 'DE PRIMER GRADO', 24, 146, 1.8);
+  g.fillStyle = 'rgba(208,210,214,0.55)';
+  g.font = MONO(12);
+  letras(g, bio ? 'CIRCULACIÓN MAYOR Y MENOR' : 'DESPEJAR X · COMPROBAR', 24, 170, 1.4);
+  g.strokeStyle = 'rgba(236,235,231,0.25)';
+  g.beginPath(); g.moveTo(22, H - 40.5); g.lineTo(W - 22, H - 40.5); g.stroke();
+  g.fillStyle = 'rgba(208,210,214,0.5)';
+  letras(g, 'TUTOR · TE ESCUCHA CUANDO LO NECESITES', 24, H - 20, 1.4);
+}
+
 function dibujarMesaOtra(g, W, H, t) {
   fondoMesa(g, W, H);
   g.strokeStyle = 'rgba(236,235,231,0.5)';
@@ -416,7 +447,7 @@ export function buildVida({ scene, world, camera }) {
     const zc = zona(camera.position.x, camera.position.z);
     accPiz += dt; accMesa += dt;
     if (accPiz > 0.16 && ['proyeccion', 'hall', 'nodo', 'pasillo'].includes(zc)) { accPiz = 0; dibujarPizarron(piz.g, 1024, 410, d, t, S); piz.t.needsUpdate = true; }
-    if (accMesa > 0.25 && ['taller', 'hall'].includes(zc)) { accMesa = 0; dibujarMesa(mesaLu.g, 512, 230, d, t); mesaLu.t.needsUpdate = true; dibujarMesaOtra(mesaB.g, 512, 230, t); mesaB.t.needsUpdate = true; }
+    if (accMesa > 0.25 && ['taller', 'hall'].includes(zc)) { accMesa = 0; if (S.mesaClase) dibujarMesaClase(mesaLu.g, 512, 230, t, S.mesaClase); else dibujarMesa(mesaLu.g, 512, 230, d, t); mesaLu.t.needsUpdate = true; dibujarMesaOtra(mesaB.g, 512, 230, t); mesaB.t.needsUpdate = true; }
     // holograma
     barras.forEach((b, i) => {
       b.st.scale.y = Math.max(0.02, (d.stock[i] / MAX) * 1.75 * (1 + 0.015 * Math.sin(t * 3 + i)));

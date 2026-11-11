@@ -456,6 +456,15 @@ body.tareas-ia #tarea { display: none !important; }
 body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-height: 1.3; }
 #intro .nota { font-family: var(--texto); font-size: 12.5px; line-height: 1.45; color: rgba(236,235,231,.6); margin: 12px 0 0; }
 #intro .nota b { color: rgba(236,235,231,.9); font-weight: 500; }
+#intro .nota .enlace { all: unset; cursor: pointer; display: inline-block; margin-top: 8px; color: var(--naranja); font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; border-bottom: 1px solid currentColor; }
+#intro .nota .enlace:hover { color: #fff; }
+#moderador .ses { list-style: none; margin: 6px 0 0; padding: 0; }
+#moderador .ses li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 7px 0; border-top: 1px solid rgba(236,235,231,.1); color: rgba(236,235,231,.75); }
+#moderador .ses li b { color: #fff; font-weight: 500; }
+#moderador .ses li em { color: var(--naranja); font-style: normal; }
+#moderador .ses button { flex: none; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; padding: 5px 8px; border: 1px solid rgba(236,235,231,.3); }
+#moderador .ses button:hover { border-color: #fff; color: #fff; }
+#moderador .aviso-g { color: var(--naranja); }
 /* consigna para el participante (afuera de la ficción, como la tarjeta de la versión guiada) */
 #consigna { position: fixed; top: 62px; left: 50%; transform: translateX(-50%); width: min(520px, calc(100vw - 760px)); min-width: 360px; z-index: 4; background: #ecebe7; color: #16181b; font-family: var(--mono); padding: 10px 16px 12px; box-shadow: 0 10px 30px rgba(11,12,14,.25); }
 #consigna[hidden] { display: none; }
@@ -759,7 +768,7 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
       <button type="button" id="intro-tareas-ia">Test de tareas · IA que explica</button>
       <button type="button" id="intro-libre">Explorar el mundo (revisión)</button>
     </div>
-    <p class="nota"><b>Test de tareas · IA que explica:</b> autoguiado. El participante empieza sentado en su mesa del aula-taller, lee las instrucciones y hace 6 tareas solo, con un tutor de respuestas guionadas (no usa la clave de Gemini). Los resultados se descargan desde el panel escondido: Shift + M.</p>
+    <p class="nota"><b>Test de tareas · IA que explica:</b> autoguiado. El participante empieza sentado en su mesa del aula-taller, lee las instrucciones y hace 6 tareas solo, con un tutor de respuestas guionadas (no usa la clave de Gemini). Los resultados se guardan solos en este navegador mientras hace la prueba, aunque se cierre la pestaña: se descargan con Shift + M o desde acá. <button type="button" id="intro-resultados" class="enlace" hidden>Resultados guardados</button></p>
   </div>
 </div>
 <div id="cam-oculta"></div>

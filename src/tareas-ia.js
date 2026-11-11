@@ -3,6 +3,8 @@
 // sus respuestas están escritas de antemano (corazon.js y ejercicio.js), así todos ven lo mismo.
 // Todo se maneja con la voz; el moderador tiene teclas de respaldo (Shift + tecla) y un panel (⇧M)
 // que marca cada tarea, toma tiempos, cuenta pistas y frases, y descarga los resultados.
+// Los resultados se guardan solos en este navegador mientras se hace la prueba: si alguien cierra o
+// recarga la pestaña, se recuperan desde la pantalla de preparación («Resultados guardados») o con ⇧M.
 import { Corazon, PASO_VENTRICULO, NOMBRE_PREGUNTA } from './corazon.js';
 import { Ejercicio } from './ejercicio.js';
 
@@ -103,8 +105,9 @@ const TECLAS = [
 ];
 
 export class TareasIA {
-  constructor({ hud, nav, scene, camera }) {
+  constructor({ hud, nav, scene, camera, world }) {
     this.hud = hud; this.nav = nav; this.camera = camera;
+    this.S = world && world.sistema;
     this.corazon = new Corazon({ hud, scene, camera, pos: SOBRE_MESA });
     this.ej = new Ejercicio({ hud });
     this.activa = false;
@@ -124,6 +127,9 @@ export class TareasIA {
     });
     hud.on('registro', (r) => this._registro(r));
     hud.on('cambio', () => this.check());
+    // si se cierra, se recarga o se va a otra pestaña, lo hecho hasta ahí queda guardado
+    window.addEventListener('pagehide', () => this._guardarYa());
+    document.addEventListener('visibilitychange', () => { if (document.hidden) this._guardarYa(); });
     // las teclas del moderador van antes que las de las gafas y la caminata (fase de captura)
     window.addEventListener('keydown', (e) => this._tecla(e), true);
   }
@@ -134,6 +140,8 @@ export class TareasIA {
     this.activa = true;
     this.t0 = performance.now();
     this.fecha = new Date();
+    this.id = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+    this.guardada = null;
     document.body.classList.add('tareas-ia');
     // el tutor de este modo es guionado: no se usa la IA real aunque haya clave
     h.guionado = true;
@@ -148,6 +156,9 @@ export class TareasIA {
     if (h.voz && h.voz.modo) h.pistaVoz = h.voz.modo === 'claude' ? 'Mantené la barra espaciadora y hablame.' : 'Hablame cuando quieras: empezá con «Tutor…».';
     const mesa = h.anclas.find((a) => a.id === 'mesa');
     if (mesa) mesa.max = 0;   // la etiqueta del proyecto de la mesa no aplica en este modo
+    // la mesa queda para la clase: sin las prendas ni la pantalla del proyecto de talles
+    if (this.S && this.S.pilasMesa) this.S.pilasMesa.visible = false;
+    this._clase(1);
     // sentado en su banqueta: puede mirar alrededor, no caminar
     nav.fijo = true;
     nav.walk = null;
@@ -203,6 +214,7 @@ export class TareasIA {
     r.intentos++;
     r.tDesde = ahora;
     this._preparar(n);
+    this._clase(n);
     this.corazon.marcarInicio();
     this.focoOrigen = null;
     this.practicaOfrecida = false;
@@ -286,6 +298,14 @@ export class TareasIA {
     if (n === 6) { ej.espontaneas = true; ej.demora = 15; if (!(ej.e && ej.e.n === 3 && !ej.e.resuelto)) ej.cargar(2); }
   }
 
+  // la materia de la clase en la pantalla de la mesa y en «Hoy»: Biología (tareas 1 a 3) o Matemática (4 a 6)
+  _clase(n) {
+    const bio = n <= 3;
+    if (this.S) this.S.mesaClase = bio ? 'bio' : 'mate';
+    this.hud.hoyFijo = bio ? 'Biología · El corazón' : 'Matemática · Ecuaciones';
+    this.hud._hoyPill();
+  }
+
   _mirarCuaderno() {
     const nav = this.nav;
     nav.vy = nav.vp = 0;
@@ -313,6 +333,7 @@ export class TareasIA {
     c.card.classList.add('fin');
     this.hud.registrar('tarea', 'fin');
     this._final();
+    this._guardarYa();
     this._pintar();
   }
 
@@ -424,10 +445,18 @@ export class TareasIA {
   _registro(r) {
     if (!this.activa) return;
     this.eventos.push({ s: Math.round((r.t - this.t0) / 100) / 10, tarea: this.fin ? 'fin' : this.i, tipo: r.tipo, dato: String(r.dato) });
+    // se guarda sola cada pocos segundos mientras pasan cosas
+    if (this.i) { clearTimeout(this._tGuardar); this._tGuardar = setTimeout(() => this._guardarYa(), 2000); }
     if (['voz', 'sugerencia', 'ejercicio', 'corazon', 'tarea', 'foco'].includes(r.tipo) && !this.el.panel.hidden) {
       clearTimeout(this._tPint);
       this._tPint = setTimeout(() => this._pintar(), 120);
     }
+  }
+
+  _guardarYa() {
+    if (!this.activa || !this.i) return;
+    clearTimeout(this._tGuardar);
+    this.guardada = guardarSesion(this.id, this._datos());
   }
 
   // todo lo que pasó en una tarea, contado desde el registro
@@ -511,7 +540,10 @@ export class TareasIA {
     const nombre = document.getElementById('prep-nombre').value.trim() || 'sin nombre';
     let h = `<div class="mod-cab"><div><b>Moderador</b><span>Tareas · IA que explica</span></div><button data-m="cerrar" title="Cerrar el panel">⇧M ×</button></div>`;
     h += `<div class="mod-meta"><span>${esc(nombre)} · sesión <b data-ses>${mmss(performance.now() - this.t0)}</b></span><span>${voz && voz.modo ? (voz.modo === 'web' ? 'Voz: manos libres' : 'Voz: barra espaciadora') : 'Sin voz: usar las teclas'}</span></div>`;
-    h += `<div class="mod-acc"><button class="prim" data-m="descargar">Descargar resultados</button><button data-m="json">Solo JSON</button></div>`;
+    h += `<div class="mod-acc"><button class="prim" data-m="descargar">Descargar esta sesión</button><button data-m="json">Solo JSON</button></div>`;
+    h += this.guardada === false
+      ? '<p class="vacio aviso-g">No se pudo guardar en este navegador: descargá los resultados antes de cerrar.</p>'
+      : '<p class="vacio">Se guarda sola en este navegador mientras avanza: si se cierra la pestaña, se recupera desde la preparación.</p>';
     h += `<div class="mod-nav"><button data-m="ant" ${this.i > 1 ? '' : 'disabled'}>← Anterior · ⇧B</button><span>${this.fin ? 'Terminó' : `Tarea ${this.i} de ${TAREAS_IA.length}`}</span><button data-m="sig">${this.i < TAREAS_IA.length || this.fin ? 'Siguiente · ⇧N →' : 'Terminar · ⇧N'}</button></div>`;
     h += '<ol class="mod-tareas">';
     for (const T of TAREAS_IA) {
@@ -549,6 +581,7 @@ export class TareasIA {
       h += `<dt>${k}</dt><dd>${esc(txt)}</dd>`;
     }
     h += '</dl><p class="vacio">Las teclas de siempre siguen igual: G gafas, H revisión, F foco, Espacio para hablar (en claude.ai).</p></section>';
+    h += htmlGuardadas(this.id);
     p.innerHTML = h;
   }
 
@@ -561,6 +594,7 @@ export class TareasIA {
       participante: nombre,
       fecha: `${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')} ${String(f.getHours()).padStart(2, '0')}:${String(f.getMinutes()).padStart(2, '0')}`,
       modo: 'Tareas · IA que explica',
+      terminada: !!this.fin,
       duracion_s: Math.round((performance.now() - this.t0) / 1000),
       ajustes: { voz: voz ? voz.modo : null, voz_del_tutor: voz ? voz.hablaTutor : null, mirada: this.hud.ojos.habilitada, camara: !!this.hud.camaraActiva },
       tareas: TAREAS_IA.map((T) => {
@@ -581,31 +615,106 @@ export class TareasIA {
     };
   }
 
-  _csv(d) {
-    const c = (v) => { const s = Array.isArray(v) ? v.join(' | ') : v == null ? '' : String(v); return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
-    const fila = (a) => a.map(c).join(';');
-    const L = [fila(['participante', 'fecha', 'tarea', 'titulo', 'estado_auto', 'detalle_auto', 'salteada', 'marca_moderador', 'intentos', 'tiempo_hasta_logro_s', 'tiempo_en_tarea_s', 'pistas_pedidas', 'pistas_por_sugerencia', 'pidio_la_respuesta', 'pasos_equivocados', 'sugerencias_mostradas', 'sugerencias_aceptadas', 'sugerencias_descartadas', 'sugerencias_retenidas_foco', 'controles_corazon', 'preguntas_corazon', 'frases_entendidas', 'frases_sin_accion'])];
-    for (const t of d.tareas) L.push(fila([d.participante, d.fecha, t.n, t.titulo, t.estado_auto, t.detalle_auto, t.salteada ? 'si' : 'no', t.marca_moderador, t.intentos, t.tiempo_hasta_logro_s, t.tiempo_en_tarea_s, t.pistas_pedidas, t.pistas_por_sugerencia, t.pidio_la_respuesta, t.pasos_equivocados, t.sugerencias.mostradas, t.sugerencias.aceptadas, t.sugerencias.descartadas, t.sugerencias.retenidas_por_foco, t.corazon.controles, t.corazon.preguntas, t.frases.entendidas.length, t.frases.sin_accion.length]));
-    L.push('', fila(['ejercicio', 'resuelto', 'comprobado', 'tiempo_s', 'pistas_pedidas', 'pistas_por_sugerencia', 'pidio_la_respuesta', 'pasos_equivocados']));
-    for (const e of d.ejercicios) L.push(fila([e.ecuacion, e.resuelto ? 'si' : 'no', e.comprobado ? 'si' : 'no', e.tiempo_s, e.pistas_pedidas, e.pistas_por_sugerencia, e.pidio_la_respuesta, e.pasos_equivocados.length]));
-    L.push('', fila(['segundo', 'tarea', 'frase', 'entendida']));
-    for (const f of d.frases) L.push(fila([Math.round(f.segundo), f.tarea, f.frase, f.entendida ? 'si' : 'sin accion']));
-    return '﻿' + L.join('\r\n');
-  }
-
   descargar(soloJSON = false) {
-    const d = this._datos();
-    const base = `tareas-ia_${(d.participante || 'participante').replace(/[^\p{L}\p{N}_-]+/gu, '-')}_${d.fecha.replace(/[: ]/g, '-')}`;
-    const bajar = (txt, tipo, ext) => {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([txt], { type: tipo }));
-      a.download = `${base}.${ext}`;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
-    };
-    if (!soloJSON) bajar(this._csv(d), 'text/csv;charset=utf-8', 'csv');
-    setTimeout(() => bajar(JSON.stringify(d, null, 2), 'application/json', 'json'), soloJSON ? 0 : 600);
+    this._guardarYa();
+    bajarDatos(this._datos(), soloJSON);
     this.hud.registrar('moderador', soloJSON ? 'descargar:json' : 'descargar:csv+json');
   }
 }
+
+// ── resultados: CSV, descargas y sesiones guardadas en este navegador ──
+const CAB_TAREAS = ['participante', 'fecha', 'terminada', 'tarea', 'titulo', 'estado_auto', 'detalle_auto', 'salteada', 'marca_moderador', 'intentos', 'tiempo_hasta_logro_s', 'tiempo_en_tarea_s', 'pistas_pedidas', 'pistas_por_sugerencia', 'pidio_la_respuesta', 'pasos_equivocados', 'sugerencias_mostradas', 'sugerencias_aceptadas', 'sugerencias_descartadas', 'sugerencias_retenidas_foco', 'controles_corazon', 'preguntas_corazon', 'frases_entendidas', 'frases_sin_accion'];
+const celda = (v) => { const s = Array.isArray(v) ? v.join(' | ') : v == null ? '' : String(v); return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+const fila = (a) => a.map(celda).join(';');
+const filaTarea = (d, t) => fila([d.participante, d.fecha, d.terminada === false ? 'no' : 'si', t.n, t.titulo, t.estado_auto, t.detalle_auto, t.salteada ? 'si' : 'no', t.marca_moderador, t.intentos, t.tiempo_hasta_logro_s, t.tiempo_en_tarea_s, t.pistas_pedidas, t.pistas_por_sugerencia, t.pidio_la_respuesta, t.pasos_equivocados, t.sugerencias.mostradas, t.sugerencias.aceptadas, t.sugerencias.descartadas, t.sugerencias.retenidas_por_foco, t.corazon.controles, t.corazon.preguntas, t.frases.entendidas.length, t.frases.sin_accion.length]);
+
+function csvDe(d) {
+  const L = [fila(CAB_TAREAS)];
+  for (const t of d.tareas) L.push(filaTarea(d, t));
+  L.push('', fila(['ejercicio', 'resuelto', 'comprobado', 'tiempo_s', 'pistas_pedidas', 'pistas_por_sugerencia', 'pidio_la_respuesta', 'pasos_equivocados']));
+  for (const e of d.ejercicios) L.push(fila([e.ecuacion, e.resuelto ? 'si' : 'no', e.comprobado ? 'si' : 'no', e.tiempo_s, e.pistas_pedidas, e.pistas_por_sugerencia, e.pidio_la_respuesta, e.pasos_equivocados.length]));
+  L.push('', fila(['segundo', 'tarea', 'frase', 'entendida']));
+  for (const f of d.frases) L.push(fila([Math.round(f.segundo), f.tarea, f.frase, f.entendida ? 'si' : 'sin accion']));
+  return '\ufeff' + L.join('\r\n');
+}
+
+function bajar(txt, tipo, nombre) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([txt], { type: tipo }));
+  a.download = nombre;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+
+const nombreBase = (d) => `tareas-ia_${(d.participante || 'participante').replace(/[^\p{L}\p{N}_-]+/gu, '-')}_${d.fecha.replace(/[: ]/g, '-')}`;
+
+function bajarDatos(d, soloJSON = false) {
+  if (!soloJSON) bajar(csvDe(d), 'text/csv;charset=utf-8', `${nombreBase(d)}.csv`);
+  setTimeout(() => bajar(JSON.stringify(d, null, 2), 'application/json', `${nombreBase(d)}.json`), soloJSON ? 0 : 600);
+}
+
+// todas las sesiones en un solo CSV: una fila por tarea y por participante, lista para comparar
+function bajarTodas() {
+  const ss = sesionesGuardadas();
+  if (!ss.length) return;
+  const L = [fila(CAB_TAREAS)];
+  for (const { datos: d } of ss) for (const t of d.tareas) L.push(filaTarea(d, t));
+  const f = new Date();
+  bajar('\ufeff' + L.join('\r\n'), 'text/csv;charset=utf-8', `tareas-ia_todas_${f.getFullYear()}-${String(f.getMonth() + 1).padStart(2, '0')}-${String(f.getDate()).padStart(2, '0')}.csv`);
+}
+
+const CLAVE_SESIONES = 'tutor-tareas-ia-sesiones';
+
+export function sesionesGuardadas() {
+  try {
+    const v = JSON.parse(localStorage.getItem(CLAVE_SESIONES) || '[]');
+    return Array.isArray(v) ? v.filter((x) => x && x.id && x.datos && Array.isArray(x.datos.tareas)) : [];
+  } catch { return []; }
+}
+
+// guarda (o actualiza) una sesión; si el navegador se queda sin lugar, deja afuera las más viejas
+function guardarSesion(id, datos) {
+  let todas = sesionesGuardadas().filter((x) => x.id !== id);
+  todas.push({ id, datos });
+  todas = todas.slice(-60);
+  for (;;) {
+    try { localStorage.setItem(CLAVE_SESIONES, JSON.stringify(todas)); return true; } catch {
+      if (todas.length <= 1) return false;
+      todas = todas.slice(1);
+    }
+  }
+}
+
+function htmlGuardadas(actual) {
+  const ss = sesionesGuardadas().reverse();
+  let h = `<section><h4>Sesiones guardadas en este navegador <small>${ss.length}</small></h4>`;
+  if (!ss.length) return `${h}<p class="vacio">Todavía no hay ninguna.</p></section>`;
+  h += '<div class="mod-acc"><button class="prim" data-g="todas">Descargar todas · un CSV</button></div><ul class="ses">';
+  for (const { id, datos: d } of ss) {
+    const ok = d.tareas.filter((t) => t.estado_auto === 'ok').length;
+    const marcas = [id === actual ? '<em>esta sesión</em>' : '', d.terminada === false ? 'sin terminar' : ''].filter(Boolean).join(' · ');
+    h += `<li><span><b>${esc(d.participante || 'Sin nombre')}</b> · ${esc(d.fecha)} · ${mmss((d.duracion_s || 0) * 1000)} · ${ok} de ${d.tareas.length} cumplidas${marcas ? ` · ${marcas}` : ''}</span><button data-g="bajar:${esc(id)}">CSV + JSON</button></li>`;
+  }
+  return `${h}</ul></section>`;
+}
+
+// el panel muestra las sesiones guardadas también desde la preparación, sin empezar una sesión nueva
+export function abrirGuardadas(panel) {
+  panel.innerHTML = '<div class="mod-cab"><div><b>Resultados</b><span>Test de tareas · IA que explica</span></div><button data-g="cerrar" title="Cerrar">×</button></div>'
+    + '<p class="vacio">Cada sesión se guarda sola mientras se hace, aunque se cierre la pestaña. Quedan en este navegador, en esta compu.</p>'
+    + htmlGuardadas(null);
+  panel.hidden = false;
+}
+
+export function instalarGuardadas(panel) {
+  panel.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-g]');
+    if (!b) return;
+    const [k, id] = b.dataset.g.split(':');
+    if (k === 'cerrar') panel.hidden = true;
+    else if (k === 'todas') bajarTodas();
+    else if (k === 'bajar') { const x = sesionesGuardadas().find((y) => y.id === id); if (x) bajarDatos(x.datos); }
+  });
+}
+
