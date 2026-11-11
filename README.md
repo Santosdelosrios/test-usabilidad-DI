@@ -13,6 +13,10 @@ Prototipo navegable para el test de usabilidad de Diseño de Futuros (UTDT): una
 
 El guión para moderar las sesiones (objetivo, hipótesis, preparación, intro, preguntas, escenario, proyectos y planilla del observador) está en [`guion.md`](guion.md).
 
+## Test de tareas · IA que explica
+
+Es un segundo modo, para evaluar solo al tutor que explica y ayuda a aprender. Se abre desde la pantalla de preparación con el botón «Test de tareas · IA que explica». El participante empieza sentado en su mesa del aula-taller y hace seis tareas: pedir que le expliquen el corazón (aparece en 3D sobre la mesa), moverse dentro de la explicación, repreguntar, resolver una ecuación con pistas, responder a una sugerencia del tutor y silenciarlo. El tutor de este modo tiene las respuestas escritas de antemano: no usa la clave de Gemini. El moderador tiene teclas de respaldo (Shift + tecla) y un panel con Shift + M que marca las tareas, toma tiempos y descarga los resultados. El guión, las frases de voz y las teclas están en [`guion-tareas-ia.md`](guion-tareas-ia.md).
+
 ## Compilarlo
 
 Hace falta [Node.js](https://nodejs.org) 18 o más nuevo.
@@ -47,5 +51,6 @@ Lo que se publica en el link es el `index.html` de la raíz, en las ramas `main`
 | `src/camara.js` | Detección de gafas puestas o sacadas con la cámara |
 | `src/oculo.js` | Recorrido de la luz del sol por el hall |
 | `src/tipos.js`, `ui.js`, `tareas.js` | Tipografías, modo revisión (tecla H) y restos de la versión guiada |
+| `src/tareas-ia.js`, `corazon.js`, `ejercicio.js` | Test de tareas · IA que explica: las seis tareas y el panel del moderador, el corazón en 3D y el ejercicio con pistas |
 
-Teclas del moderador durante el test: F2 mensaje de Santi, F3 mensaje de Prof. Sosa, F4 corta o devuelve internet, G pone o saca las gafas, H modo revisión.
+Teclas del moderador durante el test: F2 mensaje de Santi, F3 mensaje de Prof. Sosa, F4 corta o devuelve internet, G pone o saca las gafas, H modo revisión. En el test de tareas, las teclas del moderador van con Shift (la lista está en su panel y en `guion-tareas-ia.md`).
