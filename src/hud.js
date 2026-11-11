@@ -298,6 +298,7 @@ export class HUD {
   // Lu mira al tutor: retoma lo que estaba proponiendo o le ofrece lo que sirve acá
   abrirTutor() {
     if (!this.st.conectada || !this.puestas) return;
+    if (this.alAbrirTutor) return this.alAbrirTutor(); // el modo activo decide (test de tareas)
     if (this.ia) { if (this.voz) this.voz.abrirVentana(10); return this.proponer('Te escucho.'); }
     const st = this.st, aca = this.nav.walk ? null : this.nav.current;
     if (this.propuesta && this.propuesta.opciones.length) {
@@ -327,7 +328,8 @@ export class HUD {
   }
 
   // conversación en grande (también la usa el panel del facilitador en la etapa 5)
-  decir(texto, opciones = []) {
+  // alTerminar: avisa cuando la voz del tutor terminó de decirlo (lo usa la explicación guionada)
+  decir(texto, opciones = [], { alTerminar } = {}) {
     this.tutorAbierto = true;
     this.tutorUsado = true;
     this.propuesta = null;
@@ -335,7 +337,7 @@ export class HUD {
     if (this.panelAbierto) this.cerrarPanel();
     this.cerrarLanzador();
     this._escribir(texto, opciones, 'habla');
-    if (this.alDecir) this.alDecir(texto, { pregunta: opciones.length > 0 });
+    if (this.alDecir) this.alDecir(texto, { pregunta: opciones.length > 0, alTerminar });
     this._dock();
   }
 
@@ -646,7 +648,8 @@ export class HUD {
 
   get agenda() { return AGENDA; }
 
-  get ia() { return !!(this.cerebro && this.cerebro.activo); }
+  // en el test de tareas el tutor es guionado: no se usa la IA real aunque haya clave
+  get ia() { return !this.guionado && !!(this.cerebro && this.cerebro.activo); }
   pensando(on) { this.el.tutor.classList.toggle('pensando', !!on); }
 
   // mensaje de la docente (mundo libre): llega solo a cierta hora o lo dispara el moderador

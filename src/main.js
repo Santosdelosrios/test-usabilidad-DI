@@ -18,6 +18,7 @@ import { redibujarTextos } from './textures.js';
 import { Voz } from './voz.js';
 import { Camara } from './camara.js';
 import { Cerebro } from './ia.js';
+import { TareasIA } from './tareas-ia.js';
 
 // Acabado de imagen: leve desaturación, sombras frías, viñeta y grano (como las fotos del moodboard)
 const Acabado = {
@@ -243,6 +244,26 @@ async function start() {
     voz.encender();
   }
   $('intro-prueba').addEventListener('click', empezar);
+  // Test de tareas · IA que explica: sentado en su mesa, con un tutor guionado (no usa la clave de Gemini)
+  let tareasIA = null;
+  function empezarTareasIA() {
+    if (intro.hidden) return;
+    intro.hidden = true;
+    ui.hideHint();
+    hud.setNombre($('prep-nombre').value);
+    hud.setMirada(mirar);
+    const conCamara = cam.activa && !!cam.modelo;
+    if (cam.activa) $('cam-oculta').appendChild($('prep-video'));
+    hud.setCamara(conCamara);
+    if (cam.activa && !conCamara) cam.apagar();
+    chip.hidden = !conCamara;
+    tareasIA = new TareasIA({ hud, nav, scene, camera });
+    tareasIA.empezarSesion();
+    setModo('prueba');
+    if (conCamara && cam.estado === 'sin') setTimeout(() => hud.quitarGafas(), 400);
+    voz.encender();
+  }
+  $('intro-tareas-ia').addEventListener('click', empezarTareasIA);
   $('intro-libre').addEventListener('click', () => { intro.hidden = true; setModo('revision'); });
   window.addEventListener('keydown', (e) => {
     if (e.code !== 'Enter' && e.code !== 'NumpadEnter') return;
@@ -328,6 +349,7 @@ async function start() {
     for (const f of world.tick) f(tSim, dt);
     vida.tick(tSim, dt);
     hud.update(dt, tSim);
+    if (tareasIA) tareasIA.update(dt, tSim);
     acabado.uniforms.uTime.value = tSim;
     if (usarPost) composer.render(dt);
     else renderer.render(scene, camera);
@@ -363,7 +385,7 @@ async function start() {
   if (captura) step(1 / 60);
   else requestAnimationFrame(frame);
 
-  window.__hilo = { cerebro, voz, cam, cambiarTipo, nav, camera, renderer, scene, ao, ui, world, vida, hud, tareas, setModo, bloom, aplicarCalidad, calidad: () => calidad, cambiarLuz, luz: (n) => { luzActual = n; aplicarLuz(n, { world, scene, renderer }); ui.setLuz(n); }, listo: true, stops: STOPS, step: (n = 1, dt = 1 / 60) => { for (let i = 0; i < n; i++) step(dt); } };
+  window.__hilo = { cerebro, voz, cam, cambiarTipo, nav, camera, renderer, scene, ao, ui, world, vida, hud, tareas, get tareasIA() { return tareasIA; }, setModo, bloom, aplicarCalidad, calidad: () => calidad, cambiarLuz, luz: (n) => { luzActual = n; aplicarLuz(n, { world, scene, renderer }); ui.setLuz(n); }, listo: true, stops: STOPS, step: (n = 1, dt = 1 / 60) => { for (let i = 0; i < n; i++) step(dt); } };
 }
 
 start();

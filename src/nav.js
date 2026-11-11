@@ -242,8 +242,9 @@ export class Navigator {
     return pts;
   }
 
+  // fijo: el participante está sentado (test de tareas); puede mirar alrededor pero no caminar
   goTo(id, { instant = false } = {}) {
-    if (this.walk || id === this.current || !this.byId[id]) return;
+    if (this.walk || id === this.current || !this.byId[id] || (this.fijo && !instant)) return;
     const s = this.byId[id];
     if (instant || !this.current) {
       this.camera.position.set(s.p[0], EYE, s.p[1]);
@@ -278,6 +279,7 @@ export class Navigator {
 
   _buildMarkers() {
     this._clearMarkers();
+    if (this.fijo) return;
     const s = this.byId[this.current];
     for (const e of this.adj[this.current]) {
       const first = e.pts[0];

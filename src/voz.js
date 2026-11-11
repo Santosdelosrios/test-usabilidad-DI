@@ -174,6 +174,15 @@ export class Voz {
     return !!u && performance.now() - u.t < 8000 && puntaje(t, u.txt) > 0.6 && palabras(t).length >= 3;
   }
 
+  // ¿lo que se escuchó son palabras que el tutor acaba de decir? (comparación exacta, sirve para frases cortas)
+  _ecoExacto(t) {
+    const u = this.ultimoDicho;
+    if (!u || performance.now() - u.t > 15000) return false;
+    const dichas = new Set(norm(u.txt).split(' '));
+    const ws = palabras(t);
+    return ws.length > 0 && ws.filter((w) => dichas.has(w)).length / ws.length >= 0.75;
+  }
+
   _rec() {
     const R = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!R || this.escuchandoWeb) return;
@@ -190,8 +199,10 @@ export class Voz {
         if (this.probando) { this._mostrar(t, !r.isFinal); continue; }
         if (this._tutorHablando()) {
           // mientras habla el tutor, solo cuenta si lo interrumpen llamándolo
+          // (o, en el test de tareas, con un pedido corto como «pará» o «¿qué es eso?»)
           const ll = llamado(t);
-          if (!ll || !ll.firme || this._esEco(t)) continue;
+          const corta = !!this.hud.interrumpe && !this._ecoExacto(t) && this.hud.interrumpe(norm(t));
+          if (!corta && (!ll || !ll.firme || this._esEco(t))) continue;
           this._callarTutor();
         }
         if (this._esEco(t)) continue;
@@ -282,10 +293,10 @@ export class Voz {
   }
 
   // ── hablar (voz del tutor y de los compañeros) ───────────
-  decir(texto, { quien = 'tutor', pregunta = false } = {}) {
+  decir(texto, { quien = 'tutor', pregunta = false, alTerminar = null } = {}) {
     if (!this.hablaTutor || !this.hud.puestas || !texto) return;
     if (quien === 'tutor') this.ultimo = texto;
-    const item = { limpio: texto.replace(/[«»]/g, '').replace(/·/g, ','), quien, pregunta };
+    const item = { limpio: texto.replace(/[«»]/g, '').replace(/·/g, ','), quien, pregunta, alTerminar };
     this.colaVoz = this.colaVoz || [];
     if (quien === 'tutor') { this.colaVoz = this.colaVoz.filter((x) => x.quien !== 'tutor'); this.colaVoz.push(item); } // del tutor solo queda lo último
     else {
@@ -319,6 +330,7 @@ export class Voz {
       this.hablando = false;
       this.silencioHasta = performance.now() + 700;
       if (item.pregunta) this.abrirVentana(10);
+      if (item.alTerminar) item.alTerminar();
       if (this.activa && this.modo === 'web' && !this.escuchandoWeb) this._rec();
       this._estado(this.activa || this.ptt ? 'escucha' : 'quieta');
       setTimeout(() => this._sigVoz(), 350); // un respiro entre una voz y la siguiente
@@ -336,7 +348,7 @@ export class Voz {
     }
     u.voice = this.vozEs;
     u.lang = u.voice ? u.voice.lang : 'es-AR';
-    u.rate = 1.04;
+    u.rate = 1.04 * (this.ritmo || 1); // «más despacio» en la explicación guionada
     u.pitch = item.quien === 'tutor' ? 1 : 1.3;
     u.onend = fin; u.onerror = fin;
     s.speak(u);
@@ -422,6 +434,8 @@ export class Voz {
     if (/\b(saca|sacar|sacarme|sacate|me saco|quita|quitar|quitarme|me quito)\b.*\b(gafas|lentes|anteojos)\b/.test(d)) return () => h.quitarGafas();
     if (/\b(pone|poner|ponerme|ponete|me pongo)\b.*\b(gafas|lentes|anteojos)\b/.test(d)) return () => h.ponerGafas();
     if (!h.puestas) return null;
+    // 1b · lo que entiende el modo activo (test de tareas: corazón, ejercicio, foco)
+    if (h.oirExtra) { const r = h.oirExtra(d, dir, crudo); if (r) return r; }
     // 2 · cortitas
     if (/^(repeti|repetir|repetilo|que dijiste|de nuevo|otra vez)\b/.test(d)) return () => this.decir(this.ultimo || h.el.tutorTxt.textContent);
     if (/^(cerra|cerrar|cerralo|cerrar todo|volver|volve|salir|sali|ya esta|basta|listo gracias|eso es todo)$/.test(d)) return () => { h.cerrarPanel(); h.cerrarLanzador(); h.cerrarTutor(); };
@@ -581,6 +595,7 @@ export class Voz {
   _noEntendi(d) {
     const h = this.hud;
     if (!h.puestas) return;
+    if (h.noEntendiExtra && h.noEntendiExtra(d)) return;
     const ops = this._opciones().map((b) => `«${b.textContent}»`);
     const pista = ops.length ? `Podés contestarme ${ops.slice(0, 3).join(', ')}.` : 'Probá con «¿qué me toca ahora?», «llevame al taller» o «sacá una foto».';
     h.proponer(`No te entendí. ${pista}`);

@@ -450,6 +450,124 @@ body.libre #tarea { display: none !important; }
   #luz { top: 40px; left: 18px; }
 }
 @media (prefers-reduced-motion: reduce) { #carga .barra i { animation: none; } }
+/* ── Test de tareas · IA que explica ─────────────────── */
+body.tareas-ia #tarea { display: none !important; }
+/* el tutor explica en oraciones largas: un poco más chico para que no tape la explicación */
+body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-height: 1.3; }
+#intro .nota { font-family: var(--texto); font-size: 12.5px; line-height: 1.45; color: rgba(236,235,231,.6); margin: 12px 0 0; }
+#intro .nota b { color: rgba(236,235,231,.9); font-weight: 500; }
+/* consigna para el participante (afuera de la ficción, como la tarjeta de la versión guiada) */
+#consigna { position: fixed; top: 62px; left: 50%; transform: translateX(-50%); width: min(520px, calc(100vw - 760px)); min-width: 360px; z-index: 4; background: #ecebe7; color: #16181b; font-family: var(--mono); padding: 10px 16px 12px; box-shadow: 0 10px 30px rgba(11,12,14,.25); pointer-events: none; }
+#consigna[hidden] { display: none; }
+#consigna .cab { font-size: 10px; letter-spacing: calc(.2em * var(--esp-m)); text-transform: uppercase; color: #5b5e63; }
+#consigna .cab b { color: #16181b; font-weight: 500; }
+#consigna p { margin: 0; font-family: var(--texto); }
+#consigna #c-esc { font-size: 12.5px; line-height: 1.4; color: #5b5e63; margin: 6px 0 5px; padding-left: 9px; border-left: 2px solid rgba(22,24,27,.18); }
+#consigna #c-esc:empty { display: none; }
+#consigna #c-txt { font-size: 15.5px; line-height: 1.4; color: #16181b; margin-top: 4px; }
+#consigna.fin { box-shadow: 0 0 0 2px var(--naranja), 0 10px 30px rgba(11,12,14,.25); }
+@media (max-width: 900px) { #consigna { width: calc(100vw - 32px); min-width: 0; top: 108px; } }
+
+/* corazón: etiquetas, título y controles en la capa de las gafas */
+.corazon-capa { position: absolute; inset: 0; pointer-events: none; }
+.corazon-capa .et { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; font-size: 9.5px; letter-spacing: calc(.12em * var(--esp-m)); text-transform: uppercase; white-space: nowrap; color: rgba(236,235,231,.66); }
+.corazon-capa .et.l { flex-direction: row-reverse; }
+.corazon-capa .et.c { flex-direction: column-reverse; gap: 4px; }
+.corazon-capa .et i { width: 6px; height: 6px; border-radius: 50%; background: rgba(236,235,231,.75); box-shadow: 0 0 0 3px rgba(11,12,14,.4); flex: none; }
+.corazon-capa .et span { padding: 3px 7px; background: rgba(11,12,14,.74); border: 1px solid rgba(236,235,231,.14); transition: border-color .25s, color .25s; }
+.corazon-capa .et.on { color: #fff; z-index: 2; }
+.corazon-capa .et.on i { background: var(--naranja); box-shadow: 0 0 0 3px rgba(232,116,59,.25); }
+.corazon-capa .et.on span { border-color: var(--naranja); font-size: 11px; padding: 4px 8px; }
+.corazon-capa .tag { position: absolute; left: 0; top: 0; font-size: 9px; letter-spacing: calc(.16em * var(--esp-m)); text-transform: uppercase; color: rgba(236,235,231,.5); white-space: nowrap; }
+.corazon-capa .tit { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; align-items: flex-end; text-align: right; gap: 4px; font-size: 9.5px; letter-spacing: calc(.18em * var(--esp-m)); text-transform: uppercase; color: rgba(236,235,231,.6); white-space: nowrap; }
+.corazon-capa .tit b { color: var(--naranja); font-weight: 500; }
+.corazon-capa .tit em { font-style: normal; font-family: var(--display); font-stretch: var(--estirar); font-weight: var(--peso-d); font-size: 19px; letter-spacing: .02em; text-transform: none; color: #fff; }
+.corazon-capa .tit .est { color: rgba(236,235,231,.85); }
+.corazon-capa .tit small { display: flex; align-items: center; gap: 6px; margin-top: 2px; font-size: 9px; letter-spacing: .1em; color: rgba(236,235,231,.6); }
+.corazon-capa .tit small i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.corazon-capa .tit small i.az { background: #5aa8ff; }
+.corazon-capa .tit small i.ro { background: #ff5a48; margin-left: 8px; }
+.corazon-capa .ctl { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; gap: 6px; margin-left: 10px; }
+#hud .corazon-capa .ctl button { padding: 7px 11px; font-size: 10px; letter-spacing: calc(.14em * var(--esp-m)); text-transform: uppercase; border: 1px solid rgba(236,235,231,.3); background: rgba(11,12,14,.8); color: rgba(236,235,231,.92); white-space: nowrap; text-align: center; }
+#hud .corazon-capa .ctl button:hover, #hud .corazon-capa .ctl button.on { border-color: var(--naranja); color: var(--naranja); }
+#hud.corazon .ancla.persona { visibility: hidden; }
+
+/* ejercicio: un cuaderno cuadriculado en las gafas */
+#hud-cuaderno { position: absolute; left: 50%; top: calc(var(--consigna-bajo, 180px) + 16px); transform: translateX(-50%); width: min(430px, calc(100vw - 80px)); max-height: calc(100vh - var(--consigna-bajo, 180px) - 210px); overflow: auto; padding: 14px 20px 14px 50px; pointer-events: auto; color: #1b1d21; font-family: var(--mono);
+  background-color: rgba(240,238,232,.95);
+  background-image: linear-gradient(90deg, transparent 36px, rgba(214,87,58,.55) 36px, rgba(214,87,58,.55) 37px, transparent 37px), linear-gradient(rgba(64,110,170,.15) 1px, transparent 1px), linear-gradient(90deg, rgba(64,110,170,.15) 1px, transparent 1px);
+  background-size: 100% 100%, 18px 18px, 18px 18px; box-shadow: 0 12px 34px rgba(11,12,14,.35); animation: entra .3s ease-out; }
+#hud-cuaderno[hidden] { display: none; }
+#hud.quitadas #hud-cuaderno { opacity: 0 !important; }
+#hud-cuaderno .cab { display: flex; justify-content: space-between; gap: 10px; font-size: 9.5px; letter-spacing: calc(.16em * var(--esp-m)); text-transform: uppercase; color: #5b5e63; }
+#hud-cuaderno .cab .np { color: #c9581f; }
+#hud-cuaderno .sub { margin-top: 10px; font-size: 10px; letter-spacing: calc(.14em * var(--esp-m)); text-transform: uppercase; color: #5b5e63; }
+#hud-cuaderno .ec { font-family: var(--display); font-stretch: var(--estirar); font-weight: 600; font-size: 34px; line-height: 1.1; margin: 4px 0 8px; color: #111; letter-spacing: .01em; }
+#hud-cuaderno .pasos { list-style: none; margin: 0; padding: 0; }
+#hud-cuaderno .pasos li { font-family: var(--display); font-stretch: var(--estirar); font-size: 22px; line-height: 1.5; color: #1b1d21; animation: entra .3s ease-out; }
+#hud-cuaderno .pasos li.op { font-size: 16px; color: #4a4d52; }
+#hud-cuaderno .pasos li.ok::after { content: ' ✓'; color: #c9581f; font-size: 16px; }
+#hud-cuaderno .pasos li.tachado { font-size: 17px; color: rgba(27,29,33,.42); text-decoration: line-through; text-decoration-color: #c9581f; }
+#hud-cuaderno .pasos li.fin { font-weight: 600; }
+#hud-cuaderno .pista { margin-top: 10px; padding: 8px 10px; border-left: 2px solid #c9581f; background: rgba(232,116,59,.12); font-family: var(--texto); font-size: 13.5px; line-height: 1.4; color: #2b2e33; }
+#hud-cuaderno .pista b { display: block; font-family: var(--mono); font-weight: 500; font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: #c9581f; margin-bottom: 2px; }
+#hud-cuaderno .res { margin-top: 10px; display: inline-block; padding: 5px 9px; background: #16181b; color: #ecebe7; font-size: 10px; letter-spacing: calc(.16em * var(--esp-m)); text-transform: uppercase; }
+#hud-cuaderno .pie { margin-top: 12px; font-size: 9.5px; letter-spacing: .08em; color: #7a7d82; }
+
+/* panel del moderador (afuera de la ficción) */
+#moderador { position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100vw); z-index: 9; overflow: auto; padding: 16px 18px 28px; background: #121316; color: var(--tinta); border-left: 1px solid rgba(236,235,231,.16); box-shadow: -12px 0 30px rgba(0,0,0,.35); font-family: var(--mono); font-size: 11px; line-height: 1.45; }
+#moderador[hidden] { display: none; }
+#moderador button { all: unset; cursor: pointer; box-sizing: border-box; }
+#moderador button:focus-visible { outline: 1px solid var(--naranja); outline-offset: 2px; }
+#moderador button:disabled { opacity: .35; cursor: default; }
+#moderador .mod-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+#moderador .mod-cab b { display: block; font-family: var(--display); font-weight: var(--peso-d); font-size: 20px; text-transform: uppercase; letter-spacing: .02em; }
+#moderador .mod-cab span { font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--naranja); }
+#moderador .mod-cab button { font-size: 10px; letter-spacing: .14em; color: rgba(236,235,231,.6); padding: 3px 6px; }
+#moderador .mod-cab button:hover { color: #fff; }
+#moderador .mod-meta { display: flex; justify-content: space-between; gap: 10px; margin: 10px 0; font-size: 10.5px; color: rgba(236,235,231,.7); }
+#moderador .mod-meta b { color: #fff; font-weight: 500; }
+#moderador .mod-acc, #moderador .mod-nav { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+#moderador .mod-nav { justify-content: space-between; padding: 8px 0; border-top: 1px solid rgba(236,235,231,.12); border-bottom: 1px solid rgba(236,235,231,.12); }
+#moderador .mod-nav span { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: rgba(236,235,231,.7); }
+#moderador .mod-acc button, #moderador .mod-nav button { padding: 7px 10px; border: 1px solid rgba(236,235,231,.3); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+#moderador .mod-acc button:hover, #moderador .mod-nav button:hover:not(:disabled) { border-color: #fff; }
+#moderador button.prim { background: var(--naranja); border-color: var(--naranja); color: var(--negro); }
+#moderador .mod-tareas { list-style: none; margin: 10px 0 0; padding: 0; }
+#moderador .mod-tareas > li { padding: 9px 10px 10px; margin-bottom: 6px; border: 1px solid rgba(236,235,231,.1); }
+#moderador .mod-tareas > li.actual { border-color: rgba(232,116,59,.7); background: rgba(232,116,59,.06); }
+#moderador .fila { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; }
+#moderador .fila .tit { display: flex; gap: 8px; align-items: baseline; font-family: var(--texto); font-size: 13px; color: #fff; }
+#moderador .fila .tit i { font-style: normal; font-family: var(--mono); font-size: 10px; color: var(--naranja); }
+#moderador .est { font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: rgba(236,235,231,.5); white-space: nowrap; }
+#moderador .est.ok { color: #7fd48a; }
+#moderador .est.par { color: #f0c05a; }
+#moderador .est.cur { color: var(--naranja); }
+#moderador .est.no { color: #e07a6a; }
+#moderador .tiempo { font-size: 11px; color: rgba(236,235,231,.85); min-width: 40px; text-align: right; }
+#moderador .mod-tareas p { margin: 6px 0 0; font-family: var(--texto); font-size: 12px; color: rgba(236,235,231,.85); }
+#moderador .mod-tareas p small { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: rgba(236,235,231,.45); }
+#moderador .mod-tareas p.det { color: #7fd48a; font-family: var(--mono); font-size: 10.5px; }
+#moderador ul.datos { list-style: none; margin: 6px 0 0; padding: 0; font-size: 10.5px; color: rgba(236,235,231,.75); }
+#moderador ul.datos li::before { content: '· '; color: rgba(236,235,231,.4); }
+#moderador .marca { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: rgba(236,235,231,.5); }
+#moderador .marca button { padding: 4px 8px; border: 1px solid rgba(236,235,231,.25); color: rgba(236,235,231,.85); }
+#moderador .marca button.on { border-color: var(--naranja); background: var(--naranja); color: var(--negro); }
+#moderador .marca button.ir { margin-left: auto; }
+#moderador section { margin-top: 16px; padding-top: 10px; border-top: 1px solid rgba(236,235,231,.12); }
+#moderador h4 { margin: 0 0 8px; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; font-weight: 500; display: flex; justify-content: space-between; gap: 8px; }
+#moderador h4 small { color: rgba(236,235,231,.5); letter-spacing: .06em; text-transform: none; font-size: 10px; }
+#moderador .frases { list-style: none; margin: 0; padding: 0; font-family: var(--texto); font-size: 12px; }
+#moderador .frases li { padding: 3px 0; border-bottom: 1px solid rgba(236,235,231,.06); }
+#moderador .frases li span { font-family: var(--mono); font-size: 9.5px; color: rgba(236,235,231,.45); margin-right: 8px; }
+#moderador .frases li.ok::before { content: '✓ '; color: #7fd48a; }
+#moderador .frases li.no::before { content: '? '; color: #f0c05a; }
+#moderador .frases li.no { color: rgba(236,235,231,.65); }
+#moderador .vacio { margin: 6px 0 0; font-family: var(--texto); font-size: 11.5px; color: rgba(236,235,231,.5); }
+#moderador dl.teclas { display: grid; grid-template-columns: 34px 1fr; gap: 3px 10px; margin: 0; font-size: 10.5px; }
+#moderador dl.teclas dt { color: var(--naranja); }
+#moderador dl.teclas dt.g { grid-column: 1 / -1; margin-top: 8px; font-size: 9px; letter-spacing: .16em; text-transform: uppercase; color: rgba(236,235,231,.5); }
+#moderador dl.teclas dd { margin: 0; color: rgba(236,235,231,.85); }
 </style>
 </head>
 <body>
@@ -562,6 +680,13 @@ body.libre #tarea { display: none !important; }
   <ul id="t-lista" hidden></ul>
 </div>
 
+<div id="consigna" hidden>
+  <div class="cab"><b id="c-num">Tarea 1 de 6</b> · consigna</div>
+  <p id="c-esc"></p>
+  <p id="c-txt"></p>
+</div>
+<aside id="moderador" hidden aria-label="Panel del moderador"></aside>
+
 <div id="intro" hidden>
   <div class="caja prep">
     <div class="k">Tutoría permanente 2040 · Preparación del moderador</div>
@@ -602,12 +727,14 @@ body.libre #tarea { display: none !important; }
     </div></div>
     <div class="botones">
       <button type="button" class="prim" id="intro-prueba">Empezar el test · Enter</button>
+      <button type="button" id="intro-tareas-ia">Test de tareas · IA que explica</button>
       <button type="button" id="intro-libre">Explorar el mundo (revisión)</button>
     </div>
+    <p class="nota"><b>Test de tareas · IA que explica:</b> el participante empieza sentado en su mesa del aula-taller y hace 6 tareas con un tutor de respuestas guionadas (no usa la clave de Gemini). Teclas de respaldo y resultados en el panel del moderador: Shift + M.</p>
   </div>
 </div>
 <div id="cam-oculta"></div>
-<div id="externos"><span id="cam-chip" hidden></span><button id="gafas-btn" type="button">Sacarme las gafas · G</button><button id="modo" type="button">Revisión · H</button></div>
+<div id="externos"><span id="cam-chip" hidden></span><button id="gafas-btn" type="button">Sacarme las gafas · G</button><button id="modo" type="button">Revisión · H</button><button id="mod-btn" type="button" hidden>Moderador · ⇧M</button></div>
 
 <div id="velo"></div>
 <div id="carga">
