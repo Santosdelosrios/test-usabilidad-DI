@@ -2,6 +2,8 @@
 
 Diseño de Futuros (UTDT) · TUTOR 2040 · versión del 11 de noviembre de 2026
 
+> **Para las sesiones, el moderador lee [`guion.md`](guion.md)**: es el guión unificado, con este test como bloque B después del mundo libre (bloque A), una sola intro, preguntas previas y finales comunes y un solo cierre. Este archivo es la referencia detallada del bloque B: cuándo se cumple cada tarea, frases de voz, teclas y qué traen los resultados. Sirve también si alguna vez se corre este test solo.
+
 Este test evalúa una sola cosa: el tutor de IA que explica y ayuda a aprender. El participante no recorre la escuela: está sentado en su mesa del aula-taller, con las gafas puestas, y hace seis tareas cortas. Es un modo aparte del test de mundo libre (que está en [`guion.md`](guion.md)) y se elige en la misma pantalla de preparación, con el botón **«Test de tareas · IA que explica»**.
 
 Las tareas son **autoguiadas**: la persona las hace sola, sin que nadie intervenga. Lee las instrucciones, sigue las consignas que aparecen en pantalla, pasa de tarea sola y al final ve un agradecimiento. Alrededor de las tareas hay una charla corta antes (intro y preguntas previas) y otra después (preguntas finales y cierre), como en cualquier test de usabilidad. Si nadie puede acompañar, las preguntas se mandan como formulario.

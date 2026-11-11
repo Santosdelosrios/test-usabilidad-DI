@@ -1,17 +1,18 @@
 # Guión de prueba con usuarios · TUTOR 2040
 
-Diseño de Futuros (UTDT) · versión del 10 de noviembre de 2026
+Diseño de Futuros (UTDT) · versión del 11 de noviembre de 2026
 
-> Copia del guión que el grupo edita en claude.ai. Si las dos versiones difieren, vale la de claude.ai.
+> Copia del guión que el grupo edita en claude.ai ([link](https://claude.ai/artifact/EmpKEpKqsmDAPGtvGj7TQF)). Si las dos versiones difieren, vale la de claude.ai. Es el guión que lee el moderador e incluye los dos bloques de la sesión; [`guion-tareas-ia.md`](guion-tareas-ia.md) es la referencia detallada del bloque B.
 
 ## Objetivo
 
-Queremos validar tres cosas de TUTOR 2040 con estudiantes de secundaria: las gafas en sí, el tutor de IA integrado y la interacción social cuando compañeros y docentes también usan gafas. La escuela-nodo y sus espacios son el escenario de la prueba, no lo que evaluamos.
+Queremos validar tres cosas de TUTOR 2040 con estudiantes de secundaria: las gafas en sí, el tutor de IA integrado y la interacción social cuando compañeros y docentes también usan gafas. La sesión tiene dos bloques con el mismo participante: A, un recorrido libre por la escuela, y B, seis tareas cortas con el tutor que explica. La escuela-nodo y sus espacios son el escenario de la prueba, no lo que evaluamos.
 
 En concreto, queremos aprender:
 
 - **Las gafas:** si hablarles (y, como opción, mirar) se entiende solo, y qué cambia al ponérselas y sacárselas.
 - **El tutor integrado:** si guía sin resolver por el alumno, si lo sienten una ayuda o una orden, y si sus propuestas ayudan o molestan.
+- **El tutor que explica (bloque B):** si les sirve para entender algo que no saben, si pueden manejar la explicación a su ritmo, si los destraba sin darles la respuesta y si pueden callarlo.
 - **Entre compañeros:** si leen el estado de los demás (disponible, en foco) antes de pedir ayuda, y cómo comparten lo que aprendieron.
 - **Con la docente:** si entienden qué ve de su proceso, si confían en eso y qué decidirían ocultar.
 - **Todos con gafas:** qué les parece ver información de los demás y que los demás vean la suya.
@@ -20,7 +21,7 @@ Queda afuera la arquitectura de la escuela, sus espacios y el nodo técnico. Si 
 
 ## Hipótesis
 
-Cada hipótesis dice en qué momento de la sesión se puede ver, así se confirma o descarta con lo que anota el observador.
+Cada hipótesis dice en qué momento de la sesión se puede ver, así se confirma o descarta con lo que anota el observador. H1 a H8 se ven en el bloque A; H9 a H14, en el bloque B, donde además la prueba anota sola tiempos, pistas y frases.
 
 | # | Creemos que… | Qué evalúa | Dónde se ve |
 | --- | --- | --- | --- |
@@ -32,20 +33,36 @@ Cada hipótesis dice en qué momento de la sesión se puede ver, así se confirm
 | H6 | Miran el estado de los compañeros antes de pedir ayuda y respetan a quien está en foco. | Compañeros | En el taller |
 | H7 | Responderle a un compañero les resulta más natural que mostrar algo en el pizarrón frente a toda la clase. | Compañeros | Mensaje de Santi y presentación |
 | H8 | La vista de la docente despierta dudas de privacidad; poder ocultar evidencias baja esa preocupación. | Docente | Mensaje de Prof. Sosa |
+| H9 | Le piden la explicación al tutor por voz en menos de un minuto, sin buscar un menú. | Tutor que explica | Bloque B · tarea 1 |
+| H10 | Para manejar la explicación prefieren hablar («pará», «repetí», «más despacio») antes que tocar botones. | Tutor que explica | Bloque B · tarea 2 |
+| H11 | Se animan a preguntar en el medio de la explicación y notan que retoma sola. | Tutor que explica | Bloque B · tarea 3 |
+| H12 | Cuando se traban piden ayuda antes de los dos minutos y llegan al resultado con dos pistas o menos, aunque al principio les moleste que no les den la respuesta. | Tutor que explica | Bloque B · tarea 4 |
+| H13 | Aceptan la sugerencia que no pidieron cuando están trabados y la sienten una ayuda, no una interrupción. | Tutor que explica | Bloque B · tarea 5 |
+| H14 | Saben callar al tutor por voz sin buscar en menús, y saben cómo volver a escucharlo. | Tutor que explica | Bloque B · tarea 6 |
 
 ## Preparación
 
-Cada sesión dura 35 a 45 minutos: 5 de intro, 5 de preguntas previas, 20 a 25 de recorrido libre y 5 a 10 de preguntas finales.
+Cada sesión dura unos 55 minutos con el mismo participante: primero el bloque A (mundo libre) y después el bloque B (tareas). Van en ese orden para que el B, que muestra cómo pedirle cosas al tutor, no le dé pistas en el A. Si falta tiempo, se saltea el B: el A es el principal.
+
+| Momento | Minutos | Qué hace el moderador |
+| --- | --- | --- |
+| 1 · Intro | 5 | Lee la intro y pide permiso para grabar. |
+| 2 · Preguntas previas | 5 | Hace las preguntas previas. |
+| 3 · Bloque A · mundo libre | 20 a 25 | Lee el escenario y observa, sin ayudar. Termina después de la presentación de las 10:30. |
+| 4 · Cambio de bloque | 1 | Lee la transición, recarga la página y elige «Test de tareas». |
+| 5 · Bloque B · tareas | 10 | No habla: las consignas aparecen en pantalla. |
+| 6 · Preguntas finales | 8 a 10 | Hace las preguntas finales. |
+| 7 · Cierre | 2 | Lee el cierre, baja los resultados del bloque B y corta la grabación. |
 
 - **Participantes:** 5 o 6 estudiantes de secundaria (14 a 17 años), en lo posible de escuelas distintas. Como son menores, conseguir antes el consentimiento firmado de un adulto responsable.
 - **Roles:** un moderador (lee el escenario, no ayuda) y un observador (completa la planilla, toma tiempos y frases textuales).
-- **Equipo:** notebook con Chrome, micrófono, cámara web y parlantes (el tutor habla en voz alta), unas gafas de utilería (cualquier marco sirve) y grabación de pantalla con audio.
+- **Equipo:** notebook con Chrome, micrófono, cámara web y parlantes (el tutor habla en voz alta; el test descarta lo que el micrófono oye del tutor, pero si se confunde, mejor auriculares), unas gafas de utilería (cualquier marco sirve) y grabación de pantalla con audio.
 
 **Qué versión usar**
 
 - **Link web, para las sesiones (recomendado):** https://santosdelosrios.github.io/test-usabilidad-DI/ abierto en Chrome, en cualquier compu. Tiene voz manos libres y cámara, y Chrome recuerda los permisos. Es público: lo puede abrir cualquiera que tenga el link.
 - **Compilado en la compu, de respaldo:** ver el README de este repositorio (`npm start`). Necesita internet igual, porque el reconocimiento de voz de Chrome funciona en línea.
-- **Versión en claude.ai, para revisar o mostrar:** se habla manteniendo la barra espaciadora. La cámara no funciona ahí: las gafas se sacan diciendo «me saco las gafas» o con la tecla G. Puede estar una versión atrás del link web.
+- **Versión en claude.ai, para revisar o mostrar:** se habla manteniendo la barra espaciadora. La cámara no funciona ahí: las gafas se sacan diciendo «me saco las gafas» o con la tecla G. No tiene el bloque B: para las sesiones, usar el link web.
 
 **Preparación en pantalla** (recargar la página antes de cada participante):
 
@@ -55,7 +72,7 @@ Cada sesión dura 35 a 45 minutos: 5 de intro, 5 de preguntas previas, 20 a 25 d
 4. Mirada con el mouse: activada o desactivada, según la sesión.
 5. Cámara: activarla y tomar una muestra sin gafas y otra con las gafas de utilería puestas, mirando a la cámara (3 segundos cada una).
 6. Iniciativa del tutor: encendida (puede hablar primero) o apagada (solo responde). Anotarlo en la planilla.
-7. Enter para empezar.
+7. Enter para empezar el bloque A. El bloque B se prepara después, en el cambio de bloque.
 
 **Cómo se maneja** (para explicarlo en la intro):
 
@@ -70,6 +87,7 @@ Cada sesión dura 35 a 45 minutos: 5 de intro, 5 de preguntas previas, 20 a 25 d
 - G pone o saca las gafas a mano si la cámara falla. H muestra el modo revisión.
 - En manos libres el micrófono también escucha al moderador: si una frase empieza con «Tutor», siempre responde; si no, solo actúa ante pedidos claros («llevame al taller») y deja pasar lo que se dice al pensar en voz alta. Leer las consignas sin empezar con «Tutor».
 - En Ajustes de las gafas se puede cambiar el tiempo de mirada y apagar la voz del tutor.
+- En el bloque B las teclas del moderador van con Shift y casi no hacen falta: la lista está en su panel (Shift + M).
 - En el nivel gratuito de Gemini, Google puede usar lo que se envía para mejorar sus productos. Se envía lo que el participante le dice al tutor y su nombre de pila: avisarlo en el consentimiento o dejar el nombre vacío.
 
 ## Intro
@@ -82,13 +100,13 @@ El moderador lee este texto; lo que va entre corchetes se completa o se hace.
 >
 > Lo que estamos haciendo ahora es entender si este ecosistema tiene valor para alguien como vos y si se entiende cómo usarlo. Para eso nos pusimos en contacto con vos: todo lo que nos puedas contar nos va a servir muchísimo.
 >
-> No te voy a dar tareas: te cuento una situación y después te movés como quieras. No hay nada que esté bien o mal hecho.
+> La prueba tiene dos partes. En la primera no te voy a dar tareas: te cuento una situación y después te movés como quieras. En la segunda, más corta, vas a hacer unas tareas que aparecen en la pantalla. No hay nada que esté bien o mal hecho.
 >
 > En la pantalla vas a ver una escuela de 2040 como si tuvieras puestas unas gafas TUTOR. No te evaluamos a vos: evaluamos las gafas. Si algo no sale, es un problema del diseño.
 >
 > Voy a necesitar que digas en voz alta todo lo que hacés y lo que pensás: para nosotros es súper importante entender lo que te está pasando.
 >
-> Vamos a grabar la pantalla y el audio. La cámara de la computadora solo se usa para saber si tenés puestas las gafas: no guarda imágenes. No lo vamos a publicar en ningún lado: es para uso interno, para revisarlo más tarde y no perdernos ningún detalle. ¿Puedo grabar la sesión?
+> Vamos a grabar la pantalla y el audio. La cámara de la computadora solo se usa para saber si tenés puestas las gafas: no guarda imágenes. No lo vamos a publicar en ningún lado: es para uso interno, para revisarlo más tarde y no perdernos ningún detalle. En la segunda parte, la prueba también anota qué tareas hiciste, cuánto tardaste y lo que le dijiste al tutor; eso queda en esta compu. ¿Puedo grabar la sesión?
 
 [Iniciamos grabación]
 
@@ -122,10 +140,11 @@ Para romper el hielo y entender el perfil de cada participante antes del recorri
 6. ¿Cómo te evalúan hoy? ¿Te parece que eso muestra lo que aprendiste?
 7. Cuando trabajan en grupo, ¿cómo se organizan y cómo comparten lo que hacen?
 8. ¿Te pasó de quedarte sin internet en la escuela? ¿Qué pasó con lo que estaban haciendo?
+9. Cuando alguien te explica algo que no entendés, ¿preferís que te den la respuesta o pistas para llegar solo?
 
-## Escenario e itinerario
+## Bloque A · mundo libre
 
-El test es un mundo libre: no hay tareas en pantalla ni pasos a seguir. El participante recorre la escuela a su ritmo durante 20 a 25 minutos, con el itinerario del día como única referencia, y le habla al tutor cuando quiere. El tutor no tiene charlas escritas: responde una IA en el momento.
+El bloque A es un mundo libre: no hay tareas en pantalla ni pasos a seguir. El participante recorre la escuela a su ritmo durante 20 a 25 minutos, con el itinerario del día como única referencia, y le habla al tutor cuando quiere. El tutor no tiene charlas escritas: responde una IA en el momento.
 
 **Escenario** (lo único que lee el moderador antes de empezar):
 
@@ -171,30 +190,76 @@ Los cuatro terminan igual: un gráfico o una tabla y una conclusión escrita con
 
 **Si se queda sin saber qué hacer** más de un minuto, el moderador puede decir una sola de estas frases, sin explicar cómo: «¿Qué harías ahora en tu escuela?», «Podés preguntarle lo que quieras al tutor» o «¿Hay algo que te llame la atención?».
 
+**Cuándo termina.** Después de la presentación de las 10:30 (minuto 23 o 24 del reloj real) o a los 25 minutos, lo que llegue primero.
+
+## Cambio de bloque
+
+El moderador lee este texto y después prepara el bloque B:
+
+> Muy bien, terminamos la primera parte. Ahora viene una más corta: vas a estar sentado en tu mesa del taller y arriba en la pantalla te van a aparecer unas tareas, una por una. Hacelas como si estuvieras solo: yo no te voy a ayudar, y si te trabás podés pasar a la siguiente. Seguí diciendo en voz alta lo que pensás.
+
+1. Recargar la página y escribir de nuevo el nombre de pila.
+2. Elegir otra vez la voz y la mirada como en el bloque A. La cámara y la clave de Gemini no hacen falta en este bloque.
+3. Tocar **«Test de tareas · IA que explica»**. Aparece la pantalla «Antes de empezar»: el participante la lee y toca «Empezar».
+
+## Bloque B · tareas con el tutor que explica
+
+El participante queda sentado en su mesa del aula-taller y hace seis tareas cortas, en unos 10 minutos. Cada consigna aparece en una tarjeta arriba y pasa sola a la siguiente cuando se cumple; si se traba, puede saltearla. Al final aparece un agradecimiento. En este bloque el tutor tiene respuestas escritas de antemano, así todos ven lo mismo.
+
+| Tarea | Lo que lee en pantalla | Qué pasa | Qué observar |
+| --- | --- | --- | --- |
+| 1 · Pedir una explicación | Usá las gafas para entender cómo funciona el corazón. | Aparece un corazón en 3D sobre la mesa y el tutor lo explica en nueve pasos. | ¿Le habla al tutor sin dudar o busca un menú? ¿Con qué palabras? |
+| 2 · Moverse dentro de la explicación | Averiguá por dónde entra la sangre al corazón y a dónde va después. | Puede pausar, repetir, ir más despacio, girar o acercar, por voz o con botones. | ¿Qué control busca primero? ¿Llega a la respuesta? |
+| 3 · Repreguntar | El tutor dijo «ventrículo» y no sabés qué es. Averiguá qué es sin perder la explicación. | El tutor contesta y dice «Sigo donde estábamos». | ¿Pregunta sin miedo a perder el hilo? ¿Nota que la explicación retoma? |
+| 4 · Trabarse en un ejercicio | Seguí con el ejercicio. Podés usar las gafas si te sirven. | Aparece 3x + 5 = 20. El tutor da pistas de a una y nunca la respuesta. | ¿Cuánto tarda en pedir ayuda? ¿Pide la respuesta? ¿Cuántas pistas usa? |
+| 5 · Una sugerencia que no pidió | Seguí trabajando con el ejercicio. | Si se traba, el tutor sugiere algo por su cuenta, con «Dale» y «Ahora no». | ¿La ve? ¿La acepta? ¿La siente ayuda o interrupción? |
+| 6 · Que el tutor no interrumpa | Hacé que las gafas no te interrumpan por un rato. | El tutor sugiere algo cada 15 segundos sin avances, hasta tres veces; con el modo foco se calla. | ¿Cómo intenta callarlo? ¿Sabe cómo volver? |
+
+**Durante el bloque B el moderador no habla.** Si el participante le pregunta algo, responde «¿Vos qué harías?». Si se queda trabado más de un minuto, puede recordarle una sola vez que en la tarjeta puede pasar a la siguiente.
+
+**La prueba anota sola** qué tareas cumplió, los tiempos, las pistas y las frases que le dijo al tutor, y lo guarda en el navegador cada pocos segundos, aunque se cierre la pestaña. Se baja en el cierre.
+
+**Si falla la voz,** el panel del moderador (Shift + M) tiene una tecla de respaldo para cada cosa que el participante pueda decir. Conviene abrirlo solo entre tareas, porque se ve en la misma pantalla. Las teclas, las frases de voz previstas y qué trae cada columna de los resultados están en [`guion-tareas-ia.md`](guion-tareas-ia.md).
+
 ## Preguntas finales
 
-Para entender qué pasó a lo largo de la prueba. Pedir ejemplos concretos de lo que vivieron.
+Para entender qué pasó en los dos bloques. Pedir ejemplos concretos de lo que vivieron. Si falta tiempo, priorizar la 1, 3, 5, 8, 11, 13 y 16.
+
+**Las gafas**
 
 1. En una palabra, ¿cómo te sentiste con las gafas?
 2. ¿Qué fue lo más fácil y lo más difícil? ¿En qué momento te trabaste?
 3. ¿Qué te pareció hablarle a las gafas? ¿Te entendían? Si usaste la mirada, ¿te pasó de elegir algo sin querer?
 4. Sacate las gafas y volvé a ponértelas. ¿Qué cambia? ¿Qué es de las gafas y qué es de todos?
+
+**El tutor**
+
 5. ¿Sentiste que el tutor te ayudaba o que te decía qué hacer? ¿En qué momento?
 6. ¿Por qué elegiste ese proyecto? ¿Sentís que aprendiste algo haciéndolo? ¿Me lo podrías explicar ahora?
-7. ¿Te sirvió ver si un compañero estaba disponible o en foco? ¿Te gustaría que los demás vean el tuyo?
-8. ¿Cómo te sentiste compartiendo con Santi y mostrando en el pizarrón frente a la clase? ¿Qué te dio más confianza o más vergüenza?
-9. ¿Qué pensás de que tu docente vea tu proceso? ¿Hay algo que no querrías que viera?
-10. Si todos en tu curso usaran estas gafas, ¿qué cambiaría en cómo se ayudan y se hablan entre ustedes? ¿Y con la docente?
-11. ¿Usarías estas gafas todo el día? ¿Qué te preocuparía?
-12. Del 1 al 5, ¿qué tan fácil fue usarlas? ¿Y qué tan útiles te parecieron?
+7. Cuando el tutor te explicaba el corazón y preguntaste qué era el ventrículo, ¿sentiste que perdías la explicación?
+8. En el ejercicio, ¿qué te pareció que no te diera la respuesta? ¿Las pistas te ayudaron o te frustraron?
+9. Cuando te sugirió algo sin que se lo pidieras, ¿lo sentiste como ayuda o como interrupción? ¿Sabrías cómo hacer que no te interrumpa y cómo volver a escucharlo?
+10. Comparado con preguntarle a un profe o buscar un video, ¿qué tiene de mejor y de peor?
+
+**Compañeros y docente**
+
+11. ¿Te sirvió ver si un compañero estaba disponible o en foco? ¿Te gustaría que los demás vean el tuyo?
+12. ¿Cómo te sentiste compartiendo con Santi y mostrando en el pizarrón frente a la clase? ¿Qué te dio más confianza o más vergüenza?
+13. ¿Qué pensás de que tu docente vea tu proceso? ¿Hay algo que no querrías que viera?
+14. Si todos en tu curso usaran estas gafas, ¿qué cambiaría en cómo se ayudan y se hablan entre ustedes? ¿Y con la docente?
+
+**Para cerrar**
+
+15. ¿Usarías estas gafas todo el día? ¿Qué te preocuparía?
+16. Del 1 al 5, ¿qué tan fácil fue usarlas? ¿Y qué tan útiles te parecieron para entender algo?
 
 ## Cierre y registro
 
 > ¡Muchas gracias! Todo lo que nos contaste nos ayuda a aprender y a mejorar. ¿Te quedó alguna duda de las que dejamos para el final?
 
-**Habilitamos al observador a preguntar.** Después, detener la grabación.
+**Habilitamos al observador a preguntar.** Después, bajar los resultados del bloque B (Shift + M → «Descargar esta sesión») y detener la grabación. Si se cerró la pestaña, los resultados se recuperan desde «Resultados guardados del test de tareas», en la pantalla de preparación de la misma compu.
 
-**Planilla del observador** (una copia por participante). Anotar arriba: participante, edad, escuela, fecha y si la iniciativa del tutor estaba encendida.
+**Planilla del observador** (una copia por participante). Anotar arriba: participante, edad, escuela, fecha y si la iniciativa del tutor estaba encendida. Primero va la del bloque A y después la del B.
 
 | Qué pasó | ¿Pasó? (solo / con empujón / no) | Minuto | Cómo lo hizo (voz, mirada, menú) | Frases textuales |
 | --- | --- | --- | --- | --- |
@@ -214,3 +279,14 @@ Para entender qué pasó a lo largo de la prueba. Pedir ejemplos concretos de lo
 **Proyecto elegido:** anotar cuál, cuánto tardó en elegir, hasta qué paso llegó (de 4, o de 5 en La luz del hall) y la conclusión que escribió, textual.
 
 Anotar también qué le preguntó al tutor y qué le contestó: como el tutor improvisa, cada sesión es distinta.
+
+**Bloque B.** Los tiempos, las pistas y las frases ya los anota la prueba; el observador anota lo que la prueba no ve.
+
+| Tarea | ¿Lo logró? (solo / con empujón / no) | Cómo lo hizo (voz, botón, mirada) | Frases textuales | Gestos o dudas |
+| --- | --- | --- | --- | --- |
+| 1 · Pedir una explicación | | | | |
+| 2 · Moverse dentro de la explicación | | | | |
+| 3 · Repreguntar | | | | |
+| 4 · Trabarse en un ejercicio | | | | |
+| 5 · Una sugerencia que no pidió | | | | |
+| 6 · Que el tutor no interrumpa | | | | |
