@@ -4,7 +4,7 @@
 // El clic queda como atajo (equivale al pellizco).
 
 const ELEGIBLE = '#hud button, #hud [data-a], #hud [data-mirar]';
-const AFUERA = '#tarea, #consigna, #moderador, #externos, #intro, .capa, #sin-gafas, #carga';
+const AFUERA = '#tarea, #consigna, #pantalla-ia, #moderador, #externos, #intro, .capa, #sin-gafas, #carga';
 
 export class Mirada {
   constructor({ alElegir } = {}) {

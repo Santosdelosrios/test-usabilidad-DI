@@ -457,15 +457,42 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
 #intro .nota { font-family: var(--texto); font-size: 12.5px; line-height: 1.45; color: rgba(236,235,231,.6); margin: 12px 0 0; }
 #intro .nota b { color: rgba(236,235,231,.9); font-weight: 500; }
 /* consigna para el participante (afuera de la ficción, como la tarjeta de la versión guiada) */
-#consigna { position: fixed; top: 62px; left: 50%; transform: translateX(-50%); width: min(520px, calc(100vw - 760px)); min-width: 360px; z-index: 4; background: #ecebe7; color: #16181b; font-family: var(--mono); padding: 10px 16px 12px; box-shadow: 0 10px 30px rgba(11,12,14,.25); pointer-events: none; }
+#consigna { position: fixed; top: 62px; left: 50%; transform: translateX(-50%); width: min(520px, calc(100vw - 760px)); min-width: 360px; z-index: 4; background: #ecebe7; color: #16181b; font-family: var(--mono); padding: 10px 16px 12px; box-shadow: 0 10px 30px rgba(11,12,14,.25); }
 #consigna[hidden] { display: none; }
 #consigna .cab { font-size: 10px; letter-spacing: calc(.2em * var(--esp-m)); text-transform: uppercase; color: #5b5e63; }
 #consigna .cab b { color: #16181b; font-weight: 500; }
 #consigna p { margin: 0; font-family: var(--texto); }
-#consigna #c-esc { font-size: 12.5px; line-height: 1.4; color: #5b5e63; margin: 6px 0 5px; padding-left: 9px; border-left: 2px solid rgba(22,24,27,.18); }
+#consigna #c-esc { font-size: 13.5px; line-height: 1.4; color: #45484d; margin: 6px 0 5px; padding-left: 9px; border-left: 2px solid rgba(22,24,27,.18); }
 #consigna #c-esc:empty { display: none; }
 #consigna #c-txt { font-size: 15.5px; line-height: 1.4; color: #16181b; margin-top: 4px; }
-#consigna.fin { box-shadow: 0 0 0 2px var(--naranja), 0 10px 30px rgba(11,12,14,.25); }
+#consigna.fin, #consigna.lograda { box-shadow: 0 0 0 2px var(--naranja), 0 10px 30px rgba(11,12,14,.25); }
+#consigna.fin .pie { display: none; }
+#consigna.nueva { animation: nueva-tarea 1s ease-out; }
+@keyframes nueva-tarea { 0% { opacity: 0; transform: translate(-50%, -12px); } 35% { opacity: 1; box-shadow: 0 0 0 3px var(--naranja), 0 10px 30px rgba(11,12,14,.25); } 100% { transform: translate(-50%, 0); } }
+#consigna .pie { display: flex; align-items: center; gap: 10px; margin-top: 9px; font-size: 10px; letter-spacing: calc(.16em * var(--esp-m)); text-transform: uppercase; }
+#consigna #c-estado { color: #c9581f; font-weight: 700; }
+#consigna #c-pasar { all: unset; cursor: pointer; margin-left: auto; padding: 6px 10px; border: 1px solid rgba(22,24,27,.3); font-family: var(--mono); font-size: 10px; letter-spacing: calc(.14em * var(--esp-m)); text-transform: uppercase; color: #2b2e33; }
+#consigna #c-pasar:hover { border-color: #16181b; color: #16181b; }
+#consigna #c-pasar:focus-visible { outline: 1px solid var(--naranja); outline-offset: 2px; }
+#consigna.lograda #c-pasar { background: #16181b; border-color: #16181b; color: #ecebe7; }
+/* pantallas de la persona: instrucciones al empezar y cierre (autoguiado) */
+#pantalla-ia { position: fixed; inset: 0; z-index: 8; display: grid; place-items: center; background: rgba(11,12,14,.62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+#pantalla-ia[hidden] { display: none; }
+#pantalla-ia .caja { width: min(620px, calc(100vw - 40px)); max-height: calc(100vh - 40px); overflow: auto; background: var(--negro); color: var(--tinta); border: 1px solid rgba(236,235,231,.16); padding: 28px 32px 26px; font-family: var(--mono); }
+#pantalla-ia .k { font-size: 10px; letter-spacing: calc(.22em * var(--esp-m)); text-transform: uppercase; color: rgba(236,235,231,.55); }
+#pantalla-ia h1 { font-family: var(--display); font-stretch: var(--estirar); font-weight: var(--peso-d); font-size: 32px; line-height: 1.05; margin: 10px 0 14px; text-transform: uppercase; }
+#pantalla-ia h1 em { font-style: normal; color: var(--naranja); }
+#pantalla-ia p { font-family: var(--texto); font-size: 16px; line-height: 1.5; margin: 0 0 12px; color: rgba(236,235,231,.9); }
+#pantalla-ia ul { list-style: none; margin: 4px 0 20px; padding: 0; font-family: var(--texto); font-size: 15px; line-height: 1.45; color: rgba(236,235,231,.88); }
+#pantalla-ia li { padding: 8px 0 8px 22px; border-top: 1px solid rgba(236,235,231,.1); position: relative; }
+#pantalla-ia li::before { content: ''; position: absolute; left: 2px; top: 16px; width: 7px; height: 7px; border-radius: 50%; background: var(--naranja); }
+#pantalla-ia li b { color: #fff; font-weight: 500; }
+#pantalla-ia .botones { display: flex; gap: 10px; flex-wrap: wrap; }
+#pantalla-ia button { all: unset; cursor: pointer; padding: 11px 16px; font-size: 11px; letter-spacing: calc(.18em * var(--esp-m)); text-transform: uppercase; border: 1px solid rgba(236,235,231,.3); }
+#pantalla-ia button.prim { background: var(--naranja); border-color: var(--naranja); color: var(--negro); }
+#pantalla-ia button:hover { border-color: #fff; }
+#pantalla-ia button:focus-visible { outline: 1px solid var(--naranja); outline-offset: 2px; }
+#pantalla-ia .nota { font-size: 12.5px; color: rgba(236,235,231,.55); margin: 14px 0 0; }
 @media (max-width: 900px) { #consigna { width: calc(100vw - 32px); min-width: 0; top: 108px; } }
 
 /* corazón: etiquetas, título y controles en la capa de las gafas */
@@ -684,7 +711,9 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
   <div class="cab"><b id="c-num">Tarea 1 de 6</b> · consigna</div>
   <p id="c-esc"></p>
   <p id="c-txt"></p>
+  <div class="pie"><span id="c-estado"></span><button id="c-pasar" type="button">Pasar a la siguiente →</button></div>
 </div>
+<div id="pantalla-ia" hidden></div>
 <aside id="moderador" hidden aria-label="Panel del moderador"></aside>
 
 <div id="intro" hidden>
@@ -730,7 +759,7 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
       <button type="button" id="intro-tareas-ia">Test de tareas · IA que explica</button>
       <button type="button" id="intro-libre">Explorar el mundo (revisión)</button>
     </div>
-    <p class="nota"><b>Test de tareas · IA que explica:</b> el participante empieza sentado en su mesa del aula-taller y hace 6 tareas con un tutor de respuestas guionadas (no usa la clave de Gemini). Teclas de respaldo y resultados en el panel del moderador: Shift + M.</p>
+    <p class="nota"><b>Test de tareas · IA que explica:</b> autoguiado. El participante empieza sentado en su mesa del aula-taller, lee las instrucciones y hace 6 tareas solo, con un tutor de respuestas guionadas (no usa la clave de Gemini). Al final descarga los resultados. Si alguien acompaña, tiene un panel de respaldo con Shift + M.</p>
   </div>
 </div>
 <div id="cam-oculta"></div>
