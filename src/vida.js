@@ -350,6 +350,13 @@ export function buildVida({ scene, world, camera }) {
   }
   const barrido = new THREE.Mesh(new THREE.RingGeometry(3.2, 3.26, 128).rotateX(-Math.PI / 2), aditivo(NARANJA, 0.5));
   holo.add(barrido);
+  // El holograma es capa digital: solo se ve con las gafas puestas. Se apaga y prende con un fundido.
+  const matsHolo = [];
+  holo.traverse((o) => {
+    if (o.material && o !== barrido && o !== menosMesh && !matsHolo.includes(o.material)) { o.material.userData.base = o.material.opacity; matsHolo.push(o.material); }
+  });
+  let arK = 1, arObj = 1;
+  const setAR = (on) => { arObj = on ? 1 : 0; };
 
   // ── NODO: pulsos de datos ─────────────────────────────────
   const pulsoMat = new THREE.MeshStandardMaterial({ color: NARANJA, emissive: NARANJA, emissiveIntensity: 5 });
@@ -448,7 +455,13 @@ export function buildVida({ scene, world, camera }) {
     accPiz += dt; accMesa += dt;
     if (accPiz > 0.16 && ['proyeccion', 'hall', 'nodo', 'pasillo'].includes(zc)) { accPiz = 0; dibujarPizarron(piz.g, 1024, 410, d, t, S); piz.t.needsUpdate = true; }
     if (accMesa > 0.25 && ['taller', 'hall'].includes(zc)) { accMesa = 0; if (S.mesaClase) dibujarMesaClase(mesaLu.g, 512, 230, t, S.mesaClase); else dibujarMesa(mesaLu.g, 512, 230, d, t); mesaLu.t.needsUpdate = true; dibujarMesaOtra(mesaB.g, 512, 230, t); mesaB.t.needsUpdate = true; }
-    // holograma
+    // holograma (fundido según las gafas)
+    if (arK !== arObj) {
+      arK += (arObj - arK) * Math.min(1, dt * 6);
+      if (Math.abs(arObj - arK) < 0.01) arK = arObj;
+      for (const m of matsHolo) m.opacity = m.userData.base * arK;
+    }
+    holo.visible = arK > 0;
     barras.forEach((b, i) => {
       b.st.scale.y = Math.max(0.02, (d.stock[i] / MAX) * 1.75 * (1 + 0.015 * Math.sin(t * 3 + i)));
       b.de.scale.y = Math.max(0.02, (d.demanda[i] / MAX) * 1.75 * (1 + 0.015 * Math.sin(t * 3.4 + i)));
@@ -466,10 +479,10 @@ export function buildVida({ scene, world, camera }) {
       menos.t.needsUpdate = true;
     }
     menosMesh.position.set(1.65 + 0.25, (d.demanda[3] / MAX) * 1.75 + 0.45 + 0.04 * Math.sin(t * 2), 0);
-    menosMesh.material.opacity = 0.8 + 0.2 * Math.sin(t * 4);
+    menosMesh.material.opacity = (0.8 + 0.2 * Math.sin(t * 4)) * arK;
     const kb = (t % 3.2) / 3.2;
     barrido.position.y = 0.02 + kb * 2.3;
-    barrido.material.opacity = 0.45 * (1 - kb);
+    barrido.material.opacity = 0.45 * (1 - kb) * arK;
 
     // nodo: pulsos por las bandejas y por el núcleo
     for (let i = 0; i < 16; i++) {
@@ -522,5 +535,5 @@ export function buildVida({ scene, world, camera }) {
   }
 
   const redibujarTextos = () => { etiquetasPiso.forEach((f) => f()); menosTxt = ''; accPiz = accMesa = 9; };
-  return { vida, tick, gente, holo, redibujarTextos };
+  return { vida, tick, gente, holo, setAR, redibujarTextos };
 }

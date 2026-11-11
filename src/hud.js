@@ -96,7 +96,7 @@ export class HUD {
     this.reset();
     this._anclas();
     this._bind();
-    this.S.alCruzarLu = (entrando) => { if (entrando && this.visible) this.conectar(); };
+    this.S.alCruzarLu = (entrando) => { if (entrando && this.visible && this.puestas) this.conectar(); };
     this.ondaCtx = this.el.onda.getContext('2d');
   }
 
@@ -243,8 +243,9 @@ export class HUD {
 
   guiar(dest) {
     this.st.guia = dest;
+    this.guia.on = this.visible && this.puestas;
     this.guia.set(dest);
-    this.nav.resaltar(this._proximo(this.nav.current, dest));
+    this.nav.resaltar(this.guia.on ? this._proximo(this.nav.current, dest) : null);
     if (dest) {
       const pts = this.nav.route(this.nav.current, dest);
       let l = 0;
@@ -255,7 +256,7 @@ export class HUD {
   }
 
   llegar(stop) {
-    if (!this.st.conectada && this.visible && stop.id !== 'entrada') this.conectar();
+    if (!this.st.conectada && this.visible && this.puestas && stop.id !== 'entrada') this.conectar();
     if (this.cola) this.cola = this.cola.filter((q) => !q.lugar || q.lugar === stop.id);
     if (this.propuesta && this.propuesta.lugar && this.propuesta.lugar !== stop.id) { this.propuesta = null; this._siguiente(); }
     setTimeout(() => this._sugerirLugar(stop.id), 1400);
@@ -265,8 +266,7 @@ export class HUD {
       this.guia.set(null);
       this.nav.resaltar(null);
     } else {
-      this.guia.rehacer();
-      this.nav.resaltar(this._proximo(stop.id, this.st.guia));
+      this._guiaVisible();
     }
     this.cambio();
   }
@@ -901,11 +901,16 @@ export class HUD {
     this.cerrarPanel(); this.cerrarTutor(true); this.cerrarLanzador();
     this.ojos.setActiva(false);
     this.el.sugerencia.hidden = true;
+    if (this.voz && this.voz._callarTutor) this.voz._callarTutor();
     this.el.hud.classList.add('quitadas');
+    // cancela cualquier puesta a medias (si no, el HUD reaparecería sin gafas)
+    this._gafasTok = (this._gafasTok || 0) + 1;
+    this._poniendo = false;
+    clearTimeout(this._tGafas); clearTimeout(this._tGafas2);
+    this.el.arranque.hidden = true;
     const L = this.el.lentes;
     L.classList.remove('poniendo'); void L.offsetWidth; L.classList.add('quitando');
-    clearTimeout(this._tGafas);
-    this._tGafas = setTimeout(() => { L.classList.remove('quitando'); this.el.sinGafas.hidden = false; }, 1000);
+    this._tGafas = setTimeout(() => { L.classList.remove('quitando'); if (!this.puestas && this.visible) this.el.sinGafas.hidden = false; }, 1000);
     this.el.gafasBtn.textContent = 'Ponerme las gafas · G';
     this._guiaVisible();
     this.cambio();
@@ -918,24 +923,40 @@ export class HUD {
     this.el.sinGafas.hidden = true;
     const L = this.el.lentes;
     L.classList.remove('quitando'); void L.offsetWidth; L.classList.add('poniendo');
-    clearTimeout(this._tGafas);
+    const tok = this._gafasTok = (this._gafasTok || 0) + 1;
+    this._poniendo = true;
+    clearTimeout(this._tGafas); clearTimeout(this._tGafas2);
     this.el.gafasBtn.textContent = 'Sacarme las gafas · G';
     this._tGafas = setTimeout(() => {
+      if (tok !== this._gafasTok) return;
       L.classList.remove('poniendo');
       const a = this.el.arranque;
       const hola = `Hola${this._coma()}`;
       this.el.arranqueTxt.textContent = this.st.conectada ? (this.st.local ? `${hola} · modo local` : `${hola} · Nodo 014`) : `${hola} · buscando nodo`;
       a.hidden = false;
-      setTimeout(() => { a.hidden = true; this.el.hud.classList.remove('quitadas'); this._guiaVisible(); }, 1100);
+      this._tGafas2 = setTimeout(() => {
+        if (tok !== this._gafasTok || !this.puestas) return;
+        a.hidden = true;
+        this._poniendo = false;
+        this.el.hud.classList.remove('quitadas');
+        this._guiaVisible();
+        // propuestas de la sala que se perdieron mientras no tenía las gafas
+        if (!this.nav.walk && this.nav.current) this._sugerirLugar(this.nav.current);
+      }, 1100);
     }, 900);
     this.cambio();
   }
 
   _guiaVisible() {
-    const v = this.visible && this.puestas;
+    const v = this.visible && this.puestas && !this._poniendo;
+    this.guia.on = v;
+    this.nav.resaltar(v && this.st.guia ? this._proximo(this.nav.current, this.st.guia) : null);
     this.guia.mesh.visible = v && !!this.st.guia && this.guia.mesh.geometry.attributes.position !== undefined;
     this.guia.meta.visible = v && !!this.st.guia;
     if (v && this.st.guia) this.guia.rehacer();
+    // capa digital compartida: el holograma de la zona de proyección solo se ve con las gafas
+    // (en revisión, con this.visible en false, se sigue viendo el mundo completo)
+    if (this.vida && this.vida.setAR) this.vida.setAR(!this.visible || this.puestas);
   }
 
   // ── explorar, subtítulos, ajustes ────────────────────────
@@ -1110,9 +1131,9 @@ export class HUD {
     if (!pn.hidden && (this._tMas = (this._tMas || 0) + dt) > 0.3 && !(this._tMas = 0)) pn.classList.toggle('mas', pn.scrollTop + pn.clientHeight < pn.scrollHeight - 4);
     if (this.mapaCanvas && (this._tMapa = (this._tMapa || 0) + dt) > 0.1) { this._tMapa = 0; this.dibujarMapa(this.mapaCanvas); }
     // las gafas se conectan al llegar a la puerta (no hace falta acertar el umbral exacto)
-    if (!st.conectada) {
+    if (!st.conectada && !this._poniendo) {
       const p = this.camera.position;
-      if (p.z < 8.8 && Math.abs(p.x) < 6) this.conectar();
+      if (zona(p.x, p.z) !== 'plaza' || (p.z < 8.8 && Math.abs(p.x) < 6)) this.conectar();
       else {
         this.buscando = (this.buscando || 0) + dt;
         if (this.buscando > 6 && !this.pistaDada) { this.pistaDada = true; this.aviso('Buscando nodo… Entrá a la escuela: las gafas se conectan en la puerta.', 'TUTOR', true); }

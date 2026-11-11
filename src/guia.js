@@ -5,6 +5,7 @@ export class Guia {
   constructor(scene, nav) {
     this.nav = nav;
     this.dest = null;
+    this.on = true; // la guía es de las gafas: sin gafas no se dibuja
     const c = document.createElement('canvas');
     c.width = 128; c.height = 32;
     const g = c.getContext('2d');
@@ -30,7 +31,7 @@ export class Guia {
 
   rehacer() {
     const nav = this.nav;
-    if (!this.dest || !nav.current || nav.current === this.dest) {
+    if (!this.on || !this.dest || !nav.current || nav.current === this.dest) {
       this.mesh.visible = false;
       this.meta.visible = false;
       return;

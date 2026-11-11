@@ -254,7 +254,7 @@ export class Oculo {
     const enHall = zona(this.camera.position.x, this.camera.position.z) === 'hall';
     const mostrar = visible && enHall && (this.activo || t < this.verHasta);
     this.g.visible = mostrar;
-    if (this.estado === 'simulando') {
+    if (this.estado === 'simulando' && visible) {
       this.simT += dt / 6.5;
       const hh = AHORA + Math.min(1, this.simT) * (15 - AHORA);
       while (this.siguiente <= 14 && hh >= this.siguiente) { this._marcarHora(this.siguiente); this.siguiente++; }

@@ -149,8 +149,13 @@ async function start() {
     document.getElementById('tarea').hidden = !prueba || !tareas.activa && tareas.el.num.textContent !== 'Fin';
     botonModo.textContent = prueba ? 'Revisión · H' : 'Volver a la prueba · H';
   }
-  botonModo.addEventListener('click', () => setModo(modo === 'prueba' ? 'revision' : 'prueba'));
-  window.addEventListener('keydown', (e) => { if (e.code === 'KeyH' && !e.repeat) setModo(modo === 'prueba' ? 'revision' : 'prueba'); });
+  // al volver de Revisión, las gafas siguen a la cámara (pudo cambiar mientras tanto)
+  function alternarModo() {
+    setModo(modo === 'prueba' ? 'revision' : 'prueba');
+    if (modo === 'prueba' && hud.camaraActiva && cam.estado) (cam.estado === 'con' ? hud.ponerGafas() : hud.quitarGafas());
+  }
+  botonModo.addEventListener('click', alternarModo);
+  window.addEventListener('keydown', (e) => { if (e.code === 'KeyH' && !e.repeat) alternarModo(); });
   // ── preparación del moderador: voz, mirada, cámara, propuestas ──
   const intro = document.getElementById('intro');
   const $ = (id) => document.getElementById(id);
