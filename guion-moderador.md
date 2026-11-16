@@ -1,6 +1,6 @@
 # Guion del moderador · TUTOR 2040
 
-Diseño de Futuros (UTDT) · 11 de noviembre de 2026 · copia del [doc de claude.ai](https://claude.ai/artifact/TATxXgvsX2GzLyySXEkPzu) (si difieren, vale el doc)
+Diseño de Futuros (UTDT) · 16 de noviembre de 2026 · copia del [doc de claude.ai](https://claude.ai/artifact/TATxXgvsX2GzLyySXEkPzu) (si difieren, vale el doc)
 
 Lo que dice el moderador en voz alta, en orden, desde que llega el participante hasta que termina la clase. Lo que va entre corchetes se hace, no se lee.
 
@@ -12,37 +12,35 @@ Lo que dice el moderador en voz alta, en orden, desde que llega el participante 
 >
 > Te voy a pedir que digas en voz alta todo lo que vas pensando y haciendo, aunque te parezca obvio.
 >
-> Vamos a grabar la pantalla y el audio, solo para uso interno del grupo. La cámara de la compu solo se usa para saber si tenés puestas las gafas: no guarda imágenes. Durante la clase, la prueba también anota qué consignas hiciste, cuánto tardaste y lo que le dijiste al tutor; eso queda en esta compu. ¿Estás de acuerdo?
+> Vamos a grabar la pantalla y el audio, solo para uso interno del grupo. La cámara de la compu solo se usa para saber si tenés puestas las gafas: no guarda imágenes. Durante la clase, la prueba también anota qué consignas hiciste, cuánto tardaste y lo que elegiste; eso queda en esta compu. ¿Estás de acuerdo?
 
 [Si dice que sí, iniciar la grabación.]
 
 > Ya estamos grabando. Si en algún momento querés frenar, avisame y paramos. Durante la prueba seguramente te surjan dudas que no te voy a poder contestar: las retomamos al final.
 
-## 2 · Cómo se usan las gafas
+## 2 · Cámara (todavía no empezó la prueba)
 
-[Darle las gafas de utilería.]
+[El moderador ya completó el nombre y la voz del tutor en la pantalla de preparación.]
 
-> En la pantalla vas a ver una escuela de 2040 como si tuvieras puestas estas gafas. Las gafas tienen un tutor. Podés usarlas de dos maneras:
->
-> **Hablando:** empezá con «Tutor…» y decí lo que necesites, como si le hablaras a una persona.
->
-> **Mirando:** el mouse son tus ojos. Si mirás un botón de las gafas y te quedás mirándolo un segundo, lo elegís. Arrastrando, girás la cabeza.
->
-> Si te sacás las gafas, la pantalla te muestra cómo se ve la escuela sin ellas. [Solo si la cámara está activada.]
+> Antes de empezar, vamos a preparar la cámara. Esto todavía no es la prueba. Mirá a la cámara sin las gafas unos segundos… Ahora ponete estas gafas y volvé a mirar a la cámara.
 
-[Si la mirada está desactivada, saltear «Mirando». En claude.ai, para hablar se mantiene apretada la barra espaciadora.]
+[Darle las gafas de utilería. Tocar «Activar cámara», «Muestra sin gafas» y, con las gafas puestas, «Muestra con gafas». Después, «Listo · Empezar con el participante».]
 
-> ¿Alguna duda antes de empezar?
+## 3 · Bienvenida en pantalla
 
-## 3 · Escenario
+> Ahora la pantalla te explica cómo se usan las gafas. Leela con calma y seguí los pasos: todo se hace con el mouse, sin hacer clic.
 
-[Apretar Enter en la pantalla de preparación y leer:]
+[La bienvenida tiene 5 pasos y en uno le hace probar cómo se elige con la mirada. El moderador no explica nada: si el participante pregunta, le dice «Leelo de nuevo, ¿qué te parece que dice?».]
+
+## 4 · Al llegar a la escuela
+
+[Cuando termina la bienvenida y aparece la escuela, leer:]
 
 > Es martes, son las 9:22 y estás llegando a tu escuela con las gafas puestas. En las gafas tenés el horario del día: lo primero es una clase de Biología y Matemática en tu mesa del aula-taller. Hacé lo que harías en un día normal y contame en voz alta lo que vas pensando.
 
 [Desde acá, el moderador no explica ni ayuda: observa.]
 
-## 4 · Durante la prueba
+## 5 · Durante la prueba
 
 El moderador solo habla en estos casos, y solo con estas frases. Nunca dice cómo se hace algo ni qué botón tocar.
 
@@ -50,12 +48,12 @@ El moderador solo habla en estos casos, y solo con estas frases. Nunca dice cóm
 | --- | --- |
 | Le pregunta algo (cómo se hace, qué tiene que hacer) | «¿Vos qué harías?» |
 | Se queda callado más de 20 segundos | «¿Qué estás pensando?» |
-| Antes de la clase, no sabe qué hacer por más de un minuto | Una sola de estas: «¿Qué harías ahora en tu escuela?», «Podés preguntarle lo que quieras al tutor» o «Fijate en tu horario». |
+| Antes de la clase, no sabe qué hacer por más de un minuto | Una sola de estas: «¿Qué harías ahora en tu escuela?», «Fijate qué te ofrece el tutor» o «Fijate en tu horario». |
 | A los 6 minutos todavía no se sentó para la clase | «Vamos directo a la clase.» [Apretar F8.] |
 | En la clase, está trabado en una consigna por más de un minuto | «Si querés, podés pasar a la siguiente.» (una sola vez por consigna) |
 | Quiere dejar | «Paramos acá. ¡Gracias por todo!» [Ir al cierre.] |
 
-## 5 · Cierre
+## 6 · Cierre
 
 [Cuando aparece «¡Terminaste las 6 tareas!»:]
 
