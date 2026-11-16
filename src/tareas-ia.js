@@ -282,7 +282,7 @@ export class TareasIA {
       if (r.salteada) return 'salteada';
       return r.intentos ? 'hecha' : 'pend';
     };
-    const rep = (k) => (this.repasos[k] ? 'hecha' : this.interludio && this.interludio.k.startsWith(`Repaso de ${REPASOS[k].materia}`) ? 'ahora' : 'pend');
+    const rep = (k) => (this.repasos[k] === 'salteado' ? 'salteada' : this.repasos[k] ? 'hecha' : this.interludio && this.interludio.k.startsWith(`Repaso de ${REPASOS[k].materia}`) ? 'ahora' : 'pend');
     return { bio: [1, 2, 3].map(est), repasoBio: rep('bio'), mate: [4, 5, 6].map(est), repasoMate: rep('mate') };
   }
 
@@ -485,6 +485,8 @@ export class TareasIA {
       c.pasar.textContent = this.i < TAREAS_IA.length ? 'Siguiente →' : 'Terminar →';
       this.hud.registrar('tarea', `${this.i}:lista`);
     }
+    // mientras le está hablando al tutor, la consigna cumplida espera (no cambia la pantalla en medio)
+    if (this.hud.consultando || this.interludio) this.cuenta = Math.max(this.cuenta, ahora + 1500);
     const s = Math.ceil((this.cuenta - ahora) / 1000);
     if (s <= 0) return this.siguiente();
     c.estado.textContent = `✓ Listo · ${this.i < TAREAS_IA.length ? 'sigue' : 'termina'} en ${s}`;
@@ -784,7 +786,7 @@ export class TareasIA {
     const voz = this.hud.voz;
     const nombre = document.getElementById('prep-nombre').value.trim() || 'sin nombre';
     let h = `<div class="mod-cab"><div><b>Moderador</b><span>Tareas · IA que explica</span></div><button data-m="cerrar" title="Cerrar el panel">⇧M ×</button></div>`;
-    h += `<div class="mod-meta"><span>${esc(nombre)} · sesión <b data-ses>${mmss(performance.now() - this.t0)}</b></span><span>${voz && voz.modo ? (voz.modo === 'web' ? 'Voz: manos libres' : 'Voz: barra espaciadora') : 'Sin voz: usar las teclas'}</span></div>`;
+    h += `<div class="mod-meta"><span>${esc(nombre)} · sesión <b data-ses>${mmss(performance.now() - this.t0)}</b></span><span>${this.hud.tutorVoz ? (this.hud.tutorVoz.puede() ? 'Voz: al mirar al tutor (Gemini)' : 'Sin voz: preguntas frecuentes') : voz && voz.modo ? (voz.modo === 'web' ? 'Voz: manos libres' : 'Voz: barra espaciadora') : 'Sin voz: usar las teclas'}</span></div>`;
     h += `<div class="mod-acc"><button class="prim" data-m="descargar">Descargar esta sesión</button><button data-m="json">Solo JSON</button></div>`;
     h += this.guardada === false
       ? '<p class="vacio aviso-g">No se pudo guardar en este navegador: descargá los resultados antes de cerrar.</p>'
@@ -842,7 +844,7 @@ export class TareasIA {
       hora_inicio_clase: this.horaInicio != null ? `${Math.floor(this.horaInicio / 60)}:${String(Math.floor(this.horaInicio % 60)).padStart(2, '0')}` : null,
       terminada: !!this.fin,
       duracion_s: Math.round((performance.now() - this.t0) / 1000),
-      ajustes: { voz: voz ? voz.modo : null, voz_del_tutor: voz ? voz.hablaTutor : null, mirada: this.hud.ojos.habilitada, camara: !!this.hud.camaraActiva },
+      ajustes: { voz: voz ? voz.modo : null, voz_del_tutor: voz ? voz.hablaTutor : null, tutor_con_ia: !!(this.hud.tutorVoz && this.hud.tutorVoz.puede()), mirada: this.hud.ojos.habilitada, camara: !!this.hud.camaraActiva },
       tareas: TAREAS_IA.map((T) => {
         const r = this.res[T.n - 1], s = this._resumen(T.n);
         return {
@@ -856,6 +858,7 @@ export class TareasIA {
       }),
       repasos: this.quiz,
       antes_de_la_clase: this.enMundo ? { segundos_hasta_sentarse: this.tSentado ? Math.round((this.tSentado - this.tInicio) / 1000) : null, eventos: this.previos } : undefined,
+      consultas_por_voz: [...this.previos.map((e) => ({ ...e, tarea: 'antes' })), ...this.eventos].filter((e) => e.tipo === 'consulta-voz').map((e) => { let d = {}; try { d = JSON.parse(e.dato); } catch (er) { /* */ } return { segundo: e.s, tarea: e.tarea, ...d }; }),
       consultas_al_tutor: [...this.previos.map((e) => ({ ...e, tarea: 'antes' })), ...this.eventos].filter((e) => e.tipo === 'ayuda' && e.dato !== 'todas').map((e) => ({ segundo: e.s, tarea: e.tarea, pregunta: e.dato.split('|')[0], lugar: e.dato.split('|')[1] || '' })),
       ejercicios: this.ej.historial.map((e) => ({ ecuacion: e.ec, resuelto: e.resuelto, comprobado: e.comprobado, tiempo_s: e.tResuelto ? Math.round((e.tResuelto - e.tInicio) / 1000) : null, pistas_pedidas: e.pistas, pistas_por_sugerencia: e.pistasSug, pidio_la_respuesta: e.pidioRespuesta, pasos_equivocados: e.errores })),
       sugerencias: this.ej.sugerencias.map((s) => ({ ecuacion: s.ec, motivo: s.motivo, texto: s.txt, resultado: s.estado === 'mostrada' ? 'sin respuesta' : s.estado })),
@@ -889,6 +892,10 @@ function csvDe(d) {
   if (d.consultas_al_tutor && d.consultas_al_tutor.length) {
     L.push('', fila(['consulta_al_tutor', 'segundo', 'tarea', 'lugar']));
     for (const c of d.consultas_al_tutor) L.push(fila([c.pregunta, Math.round(c.segundo), c.tarea, c.lugar]));
+  }
+  if (d.consultas_por_voz && d.consultas_por_voz.length) {
+    L.push('', fila(['consulta_por_voz', 'segundo', 'tarea', 'entendio', 'accion', 'valor', 'pudo', 'respuesta', 'error', 'segundos_ia']));
+    for (const c of d.consultas_por_voz) L.push(fila([c.dijo || '', Math.round(c.segundo), c.tarea, c.entendi || '', c.accion || '', c.valor || '', c.error ? '' : c.puede === false ? 'no' : 'si', c.decir || '', c.error || '', c.segundos ?? '']));
   }
   if (d.antes_de_la_clase) L.push('', fila(['segundos_hasta_sentarse', d.antes_de_la_clase.segundos_hasta_sentarse ?? '']));
   L.push('', fila(['segundo', 'tarea', 'frase', 'entendida']));

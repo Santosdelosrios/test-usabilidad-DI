@@ -96,7 +96,7 @@ export class Ejercicio {
     this._avance();
     if (e.resuelto) return this._decir(`Ya lo resolviste: x = ${e.x}.`);
     const et = e.paso1 ? 1 : 0;
-    if (e.nivel[et] >= 3) { this.hud.registrar('ejercicio', `pista-agotada:${origen}`); return this._decir('Ya te di las tres pistas de este paso. Probá con la última y decime qué te da.'); }
+    if (e.nivel[et] >= 3) { this.hud.registrar('ejercicio', `pista-agotada:${origen}`); return this._decir('Ya te di las tres pistas de este paso. Probá con la última y elegí qué te da.'); }
     const txt = this._textosPista(et)[e.nivel[et]];
     e.nivel[et]++;
     if (origen === 'sugerencia') e.pistasSug++; else e.pistas++;
@@ -230,18 +230,31 @@ export class Ejercicio {
     h.registrar('sugerencia', `mostrada:${motivo}`);
     if (h.tutorAbierto) h.cerrarTutor(true);
     h.propuesta = null;
+    s.alAceptar = alAceptar;
     h.proponer(txt, [
-      ['Dale', () => { s.estado = 'aceptada'; h.registrar('sugerencia', `aceptada:${motivo}`); if (alAceptar) alAceptar(); h.cambio(); }],
-      ['Ahora no', () => { s.estado = 'descartada'; h.registrar('sugerencia', `descartada:${motivo}`); this._avance(); h.cambio(); }],
+      ['Dale', () => this.contestarSugerencia(true)],
+      ['Ahora no', () => this.contestarSugerencia(false)],
     ]);
     h.cambio();
   }
 
+  // aceptar o descartar la sugerencia que está esperando (con la mirada, la voz o la tecla del moderador)
+  contestarSugerencia(si, origen = '') {
+    const s = this.pendiente, h = this.hud;
+    if (!s || s.estado !== 'mostrada') return false;
+    s.estado = si ? 'aceptada' : 'descartada';
+    h.registrar('sugerencia', `${s.estado}:${s.motivo}${origen ? `:${origen}` : ''}`);
+    if (si) { if (s.alAceptar) s.alAceptar(); } else this._avance();
+    h.cambio();
+    return true;
+  }
+
   // responde a la sugerencia que está a la vista (el moderador, con sus teclas)
   responderSugerencia(si) {
-    const o = this.hud.el.opciones.querySelectorAll('button');
-    const b = si ? o[0] : o[o.length - 1];
-    if (b) b.click();
+    const s = this.pendiente, h = this.hud;
+    if (!s || s.estado !== 'mostrada') return;
+    if (h.propuesta) { h.propuesta = null; h._siguiente(); } // saca los botones «Dale / Ahora no»
+    this.contestarSugerencia(si, 'tecla');
   }
 
   // ── voz: ¿la frase es algo del ejercicio? (llega sin tildes ni mayúsculas) ──
@@ -290,6 +303,8 @@ export class Ejercicio {
 
   // ── cuadro a cuadro: sugerencia si pasa un rato sin avances ──
   update() {
+    // mientras le está hablando al tutor no se le encima una sugerencia
+    if (this.hud.consultando) { this._avance(); return; }
     if (!this.activo || !this.espontaneas) return;
     const e = this.e, h = this.hud;
     if (e.resuelto || e.sugeridas >= 3) return;
@@ -314,7 +329,7 @@ export class Ejercicio {
     if (!e.resuelto) {
       this._ops = this._opcionesPaso();
       h += `<div class="elegir"><span>Próximo paso</span>${this._ops.map(([t], i) => `<button type="button" data-dwell="1.3" data-paso="${i}">${esc(t)}</button>`).join('')}</div>`;
-      h += `<div class="pie">${this.hud.vozControl === false ? 'Elegí cada paso con la mirada' : 'Decí cada paso en voz alta o elegilo con la mirada'} · <button type="button" data-dwell="1.3" data-pista>Pedir una pista</button></div>`;
+      h += `<div class="pie">${this.hud.tutorVoz && this.hud.tutorVoz.puede() ? 'Elegí cada paso con la mirada o decíselo al tutor' : this.hud.vozControl === false ? 'Elegí cada paso con la mirada' : 'Decí cada paso en voz alta o elegilo con la mirada'} · <button type="button" data-dwell="1.3" data-pista>Pedir una pista</button></div>`;
     }
     this.el.innerHTML = h;
   }
@@ -322,16 +337,18 @@ export class Ejercicio {
   // las tres opciones del próximo paso: una correcta y dos que no (la correcta cambia de lugar)
   _opcionesPaso() {
     const e = this.e, { a, b, c, m, x } = e, B = Math.abs(b);
-    const sumar = b < 0, mal = (t) => [t, () => this._error(t, 'mirada', true)];
+    // el origen se lee al elegir: 'mirada' salvo que lo elija el tutor por voz
+    const o = () => this.origenPaso || 'mirada';
+    const sumar = b < 0, mal = (t) => [t, () => this._error(t, o(), true)];
     let ops, k;
     if (!e.paso1 && !e.op1) {
-      ops = [[`${sumar ? 'Sumar' : 'Restar'} ${B} de los dos lados`, () => this._op1('mirada')], mal(`${sumar ? 'Restar' : 'Sumar'} ${B} de los dos lados`), [`Dividir por ${a} los dos lados`, () => this._op2('mirada')]]; k = 0;
+      ops = [[`${sumar ? 'Sumar' : 'Restar'} ${B} de los dos lados`, () => this._op1(o())], mal(`${sumar ? 'Restar' : 'Sumar'} ${B} de los dos lados`), [`Dividir por ${a} los dos lados`, () => this._op2(o())]]; k = 0;
     } else if (!e.paso1) {
-      ops = [mal(`${a}x = ${c + b}`), [`${a}x = ${m}`, () => this._paso1('mirada')], mal(`x = ${m}`)]; k = 1;
+      ops = [mal(`${a}x = ${c + b}`), [`${a}x = ${m}`, () => this._paso1(o())], mal(`x = ${m}`)]; k = 1;
     } else if (!e.op2) {
-      ops = [mal(`Multiplicar por ${a} los dos lados`), mal(`Restar ${a} de los dos lados`), [`Dividir por ${a} los dos lados`, () => this._op2('mirada')]]; k = 2;
+      ops = [mal(`Multiplicar por ${a} los dos lados`), mal(`Restar ${a} de los dos lados`), [`Dividir por ${a} los dos lados`, () => this._op2(o())]]; k = 2;
     } else {
-      ops = [[`x = ${x}`, () => this._resolver('mirada')], mal(`x = ${m * a}`), mal(`x = ${m - a}`)]; k = 0;
+      ops = [[`x = ${x}`, () => this._resolver(o())], mal(`x = ${m * a}`), mal(`x = ${m - a}`)]; k = 0;
     }
     return ops;
   }

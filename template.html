@@ -436,6 +436,11 @@ body.libre #tarea { display: none !important; }
 #hud-panel .ley { display: flex; gap: 6px; align-items: center; font-size: 10px; color: rgba(236,235,231,.6); }
 #hud-panel .ley i { width: 8px; height: 8px; background: rgba(236,235,231,.75); display: inline-block; }
 #hud-panel .ley i.v { background: var(--naranja); margin-left: 8px; }
+/* escuchando una frase: el tutor late en naranja */
+#hud-tutor.escuchando #hud-tutor-yo { border-color: var(--naranja); animation: escuchaPulso 1.1s ease-out infinite; }
+#hud-tutor.escuchando #hud-tutor-yo i { background: #fff; transform: scale(1.25); }
+#hud-tutor.escuchando #hud-tutor-txt { color: #fff; }
+@keyframes escuchaPulso { 0% { box-shadow: 0 0 0 0 rgba(232,116,59,.7); } 100% { box-shadow: 0 0 0 16px rgba(232,116,59,0); } }
 #hud-tutor.pensando #hud-tutor-yo i { animation: latido .3s ease-in-out infinite alternate; background: #fff; }
 #prep-oido { margin-top: 6px; min-height: 0; font-family: var(--texto); font-size: 14px; color: var(--naranja); }
 #intro .cam { position: relative; width: 240px; height: 180px; margin-top: 10px; background: #000; border: 1px solid rgba(236,235,231,.2); }
@@ -801,7 +806,7 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
 </div>
 <div id="mirada" hidden><i></i></div>
 <div id="flash"></div>
-<div id="sin-gafas" hidden><b>Sin gafas</b> · <span id="sin-gafas-txt">Ves la escuela como es: sin ruta, sin tutor, sin capa social.</span><button type="button" id="poner-gafas">Ponerme las gafas · G</button></div>
+<div id="sin-gafas" hidden><b>Sin gafas</b> · <span id="sin-gafas-txt">Ves la escuela tal como es: sin horario, sin progreso, sin tutor, sin ruta y sin los nombres de las cosas. Ponete las gafas para volver a verlos.</span><button type="button" id="poner-gafas">Ponerme las gafas · G</button></div>
 
 <div id="tarea" hidden>
   <div class="cab"><span><b id="t-num">Tarea 1</b> / 10 · consigna</span><button id="t-menu" type="button">Tareas ▾</button></div>
@@ -834,14 +839,15 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
       <div class="linea" hidden><span class="op"><span>Proyecto</span><button type="button" data-proy="" class="on">Lo elige al entrar</button><button type="button" data-proy="talles">Talles</button><button type="button" data-proy="luz">Luz</button><button type="button" data-proy="agua">Agua</button><button type="button" data-proy="viaje">Cómo llegamos</button></span></div>
     </div></div>
     <div class="paso"><span class="n">2</span><div>
-      <b>Voz del tutor</b>
-<small>El control por voz está apagado: el participante maneja todo con la mirada. El tutor igual habla en voz alta; se puede apagar.</small>
-<small id="prep-voz" hidden>Revisando el micrófono…</small>
-<div class="linea"><button type="button" id="prep-probar" hidden>Probar el micrófono</button><span class="op"><span>Voz del tutor</span><button type="button" data-tts="1" class="on">Sí</button><button type="button" data-tts="0">No</button></span></div>
+      <b>Micrófono y voz del tutor</b>
+<small>El participante le habla al tutor cuando lo mira y mira su punto: el tutor escucha una sola frase y no queda el micrófono abierto. Probá el micrófono acá (Chrome pide permiso la primera vez: aceptalo). El tutor contesta en voz alta; se puede apagar.</small>
+<small id="prep-voz">Revisando el micrófono…</small>
+<div class="linea"><button type="button" id="prep-probar">Probar el micrófono</button><span class="op"><span>Voz del tutor</span><button type="button" data-tts="1" class="on">Sí</button><button type="button" data-tts="0">No</button></span></div>
 <div id="prep-oido" hidden></div>
     </div></div>
-    <div class="paso" hidden><span class="n">3</span><div>
-      <b>Tutor con IA</b>
+    <div class="paso"><span class="n">3</span><div>
+      <b>Tutor con IA · Gemini</b>
+      <small>Con la clave, el tutor entiende lo que el participante le dice y hace lo que se pueda en las gafas. Sin clave, al mirarlo muestra preguntas frecuentes (sin voz). La clave queda solo en este navegador.</small>
       <small id="prep-ia-txt">Revisando…</small>
       <div class="linea" id="prep-ia-linea"><input id="prep-clave" type="password" placeholder="Clave de Gemini (gratis en aistudio.google.com/apikey)" autocomplete="off" spellcheck="false"><button type="button" id="prep-ia">Probar el tutor</button></div>
     </div></div>
@@ -850,7 +856,7 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
       <small>Activada: mover el mouse es mover los ojos y sostener la mirada elige. Desactivada: todo por voz.</small>
       <div class="linea"><span class="op"><button type="button" data-mir="1" class="on">Activada</button><button type="button" data-mir="0">Desactivada</button></span></div>
     </div></div>
-    <div class="paso"><span class="n">3</span><div>
+    <div class="paso"><span class="n">4</span><div>
       <b>Cámara · con el participante</b>
 <small id="prep-cam-txt">Sentá al participante frente a la compu y explicale que esto es solo para preparar la prueba. Activá la cámara y tomá una muestra sin gafas y otra con las gafas de utilería puestas, mirando a la cámara (3 segundos cada una).</small>
       <div class="cam" id="prep-cam-caja" hidden><video id="prep-video" muted playsinline></video><canvas id="prep-caja" width="240" height="180"></canvas><div id="prep-cam-estado"></div></div>
@@ -891,11 +897,12 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
       <h1>Con gafas y <em>sin gafas</em></h1>
       <p><b>Con las gafas puestas</b> ves lo digital: tu horario, tu progreso, el tutor, la ruta y los nombres de las cosas.</p>
       <p><b>Si te las sacás</b>, ves la escuela tal como es, sin nada de eso. Cuando te las volvés a poner, aparece todo de nuevo.</p>
+      <p id="bv-gafas-como" class="chico">Para sacártelas o ponértelas, apretá la tecla G.</p>
     </section>
     <section data-bv="5" hidden>
       <h1>Tu progreso y <em>tu tutor</em></h1>
       <p><b>Arriba a la izquierda</b> ves tu día y cuánto avanzaste. Se va completando a medida que hacés cada cosa.</p>
-      <p><b>Abajo, en el centro</b>, está el tutor. Podés consultarlo en cualquier momento: miralo, mirá su punto y elegí tu pregunta.</p>
+      <p id="bv-tutor-txt"><b>Abajo, en el centro</b>, está el tutor. Podés consultarlo en cualquier momento: miralo, mirá su punto y elegí tu pregunta.</p>
     </section>
     <section data-bv="6" hidden>
       <h1>La clase: <em>Biología y Matemática</em></h1>

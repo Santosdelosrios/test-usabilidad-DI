@@ -352,7 +352,7 @@ export class Corazon {
 
   _mostrarPausa() {
     this.callado = false;
-    this.hud.decir('Pausado. Decime «seguí» cuando quieras, o preguntame algo.', [['Seguir', () => this.seguir('boton')]]);
+    this.hud.decir('Pausado. Elegí «Seguir» cuando quieras, o preguntame algo.', [['Seguir', () => this.seguir('boton')]]);
     this._refrescar();
   }
 
@@ -490,7 +490,7 @@ export class Corazon {
     const ver = () => {
       if (id !== this._hid) return;
       // si el participante está hablando (o recién cortó al tutor), se espera a su frase
-      const espera = Math.max(this.holdHasta - performance.now(), v && v.ptt ? 400 : 0);
+      const espera = Math.max(this.holdHasta - performance.now(), v && (v.ptt || v.escuchandoUna) ? 400 : 0, h.consultando ? 400 : 0);
       if (espera > 0) { setTimeout(ver, espera); return; }
       if (vozOk && tOk) { this._hid++; cb(); }
     };

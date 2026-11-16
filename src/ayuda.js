@@ -95,7 +95,11 @@ export const AYUDA = [
   },
   {
     id: 'callar', p: '¿Cómo hago que no me interrumpas?', si: (x) => x.enClase, peso: (x) => (x.foco ? 0 : 2),
-    r: (x) => ({ txt: x.foco ? 'Ya estoy en silencio. Para volver a escucharme, mirame y elegí «Ya podés hablar».' : 'Mirame y elegí «No me interrumpas»: me callo hasta que vuelvas a mirarme y elijas «Ya podés hablar».' }),
+    r: (x, h) => {
+      const voz = h.tutorVoz && h.tutorVoz.puede();
+      if (x.foco) return { txt: voz ? 'Ya estoy en silencio. Para volver a escucharme, mirame y decime «ya podés hablar».' : 'Ya estoy en silencio. Para volver a escucharme, mirame y elegí «Ya podés hablar».' };
+      return { txt: voz ? 'Mirame y decime «no me interrumpas» (o elegilo en estas preguntas): me callo hasta que me digas «ya podés hablar».' : 'Mirame y elegí «No me interrumpas»: me callo hasta que vuelvas a mirarme y elijas «Ya podés hablar».' };
+    },
   },
   {
     id: 'repaso', p: '¿Qué es este cartel?', si: (x) => x.interludio, peso: () => 8,
@@ -103,38 +107,51 @@ export const AYUDA = [
   },
   {
     id: 'gafas', p: '¿Qué pasa si me saco las gafas?', si: () => true, peso: () => 1,
-    r: () => ({ txt: 'Con las gafas puestas ves lo digital: tu horario, tu progreso, a mí, la ruta y los nombres de las cosas. Si te las sacás, ves la escuela tal como es, sin nada de eso. Al volver a ponértelas, aparece todo de nuevo.' }),
+    r: (x, h) => ({ txt: `Con las gafas puestas ves lo digital: tu horario, tu progreso, a mí, la ruta y los nombres de las cosas. Si te las sacás, ves la escuela tal como es, sin nada de eso. Al volver a ponértelas, aparece todo de nuevo. ${h.camaraActiva ? 'Te las sacás de verdad: la cámara se da cuenta.' : 'Para sacártelas o ponértelas, apretá la tecla G.'}` }),
   },
   {
     id: 'tutor', p: '¿Qué podés hacer vos?', si: () => true, peso: () => 1,
-    r: () => ({ txt: 'Te explico los temas de la clase, te doy pistas sin darte la respuesta, te llevo a donde tengas que ir y, si querés pensar solo, me callo. Podés consultarme en cualquier momento: mirame y después mirá el punto que aparece al lado.' }),
+    r: (x, h) => ({ txt: `Te explico los temas de la clase, te doy pistas sin darte la respuesta, te llevo a donde tengas que ir y, si querés pensar solo, me callo. Podés consultarme en cualquier momento: mirame y después mirá el punto que aparece al lado${h.tutorVoz && h.tutorVoz.puede() ? '; ahí te escucho y me decís qué necesitás' : ''}.` }),
   },
 ];
 
-function responder(h, q) {
+// las preguntas frecuentes se marcan: mientras están abiertas, la explicación del corazón espera
+const decirAyuda = (h, txt, ops) => {
+  h.decir(txt, ops);
+  h.el.opciones.dataset.de = 'ayuda';
+  h.consultando = true; // ya mismo (después lo mantiene tutor-voz.js mientras siga abierto)
+  const c = h.clase && h.clase.corazon;
+  if (c && c.abierto) c.retener(900);
+};
+
+function responder(h, q, volver = null) {
   const x = contexto(h);
   const { txt, ops = [] } = q.r(x, h);
   h.registrar('ayuda', `${q.id}|${x.lugar}|${x.clase}|${x.tarea}`);
-  h.decir(txt, [...ops, ['Otra pregunta…', () => todas(h)], ['Listo', () => h.cerrarTutor()]]);
+  decirAyuda(h, txt, [...ops, ['Otra pregunta…', () => todas(h, volver)], ['Listo', () => h.cerrarTutor()]]);
 }
 
-function todas(h) {
+function todas(h, volver = null) {
   const x = contexto(h);
   const L = AYUDA.filter((q) => q.si(x)).sort((a, b) => b.peso(x) - a.peso(x));
   h.registrar('ayuda', 'todas');
-  h.decir('Elegí tu pregunta:', [...L.map((q) => [q.p, () => responder(h, q)]), ['Volver', () => h.abrirTutor()]]);
+  decirAyuda(h, 'Elegí tu pregunta:', [...L.map((q) => [q.p, () => responder(h, q, volver)]), ['Volver', volver || (() => h.abrirTutor())]]);
 }
 
-// el menú del tutor: lo que se puede hacer ahora (acciones) + las preguntas más útiles para este momento
-export function abrirAyuda(h, acciones = []) {
+// el menú del tutor: lo que se puede hacer ahora (acciones) + las preguntas más útiles para este momento.
+// Con IA y micrófono, mirar al tutor primero lo escucha (tutor-voz.js); «Ver preguntas» abre este menú.
+export function abrirAyuda(h, acciones = [], { menu = false } = {}) {
+  if (!menu && h.tutorVoz && h.tutorVoz.puede()) return h.tutorVoz.escuchar(() => abrirAyuda(h, acciones, { menu: true }));
+  const volver = () => abrirAyuda(h, acciones, { menu: true });
   const x = contexto(h);
   const n = 2;
   const sug = AYUDA.filter((q) => q.si(x)).sort((a, b) => b.peso(x) - a.peso(x)).slice(0, n);
   h.registrar('tutor', 'abrir');
-  h.decir(`Te escucho${h._coma()}. ¿Qué necesitás?`, [
+  decirAyuda(h, `${h.tutorVoz && h.tutorVoz.puede() ? 'Estas son las preguntas frecuentes' : `Te escucho${h._coma()}`}. ¿Qué necesitás?`, [
     ...acciones,
-    ...sug.map((q) => [q.p, () => responder(h, q)]),
-    ['Otra pregunta…', () => todas(h)],
+    ...sug.map((q) => [q.p, () => responder(h, q, volver)]),
+    ['Otra pregunta…', () => todas(h, volver)],
+    ...(h.tutorVoz && h.tutorVoz.puede() ? [['Hablarle', () => h.tutorVoz.escuchar(volver)]] : []),
     ['Nada, gracias', () => h.cerrarTutor()],
   ]);
 }
@@ -149,7 +166,7 @@ function accionesMundo(h) {
 // ── recorrido guiado de la interfaz, la primera vez que se pone las gafas ──
 const PASOS_TOUR = [
   { sel: '#hud-hoy', lado: 'der', txt: 'Este es tu día y tu progreso. Se va completando a medida que avanzás.' },
-  { sel: '#hud-tutor-yo', lado: 'arriba', txt: 'Este soy yo, tu tutor. Cuando tengas una duda, mirame y después mirá el punto que aparece al lado: te muestro qué podés preguntarme.' },
+  { sel: '#hud-tutor-yo', lado: 'arriba', txt: (h) => (h.tutorVoz && h.tutorVoz.puede() ? 'Este soy yo, tu tutor. Cuando necesites algo, mirame y después mirá el punto que aparece al lado: te escucho y me lo decís en voz alta.' : 'Este soy yo, tu tutor. Cuando tengas una duda, mirame y después mirá el punto que aparece al lado: te muestro qué podés preguntarme.') },
   { sel: null, lado: 'centro', txt: 'La línea naranja del piso te lleva a tu mesa. Para ir directo, elegí «Llevame» cuando te lo ofrezca.' },
 ];
 
@@ -175,7 +192,7 @@ export function recorridoGuiado(h, alTerminar) {
     const P = PASOS_TOUR[i];
     if (i === 2 && h.clase && h.clase.pendiente()) h.guiar('taller', true); // que se vea la línea naranja
     caja.querySelector('.k').textContent = `Tus gafas · ${i + 1} de ${PASOS_TOUR.length}`;
-    caja.querySelector('p').textContent = P.txt;
+    caja.querySelector('p').textContent = typeof P.txt === 'function' ? P.txt(h) : P.txt;
     caja.querySelector('button').textContent = i === PASOS_TOUR.length - 1 ? 'Entendido · empezar' : 'Entendido';
     caja.hidden = false;
     caja.className = P.lado;

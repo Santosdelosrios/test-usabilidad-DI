@@ -148,6 +148,70 @@ export class Voz {
     }, 5000);
   }
 
+  // ── escuchar UNA frase (al mirar el punto del tutor): sin palabra clave y sin micrófono abierto todo el rato ──
+  // alParcial(texto) mientras habla; alFin(texto, error) cuando termina (texto vacío si no dijo nada).
+  // El tutor no habla mientras escucha, así el micrófono no se oye a sí mismo.
+  escucharUna({ alParcial = null, alFin, maxSeg = 12, silencioSeg = 1.6, esperaSeg = 7 } = {}) {
+    this.cancelarEscucha();
+    this._callarTutor();
+    this.escuchandoUna = true;
+    let texto = '', terminado = false, tSil = null;
+    const tInicio = setTimeout(() => { if (!texto) cerrar(); }, esperaSeg * 1000);
+    const tMax = setTimeout(() => cerrar(), maxSeg * 1000);
+    const callado = () => { clearTimeout(tSil); tSil = setTimeout(() => cerrar(), silencioSeg * 1000); };
+    const fin = (error = '') => {
+      if (terminado) return;
+      terminado = true;
+      clearTimeout(tInicio); clearTimeout(tMax); clearTimeout(tSil);
+      this.escuchandoUna = false;
+      this._una = null;
+      setTimeout(() => this._sigVoz(), 50);
+      if (alFin) alFin(texto.trim(), error);
+    };
+    let cerrar = () => fin();
+    if (this.modo === 'claude' && this.dictado) {
+      this.finales = ''; this._parcial = '';
+      const prev = this.alMostrar;
+      this.alMostrar = (t) => { texto = t; if (alParcial) alParcial(t); callado(); };
+      cerrar = async () => { if (terminado) return; try { await this.dictado.stop(); } catch (e) { /* */ } this.alMostrar = prev; texto = (this.finales || this._parcial || texto || '').trim(); this.finales = ''; this._parcial = ''; fin(); };
+      this.dictado.start().catch((e) => { this.alMostrar = prev; fin(e && e.code === 'not_granted' ? 'sin permiso' : 'sin micrófono'); });
+      this._una = { cancelar: () => { try { this.dictado.stop(); } catch (e) { /* */ } this.alMostrar = prev; terminado = true; this.escuchandoUna = false; clearTimeout(tInicio); clearTimeout(tMax); clearTimeout(tSil); } };
+      return true;
+    }
+    const R = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!R) { fin('sin reconocimiento'); return false; }
+    if (this.rec && this.escuchandoWeb) { try { this.rec.abort(); } catch (e) { /* */ } }
+    const rec = new R();
+    rec.lang = 'es-AR';
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    let finales = '';
+    rec.onresult = (e) => {
+      let parcial = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        const r = e.results[i];
+        if (r.isFinal) finales = `${finales} ${r[0].transcript}`.trim(); else parcial += r[0].transcript;
+      }
+      texto = `${finales} ${parcial}`.trim();
+      if (alParcial) alParcial(texto);
+      callado();
+    };
+    let error = '';
+    rec.onerror = (e) => {
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') error = 'sin permiso';
+      else if (e.error === 'audio-capture') error = 'sin micrófono';
+      else if (e.error === 'network') error = 'sin conexión';
+    };
+    rec.onend = () => fin(error);
+    cerrar = () => { try { rec.stop(); } catch (e) { fin(); } };
+    this._una = { cancelar: () => { terminado = true; this.escuchandoUna = false; clearTimeout(tInicio); clearTimeout(tMax); clearTimeout(tSil); try { rec.abort(); } catch (e) { /* */ } } };
+    try { rec.start(); } catch (e) { fin('sin micrófono'); return false; }
+    return true;
+  }
+
+  cancelarEscucha() { if (this._una) { this._una.cancelar(); this._una = null; } }
+
   // manos libres (Chrome local)
   encender() {
     if (this.modo !== 'web' || this.activa) return;
@@ -372,7 +436,7 @@ export class Voz {
   }
 
   _sigVoz() {
-    if (this.actualVoz || this.ptt) return;
+    if (this.actualVoz || this.ptt || this.escuchandoUna) return;
     const item = (this.colaVoz || []).shift();
     if (!item) return;
     this.actualVoz = item;

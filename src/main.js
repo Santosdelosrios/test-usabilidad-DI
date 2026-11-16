@@ -20,6 +20,7 @@ import { Camara } from './camara.js';
 import { Cerebro } from './ia.js';
 import { TareasIA, sesionesGuardadas, instalarGuardadas, abrirGuardadas } from './tareas-ia.js';
 import { instalarAyuda } from './ayuda.js';
+import { instalarTutorVoz } from './tutor-voz.js';
 
 // Acabado de imagen: leve desaturación, sombras frías, viñeta y grano (como las fotos del moodboard)
 const Acabado = {
@@ -156,7 +157,9 @@ async function start() {
     if (modo === 'prueba' && hud.camaraActiva && cam.estado) (cam.estado === 'con' ? hud.ponerGafas() : hud.quitarGafas());
   }
   botonModo.addEventListener('click', alternarModo);
-  window.addEventListener('keydown', (e) => { if (e.code === 'KeyH' && !e.repeat) alternarModo(); });
+  // (las teclas sueltas no cuentan mientras se escribe en un campo: el nombre o la clave)
+  const escribiendo = (e) => !!(e.target && /input|textarea|select/i.test(e.target.tagName));
+  window.addEventListener('keydown', (e) => { if (e.code === 'KeyH' && !e.repeat && !escribiendo(e)) alternarModo(); });
   // ── cómo es el test por ahora ──
   // SOLO_CLASE: el test es llegar a la escuela y hacer la clase en su mesa (las 6 consignas);
   //   con false vuelven el proyecto, los mensajes, la presentación y el resto del día.
@@ -168,7 +171,10 @@ async function start() {
   const intro = document.getElementById('intro');
   const $ = (id) => document.getElementById(id);
   const voz = new Voz({ hud, nav });
-  voz.iniciar().then(() => { $('prep-voz').textContent = voz.describir(); $('prep-probar').disabled = !voz.modo; });
+  voz.iniciar().then(() => {
+    $('prep-voz').textContent = !voz.modo ? voz.describir() : location.protocol === 'file:' ? 'Ojo: abierto como archivo, Chrome pide el permiso del micrófono seguido. Mejor usá el link web.' : voz.modo === 'claude' ? 'Dictado de claude.ai disponible.' : 'Este navegador puede escuchar.';
+    $('prep-probar').disabled = !voz.modo;
+  });
   const cerebro = new Cerebro({ hud, nav, voz });
   const pintarIA = () => { $('prep-ia-txt').textContent = cerebro.describir(); $('prep-clave').hidden = cerebro.backend === 'claude'; };
   cerebro.iniciar().then(() => { if (cerebro.clave) $('prep-clave').value = cerebro.clave; pintarIA(); });
@@ -186,8 +192,18 @@ async function start() {
   document.querySelectorAll('#intro [data-mir]').forEach((b) => b.addEventListener('click', () => { mirar = b.dataset.mir === '1'; elegir('[data-mir]', b); }));
   document.querySelectorAll('#intro [data-prop]').forEach((b) => b.addEventListener('click', () => { propuestas = b.dataset.prop === '1'; elegir('[data-prop]', b); }));
   $('prep-probar').addEventListener('click', () => {
-    $('prep-oido').textContent = 'Escuchando… decí algo como «Tutor, llevame al taller»';
-    voz.probar((t) => { $('prep-oido').textContent = t; });
+    const oido = $('prep-oido');
+    oido.hidden = false;
+    oido.textContent = 'Escuchando… decí algo como «llevame a mi mesa».';
+    voz.escucharUna({
+      alParcial: (t) => { oido.textContent = `«${t}»`; },
+      alFin: (t, error) => {
+        if (error === 'sin permiso') oido.textContent = 'El navegador no dio permiso para el micrófono: tocá el candado de la barra de direcciones y permitilo.';
+        else if (error === 'sin micrófono' || error === 'sin reconocimiento') oido.textContent = 'No encuentro un micrófono o este navegador no puede escuchar. Usá Chrome.';
+        else if (error === 'sin conexión') oido.textContent = 'El reconocimiento de voz necesita internet.';
+        else oido.textContent = t ? `Escuché: «${t}» · el micrófono anda.` : 'No escuché nada. Revisá el micrófono y probá de nuevo.';
+      },
+    });
   });
   const chip = $('cam-chip');
   const cam = new Camara({
@@ -248,12 +264,17 @@ async function start() {
   }
   function abrirBienvenida() {
     if (intro.hidden || empezado) return;
+    if (cerebro.backend !== 'claude') cerebro.setClave($('prep-clave').value);
     intro.hidden = true;
     const nom = $('prep-nombre').value.trim().split(/\s+/)[0];
     $('bv-nombre').textContent = nom ? `, ${nom}` : '';
     bvPaso = 1; bvPracticado = false;
     $('bv-practica').parentElement.classList.remove('ok');
     $('bv-ok').textContent = 'Probalo: mirá el botón y después su punto.';
+    // cómo se sacan las gafas: con la cámara, de verdad; sin cámara, con la tecla G
+    $('bv-gafas-como').textContent = cam.activa && cam.modelo ? 'Para sacártelas o ponértelas, hacelo de verdad con las gafas que tenés puestas: la cámara se da cuenta.' : 'Para sacártelas o ponértelas, apretá la tecla G.';
+    // con IA y micrófono, al tutor se le habla
+    if (cerebro.activo && voz.modo) $('bv-tutor-txt').innerHTML = '<b>Abajo, en el centro</b>, está el tutor. Podés consultarlo en cualquier momento: miralo, mirá su punto y <b>decile en voz alta qué necesitás</b>. Si puede, lo hace; si no, te dice que no. También tiene preguntas frecuentes.';
     bv.hidden = false;
     // la bienvenida se maneja con la misma mirada que las gafas
     hud.ojos.setActiva(true);
@@ -319,8 +340,13 @@ async function start() {
       hud.vozControl = false;
       hud.pistaVoz = '¿Tenés una duda? Mirame, después mirá el punto naranja y elegí tu pregunta.';
     }
-    // el tutor siempre se puede consultar: preguntas según el momento (sin IA)
-    if (SOLO_CLASE) instalarAyuda(hud);
+    // el tutor siempre se puede consultar: mirando su punto le habla (Gemini interpreta y hace lo que se pueda);
+    // sin clave o sin micrófono, preguntas frecuentes según el momento
+    if (SOLO_CLASE) {
+      instalarAyuda(hud);
+      instalarTutorVoz(hud, { cerebro, voz });
+      if (cerebro.activo && voz.modo) hud.pistaVoz = '¿Tenés una duda? Mirame, mirá mi punto y decime qué necesitás.';
+    }
   }
   $('intro-prueba').addEventListener('click', abrirBienvenida);
   // la clase en su mesa (9:30, lo primero del día): seis consignas cortas con el tutor que explica (tareas-ia.js)
@@ -342,7 +368,7 @@ async function start() {
   });
   window.addEventListener('keydown', (e) => {
     if (e.code !== 'Enter' && e.code !== 'NumpadEnter') return;
-    if (!intro.hidden) { e.preventDefault(); abrirBienvenida(); return; }
+    if (!intro.hidden) { if (escribiendo(e)) { e.target.blur(); return; } e.preventDefault(); abrirBienvenida(); return; }
     if (!bv.hidden) { e.preventDefault(); $('bv-sig').click(); return; }
     // (Enter también da «Empezar» en la clase y pasa de consigna cuando la tarjeta lo ofrece)
     // el moderador pasa a la tarea siguiente con Enter
@@ -360,7 +386,7 @@ async function start() {
   }
   ui.onTipo = (k) => cambiarTipo(k);
   ui.setTipo(tipoActual());
-  window.addEventListener('keydown', (e) => { if (e.code === 'KeyL') cambiarLuz(luzActual === 'manana' ? 'tarde' : 'manana'); });
+  window.addEventListener('keydown', (e) => { if (e.code === 'KeyL' && !escribiendo(e)) cambiarLuz(luzActual === 'manana' ? 'tarde' : 'manana'); });
   const pedida = STOPS.find((s) => s.id === (location.hash || '').slice(1));
   nav.goTo((pedida || STOPS[0]).id, { instant: true });
   if (pedida) setModo('revision'); else intro.hidden = false;

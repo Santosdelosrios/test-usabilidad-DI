@@ -91,7 +91,7 @@ export class Cerebro {
   describir() {
     if (this.backend === 'claude') return 'Tutor con IA: Claude (incluido en claude.ai).';
     if (this.backend === 'gemini') return `Tutor con IA: Gemini${this.modelo ? ` (${this.modelo})` : ''}. La clave queda guardada solo en este navegador.`;
-    return 'Sin IA: pegá una clave gratuita de Gemini para que el tutor converse libremente. Sin clave, el tutor solo entiende pedidos simples.';
+    return 'Sin clave todavía: pegá una clave gratuita de Gemini (aistudio.google.com/apikey) y tocá «Probar el tutor».';
   }
 
   // prueba desde la preparación

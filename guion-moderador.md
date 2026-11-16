@@ -12,7 +12,7 @@ Lo que dice el moderador en voz alta, en orden, desde que llega el participante 
 >
 > Te voy a pedir que digas en voz alta todo lo que vas pensando y haciendo, aunque te parezca obvio.
 >
-> Vamos a grabar la pantalla y el audio, solo para uso interno del grupo. La cámara de la compu solo se usa para saber si tenés puestas las gafas: no guarda imágenes. Durante la clase, la prueba también anota qué consignas hiciste, cuánto tardaste y lo que elegiste; eso queda en esta compu. ¿Estás de acuerdo?
+> Vamos a grabar la pantalla y el audio, solo para uso interno del grupo. La cámara de la compu solo se usa para saber si tenés puestas las gafas: no guarda imágenes. Durante la clase, la prueba también anota qué consignas hiciste, cuánto tardaste, lo que elegiste y lo que le dijiste al tutor; eso queda en esta compu. Cuando le hablás al tutor, tu voz se pasa a texto y ese texto se manda a un servicio de inteligencia artificial de Google para entender qué pedís. ¿Estás de acuerdo?
 
 [Si dice que sí, iniciar la grabación.]
 
@@ -20,7 +20,7 @@ Lo que dice el moderador en voz alta, en orden, desde que llega el participante 
 
 ## 2 · Cámara (todavía no empezó la prueba)
 
-[El moderador ya completó el nombre y la voz del tutor en la pantalla de preparación.]
+[Antes de que llegue el participante, el moderador ya completó en la pantalla de preparación: el nombre, la prueba del micrófono (Chrome pide permiso: aceptarlo) y la clave de Gemini con «Probar el tutor».]
 
 > Antes de empezar, vamos a preparar la cámara. Esto todavía no es la prueba. Mirá a la cámara sin las gafas unos segundos… Ahora ponete estas gafas y volvé a mirar a la cámara.
 
@@ -43,6 +43,7 @@ Lo que dice el moderador en voz alta, en orden, desde que llega el participante 
 - Si no entra a la escuela, a los pocos segundos las gafas le dicen cómo (mirar la flecha del piso «02 Hall» y después su punto).
 - Al entrar, las gafas se conectan y muestran un recorrido corto de 3 carteles: su progreso, el tutor y la línea naranja hasta su mesa. Se pasan mirando «Entendido».
 - Después el tutor lo saluda y le ofrece «Llevame». Si se queda sin hacer nada, el tutor le vuelve a ofrecer ayuda (hasta 3 veces).
+- Para hablarle al tutor, lo mira y mira su punto: el tutor escucha una frase, la entiende con IA y, si se puede, lo hace; si no, le dice que no. Si no hay clave, no hay micrófono o falla la conexión, el tutor muestra preguntas frecuentes.
 - Al sentarse, un cartel en el centro marca el inicio de la clase.
 
 ## 5 · Durante la prueba

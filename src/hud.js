@@ -365,7 +365,7 @@ export class HUD {
     ];
     // si un grupo ya terminó pero el siguiente todavía no empezó, lo que sigue queda marcado como «ahora»
     if (sentado && !filas.some((f) => f[1] === 'ahora')) { const sig = filas.find((f) => f[1] === 'pend'); if (sig) sig[1] = 'ahora'; }
-    const unidades = [st.conectada, sentado, ...P.bio.map((e) => e === 'hecha' || e === 'salteada'), P.repasoBio === 'hecha', ...P.mate.map((e) => e === 'hecha' || e === 'salteada'), P.repasoMate === 'hecha'];
+    const unidades = [st.conectada, sentado, ...P.bio.map((e) => e === 'hecha' || e === 'salteada'), P.repasoBio === 'hecha' || P.repasoBio === 'salteada', ...P.mate.map((e) => e === 'hecha' || e === 'salteada'), P.repasoMate === 'hecha' || P.repasoMate === 'salteada'];
     const pct = Math.round((100 * unidades.filter(Boolean).length) / unidades.length);
     const firma = `${pct}|${filas.map((f) => f[1] + (f[2] || []).join('')).join('/')}|${this.nombre}`;
     if (firma === this._firmaHorario) return;
@@ -374,7 +374,7 @@ export class HUD {
     this.el.hoy.classList.add('progreso');
     this.el.hoy.querySelector('.cab').innerHTML = `<em>Tu progreso</em><span>${esc(this.nombre || 'Hoy')} · ${pct}%</span>`;
     this.el.hoy.querySelector('.barra i').style.width = `${pct}%`;
-    this.el.horario.innerHTML = filas.map(([t, e, sub]) => `<li class="${e}"><span class="h">${ICONO[e]}</span><span class="t">${esc(t)}${sub ? `<span class="puntos">${sub.map((x, i) => `<b class="${x}" title="Consigna">${i + 1 + (t.startsWith('Mate') ? 3 : 0)}</b>`).join('')}</span>` : ''}${e === 'ahora' && !sentado && st.conectada ? '<small>Ahora · elegí «Llevame» o mirá al tutor</small>' : ''}</span></li>`).join('');
+    this.el.horario.innerHTML = filas.map(([t, e, sub]) => `<li class="${e}"><span class="h">${ICONO[e]}</span><span class="t">${esc(t)}${sub ? `<span class="puntos">${sub.map((x, i) => `<b class="${x}" title="Consigna">${i + 1 + (t.startsWith('Mate') ? 3 : 0)}</b>`).join('')}</span>` : ''}${e === 'ahora' && !sentado && st.conectada ? '<small>Ahora · elegí «Llevame» o pedíselo al tutor</small>' : ''}</span></li>`).join('');
     const abajo = this.el.hoy.offsetTop + this.el.hoy.offsetHeight + 12;
     if (abajo > 80) this.el.avisos.style.top = `${abajo}px`;
   }
@@ -492,6 +492,7 @@ export class HUD {
     this.el.tutorTxt.textContent = '';
     const o = this.el.opciones;
     o.innerHTML = '';
+    o.dataset.de = ''; // quien lo escribió lo marca (las preguntas frecuentes: 'ayuda')
     o.classList.toggle('esperando', opciones.length > 0);
     opciones.forEach(([txtB, fn]) => {
       const b = document.createElement('button');
@@ -878,7 +879,8 @@ export class HUD {
     this.el.conexion.addEventListener('click', () => this.panel('conexion'));
     this.el.seguimiento.addEventListener('click', () => this.panel('seguimiento'));
     this.el.tutor.querySelector('[data-cerrar-tutor]').addEventListener('click', () => this.cerrarTutor());
-    this.el.tutorYo.addEventListener('click', () => { if (!this.tutorAbierto) this.abrirTutor(); });
+    // mirar al tutor mientras habla también lo abre si se le puede hablar (interrumpe la explicación)
+    this.el.tutorYo.addEventListener('click', () => { if (!this.tutorAbierto || this.soloClase) this.abrirTutor(); });
     this.el.tutorMenu.addEventListener('click', () => this.dock('menu'));
     this.el.lanzador.querySelector('[data-cerrar-lanzador]').addEventListener('click', () => this.cerrarLanzador());
     document.getElementById('poner-gafas').addEventListener('click', () => this.ponerGafas());
