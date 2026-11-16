@@ -1290,7 +1290,7 @@ export class HUD {
     const tmp = new THREE.Vector3();
     const g = this.ojos.punto();
     for (const a of this.anclas) {
-      let on = st.conectada && !this.nav.walk;
+      let on = st.conectada && !this.nav.walk && !this.nav.guion;
       if (a.tipo === 'persona') {
         a.persona.cabeza.getWorldPosition(a.v);
         a.v.y += 0.32;

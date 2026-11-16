@@ -23,7 +23,7 @@ const MANUAL = `MANUAL DE LAS GAFAS (es todo lo que existe en esta prueba; no ha
 - Biología: un corazón en 3D sobre la mesa que vos explicás paso a paso. Al costado tiene botones: Pausar, Repetir, Más despacio, Girar, Acercar, Cerrar. Mirando el nombre de una parte (y su punto) pregunta qué es, y la explicación sigue donde estaba.
 - Matemática: un cuaderno con una ecuación. En cada paso elige entre 3 opciones; hay un botón «Pedir una pista» (3 pistas por paso). Vos podés sugerirle ayuda: él decide si la acepta («Dale») o no («Ahora no»).
 - «No me interrumpas»: el tutor se calla y guarda los avisos hasta que diga «Ya podés hablar».
-- Al terminar cada materia hay un repaso corto de 2 preguntas en un cartel en el centro, y otro cartel marca el cambio de materia.
+- Al terminar cada materia hay un repaso corto de 2 preguntas en un cartel en el centro. Después del repaso de Biología cambia de clase solo: se levanta, sigue la línea naranja y se sienta en la mesa de atrás, donde es Matemática (unos diez segundos, sin hacer nada).
 - Lo que NO hay en esta prueba: proyectos, mensajes a compañeros o docentes, fotos, internet, música, juegos, notas, cambiar de consigna a elección, saltear los repasos. Vos no podés sacarle las gafas ni mover el mouse por él.
 
 LAS 6 CONSIGNAS

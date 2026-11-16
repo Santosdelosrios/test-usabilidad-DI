@@ -285,6 +285,7 @@ export function buildVida({ scene, world, camera }) {
   const pm = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 0.52).rotateZ(Math.PI).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: mesaLu.t, transparent: true, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2 }));
   pm.position.set(-12.0, 0.777, 3.33);
   vida.add(pm);
+  S.pantallaMesa = pm; // la clase la cambia de mesa cuando pasa a Matemática (tareas-ia.js)
   const mesaB = lienzo(512, 230);
   const pb = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.5).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: mesaB.t, transparent: true, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2 }));
   pb.position.set(-17.6, 0.777, -3.75);

@@ -36,7 +36,18 @@ export class Guia {
       this.meta.visible = false;
       return;
     }
-    const pts = nav.route(nav.current, this.dest).map(([x, z]) => new THREE.Vector3(x, 0.03, z));
+    this._dibujar(nav.route(nav.current, this.dest));
+  }
+
+  // camino fijo de puntos [x, z], sin pasar por las paradas (el cambio de clase de la clase en la mesa)
+  trazar(puntos) {
+    this.dest = null;
+    if (!this.on) { this.mesh.visible = false; this.meta.visible = false; return; }
+    this._dibujar(puntos);
+  }
+
+  _dibujar(puntos) {
+    const pts = puntos.map(([x, z]) => new THREE.Vector3(x, 0.03, z));
     const curva = new THREE.CatmullRomCurve3(pts, false, 'centripetal');
     const largo = curva.getLength();
     const n = Math.max(2, Math.ceil(largo / 0.15));

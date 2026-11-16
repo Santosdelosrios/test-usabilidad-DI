@@ -48,7 +48,8 @@ Son las hipótesis H9 a H14 de [`guion.md`](guion.md). Cada una dice en qué tar
 1. **Arranque.** Al sentarse, el tutor dice que arranca la clase y que, si se traba en una consigna, puede pasar a la siguiente. Aparece la tarea 1 y empieza a correr su tiempo.
 2. **Cada tarea.** Arriba hay una tarjeta blanca con el número de tarea, el escenario y la consigna. No muestra el nombre de la tarea, para no dar pistas. Cuando cambia de tarea, la tarjeta se anima para que se note. La pantalla de la mesa y la pastilla «Hoy» muestran la materia: Biología (el corazón) en las tareas 1 a 3 y Matemática (ecuaciones) de la 4 a la 6.
 3. **Pasar de tarea.** Cuando la tarea termina, la tarjeta muestra «✓ Listo · sigue en 4» y a los cuatro segundos pasa sola a la siguiente (con «Siguiente →» se adelanta). Si la persona se traba, puede tocar «Pasar a la siguiente» en la tarjeta o decir «siguiente tarea»: la tarea queda anotada como salteada.
-4. **Fin.** Después de la tarea 6 se levanta en el aula-taller y sigue el recorrido: su proyecto y la presentación de las 10:45.
+4. **Repaso y cambio de clase.** Después de la tarea 3 aparece el repaso de Biología (dos preguntas en un cartel en el centro). Al terminarlo, la tarea 4 no arranca enseguida: Biología y Matemática son dos clases distintas. La tarjeta dice «Cambio de clase · Biología → Matemática» y «No tenés que hacer nada», el corazón se guarda y el tutor avisa: «Terminó Biología. Matemática es en la mesa de atrás: te marco el camino». La persona se levanta, gira, camina por la línea naranja que marcan las gafas en el piso hasta la mesa de atrás (donde ya está la pantalla de Matemática) y se sienta. Dura unos diez segundos, es automático y no se puede tocar nada: el mouse no mueve la vista y el tutor no se puede consultar. Después arranca la tarea 4, ya en la mesa nueva, y las tareas 5 y 6 siguen ahí.
+5. **Fin.** Después de la tarea 6 (y el repaso de Matemática) se levanta en el aula-taller y sigue el recorrido: su proyecto y la presentación de las 10:45. En esta versión (`SOLO_CLASE`), aparece el cierre.
 
 Cuándo se considera terminada cada tarea para pasar a la siguiente está en cada tarea, abajo («Pasa a la siguiente»). Es un poco más exigente que el éxito: por ejemplo, en la tarea 1 alcanza con abrir la explicación para cumplirla, pero pasa a la siguiente recién cuando la explicación termina.
 
@@ -57,6 +58,8 @@ Cuándo se considera terminada cada tarea para pasar a la siguiente está en cad
 Quien acompaña observa y anota en la planilla, sin ayudar durante las tareas. Si la persona pregunta algo, se le responde «¿Vos qué harías?» y se retoma en el cierre.
 
 El panel del moderador está escondido: se abre y se cierra con **Shift + M**. Muestra las tareas con su escenario y su consigna, cuál está en curso, si se cumplió, los tiempos, las pistas, las frases de voz entendidas y no entendidas, las teclas y los botones de descarga. Desde ahí se puede marcar cada tarea a mano (sola, con empujón o no), saltar a cualquier tarea y, si el reconocimiento de voz falla, disparar con su tecla lo que la persona dijo (todas son Shift + tecla). Está en la misma pantalla que ve la persona: conviene abrirlo solo entre tareas o al final.
+
+Durante el cambio de clase solo funcionan Shift + M (panel), Shift + N (lo saltea y arranca la tarea 4) y Shift + B (vuelve a la tarea 2). Si se salta de una tarea a otra desde el panel, la persona aparece sentada en la mesa que corresponde (Biología o Matemática), sin caminar.
 
 ## Las seis tareas
 
@@ -95,7 +98,7 @@ El panel del moderador está escondido: se abre y se cierra con **Shift + M**. M
 - **Escenario:** Estás resolviendo una ecuación para matemática y te trabaste en un paso.
 - **Consigna:** Seguí con el ejercicio. Podés usar las gafas si te sirven.
 - **Éxito:** pide ayuda y llega al resultado después de las pistas. Si lo resuelve sin pedir ayuda, queda «parcial».
-- **Qué pasa:** se cierra el corazón y aparece un cuaderno con `3x + 5 = 20`. El participante dice en voz alta lo que haría. El tutor anota los pasos que entiende, tacha los equivocados y da pistas de a una cuando se las piden: primero qué mirar, después qué operación hacer y, por último, cómo quedaría. Nunca dice la respuesta, ni aunque se la pidan. Al llegar a `x = 5` le pide que lo compruebe. En esta tarea el tutor no sugiere nada por su cuenta: espera a que le pidan ayuda.
+- **Qué pasa:** después del repaso de Biología y del cambio de clase, ya sentado en la mesa de atrás, aparece un cuaderno con `3x + 5 = 20`. El participante dice en voz alta lo que haría. El tutor anota los pasos que entiende, tacha los equivocados y da pistas de a una cuando se las piden: primero qué mirar, después qué operación hacer y, por último, cómo quedaría. Nunca dice la respuesta, ni aunque se la pidan. Al llegar a `x = 5` le pide que lo compruebe. En esta tarea el tutor no sugiere nada por su cuenta: espera a que le pidan ayuda.
 - **Qué observar:** cuánto tarda en pedir ayuda. Si pide la respuesta directa y cómo reacciona a que no se la den. Cuántas pistas usa.
 - **Pasa a la siguiente:** cuando resuelve el ejercicio (con pistas o sin ellas) y contesta la pregunta de comprobación, o diez segundos después de resolverlo.
 - **Teclas de respaldo, si alguien acompaña:** Shift + H (pide ayuda), 1 (primer paso), 2 (`3x = 15`), 3 (divide por 3), 4 (`x = 5`), 5 (lo comprobó), 0 (paso equivocado).
@@ -156,7 +159,7 @@ Todas van con **Shift**, para no chocar con las teclas de las gafas. La misma li
 | --- | --- |
 | F8 | Empieza la clase ahora: lo sienta en su mesa (sin Shift; sirve antes de la clase) |
 | Shift + M | Abre o cierra el panel del moderador |
-| Shift + N | Siguiente tarea (después de la 6, termina) |
+| Shift + N | Siguiente tarea (de la 3 pasa al repaso y al cambio de clase; en un cartel o en el cambio de clase, lo saltea; después de la 6, termina) |
 | Shift + B | Tarea anterior |
 | Shift + C | Abre o cierra el corazón («explicame cómo funciona el corazón») |
 | Shift + P | Pausar o seguir |
@@ -193,3 +196,5 @@ Qué traen los archivos:
 
 - **CSV** (separado por punto y coma, se abre en Excel o en Google Sheets): una fila por tarea con el participante, la fecha, si terminó la sesión, el estado automático, el detalle, si la salteó, la marca del moderador (si alguien acompañó), los intentos, el tiempo hasta cumplirla y el tiempo total, las pistas, las sugerencias (mostradas, aceptadas, descartadas y retenidas por el foco), los controles y preguntas del corazón, y cuántas frases entendió y cuántas no. Abajo, una tabla por ejercicio y la lista de frases de voz con el segundo y la tarea.
 - **JSON** con todo lo anterior y además el registro crudo de eventos, segundo a segundo.
+
+El cambio de clase no suma tiempo a ninguna tarea. Lo que pasa mientras dura queda en los eventos con «cambio» en lugar del número de tarea, con su inicio y cómo terminó: `cambio:fin`, `cambio:salteado` (Shift + N) o `cambio:cortado` (se saltó a otra tarea).

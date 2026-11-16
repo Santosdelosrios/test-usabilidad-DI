@@ -22,7 +22,8 @@ Cambios después del test piloto (16/11):
 - **Progreso personalizado** arriba a la izquierda, con el nombre del participante: llegar, sentarse, las 3 consignas de cada materia, los 2 repasos y el porcentaje.
 - **Al tutor se le habla** (`src/tutor-voz.js`): mirarlo y mirar su punto abre el micrófono para una sola frase (no queda escuchando). Gemini recibe el manual de todo lo que se puede hacer en la prueba, la situación del momento (dónde está, qué consigna, si el corazón o el cuaderno están abiertos, qué cartel hay) y la lista de acciones posibles ahora; entiende el pedido y lo hace (llevarlo a la mesa, abrir o pausar el corazón, preguntar por una parte, dar una pista, anotar el paso que dijo, aceptar una sugerencia, contestar un repaso, no interrumpir…) o dice que no se puede y qué sí. Mientras escucha y piensa, la explicación espera. La clave de Gemini se pega en la preparación y queda solo en ese navegador. Sin clave o sin micrófono, el tutor muestra las preguntas frecuentes.
 - **Preguntas frecuentes del tutor** (`src/ayuda.js`, con «Ver preguntas» o, sin clave, al mirarlo): ofrece lo que se puede hacer en ese momento y las preguntas más útiles según el contexto (dónde está, si tiene gafas, qué consigna, si el corazón o el cuaderno están abiertos); «Otra pregunta…» muestra todas. Respuestas escritas, sin IA. Si se queda quieto antes de la clase, el tutor le vuelve a ofrecer ayuda (hasta 3 veces).
-- **Cambios de materia marcados** con un cartel en el centro, y un **repaso de 2 preguntas** al terminar Biología y al terminar Matemática, con respuesta inmediata (qué eligió, cuál era la correcta y por qué).
+- **Repaso de 2 preguntas** al terminar Biología y al terminar Matemática, con respuesta inmediata (qué eligió, cuál era la correcta y por qué).
+- **Cambio de clase** entre Biología y Matemática, sin cartel ni botón: después del repaso de Biología se levanta solo, sigue la línea naranja de las gafas y se sienta en la mesa de atrás, donde ya está la pantalla de Matemática (unos diez segundos, sin tocar nada; `src/cambio-clase.js`).
 - Textos más claros: consignas de Matemática sin ambigüedad, qué pasa al sacarse y ponerse las gafas, cómo entrar a la escuela.
 - Los resultados guardan también los repasos, las consultas al tutor (por voz: lo que dijo, qué entendió, qué hizo y si se pudo), y lo que pasó antes de sentarse.
 
@@ -66,6 +67,6 @@ Lo que se publica en el link es el `index.html` de la raíz, en las ramas `main`
 | `src/camara.js` | Detección de gafas puestas o sacadas con la cámara |
 | `src/oculo.js` | Recorrido de la luz del sol por el hall |
 | `src/tipos.js`, `ui.js`, `tareas.js` | Tipografías, modo revisión (tecla H) y restos de la versión guiada |
-| `src/tareas-ia.js`, `corazon.js`, `ejercicio.js` | La clase en la mesa: sentarse, las seis consignas, el panel del moderador y la vuelta al recorrido; el corazón en 3D y el ejercicio con pistas |
+| `src/tareas-ia.js`, `corazon.js`, `ejercicio.js`, `cambio-clase.js` | La clase en la mesa: sentarse, las seis consignas, el panel del moderador y la vuelta al recorrido; el corazón en 3D, el ejercicio con pistas y el cambio de clase caminando a la mesa de atrás |
 
 Teclas del moderador durante el test: F2 mensaje de Santi, F3 mensaje de Prof. Sosa, F4 corta o devuelve internet, F8 empieza la clase en la mesa, G pone o saca las gafas, H modo revisión. Durante la clase, las teclas del moderador van con Shift (la lista está en su panel y en `guion-tareas-ia.md`).

@@ -142,7 +142,7 @@ html, body { margin: 0; height: 100%; background: var(--negro); overflow: hidden
 body.gira-izq::before, body.gira-der::before { content: ''; position: fixed; top: 0; bottom: 0; width: 70px; z-index: 4; pointer-events: none; }
 body.gira-izq::before { left: 0; background: linear-gradient(90deg, rgba(232,116,59,.3), transparent); }
 body.gira-der::before { right: 0; background: linear-gradient(270deg, rgba(232,116,59,.3), transparent); }
-/* carteles del centro de la clase: inicio, cambio de materia y repasos */
+/* carteles del centro de la clase: inicio y repasos (el cambio de materia es caminando a la mesa de atrás) */
 #interludio { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 7; width: min(560px, calc(100vw - 48px)); padding: 26px 30px; background: rgba(11,12,14,.96); border: 1px solid rgba(236,235,231,.2); border-top: 3px solid var(--naranja); color: var(--tinta); font-family: var(--mono); }
 #interludio[hidden] { display: none; }
 #interludio .k { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--naranja); }
@@ -574,6 +574,7 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
 #consigna .pie { display: flex; align-items: center; gap: 10px; margin-top: 9px; font-size: 10px; letter-spacing: calc(.16em * var(--esp-m)); text-transform: uppercase; }
 #consigna #c-estado { color: #c9581f; font-weight: 700; }
 #consigna #c-pasar { all: unset; cursor: pointer; margin-left: auto; padding: 6px 10px; border: 1px solid rgba(22,24,27,.3); font-family: var(--mono); font-size: 10px; letter-spacing: calc(.14em * var(--esp-m)); text-transform: uppercase; color: #2b2e33; }
+#consigna #c-pasar[hidden] { display: none; }
 #consigna #c-pasar:hover { border-color: #16181b; color: #16181b; }
 #consigna #c-pasar:focus-visible { outline: 1px solid var(--naranja); outline-offset: 2px; }
 #consigna.lograda #c-pasar { background: #16181b; border-color: #16181b; color: #ecebe7; }

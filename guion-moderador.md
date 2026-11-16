@@ -57,10 +57,10 @@ El moderador solo habla en estos casos, y solo con estas frases. Nunca dice cóm
 | Antes de la clase, no sabe qué hacer por más de un minuto | Una sola de estas: «¿Qué harías ahora en tu escuela?», «Fijate qué te ofrece el tutor» o «Fijate en tu progreso». |
 | A los 6 minutos todavía no se sentó para la clase | «Vamos directo a la clase.» [Apretar F8.] |
 | En la clase, está trabado en una consigna por más de un minuto | «Si querés, podés pasar a la siguiente.» (una sola vez por consigna) |
-| Está trabado en un cartel del centro (cambio de materia o repaso) por más de un minuto | «¿Qué te pide el cartel?» Si sigue trabado: [Shift + N lo saltea]. |
+| Está trabado en un cartel del centro (un repaso) por más de un minuto | «¿Qué te pide el cartel?» Si sigue trabado: [Shift + N lo saltea]. |
 | Quiere dejar | «Paramos acá. ¡Gracias por todo!» [Ir al cierre.] |
 
-En la clase, el moderador no anuncia nada: las gafas marcan solas el cambio de materia (después de la consigna 3) y los dos repasos (al terminar Biología y al terminar Matemática).
+En la clase, el moderador no anuncia nada: las gafas marcan solas los dos repasos (al terminar Biología y al terminar Matemática) y el cambio de clase. Después del repaso de Biología, el participante se levanta solo, sigue la línea naranja y se sienta en la mesa de atrás, donde es Matemática: dura unos diez segundos y no tiene que hacer nada (si hace falta, Shift + N lo saltea).
 
 ## 6 · Cierre
 

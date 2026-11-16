@@ -5,9 +5,12 @@
 // que marca cada tarea, toma tiempos, cuenta pistas y frases, y descarga los resultados.
 // Los resultados se guardan solos en este navegador mientras se hace la prueba: si alguien cierra o
 // recarga la pestaña, se recuperan desde la pantalla de preparación («Resultados guardados») o con ⇧M.
+// Entre Biología (consignas 1 a 3 y su repaso) y Matemática (4 a 6) hay un cambio de clase automático:
+// se levanta y camina a la mesa de atrás (cambio-clase.js).
 import { Corazon, PASO_VENTRICULO, NOMBRE_PREGUNTA } from './corazon.js';
 import { Ejercicio } from './ejercicio.js';
 import { abrirAyuda } from './ayuda.js';
+import { ASIENTOS, TIEMPOS, RUTA, pose } from './cambio-clase.js';
 
 export const TAREAS_IA = [
   {
@@ -54,9 +57,7 @@ export const TAREAS_IA = [
   },
 ];
 
-// dónde se sienta el participante y dónde flota el corazón (sobre su mesa del aula-taller)
-const SENTADO = { p: [-12.0, 1.2, 2.45], yaw: 180, pitch: -9 };
-const SOBRE_MESA = [-12.0, 1.4, 3.5];
+// dónde se sienta (en cada materia) y dónde flota el corazón: ASIENTOS, en cambio-clase.js
 const D = Math.PI / 180;
 const CONTROLES_T2 = ['pausa', 'seguir', 'repetir', 'repetir-todo', 'despacio', 'normal', 'girar', 'acercar', 'alejar'];
 
@@ -127,12 +128,14 @@ export class TareasIA {
     this.hud = hud; this.nav = nav; this.camera = camera;
     this.enMundo = enMundo;
     this.hecha = false;
-    this.interludio = null;  // cartel del centro abierto (cambio de materia o repaso)
+    this.interludio = null;  // cartel del centro abierto (inicio de la clase o repaso)
+    this.cambio = null;      // el cambio de clase en curso, de Biología a Matemática (entre la consigna 3 y la 4)
+    this.lugar = null;       // en qué mesa está sentado: 'biologia' o 'matematica' (null mientras camina)
     this.repasos = {};       // repasos hechos: bio, mate
     this.quiz = [];          // respuestas de los repasos (van a los resultados)
     this.elI = document.getElementById('interludio');
     this.S = world && world.sistema;
-    this.corazon = new Corazon({ hud, scene, camera, pos: SOBRE_MESA });
+    this.corazon = new Corazon({ hud, scene, camera, pos: ASIENTOS.biologia.mesa });
     this.ej = new Ejercicio({ hud });
     this.activa = false;
     this.i = 0;
@@ -190,9 +193,8 @@ export class TareasIA {
     nav.walk = null;
     nav.current = null;
     nav.goTo('taller', { instant: true });
-    this.camera.position.set(...SENTADO.p);
-    nav.yaw = SENTADO.yaw * D; nav.pitch = SENTADO.pitch * D;
-    nav.vy = nav.vp = 0; nav.settle = null;
+    this.lugar = null;
+    this._asiento(1);
     // es autoguiado: el panel del moderador queda escondido (se abre con Shift + M si alguien acompaña)
     if (!enMundo) { this._bienvenida(); return; }
     // en el recorrido no hay pantalla de instrucciones: ya sabe usar las gafas; un cartel marca el inicio
@@ -205,7 +207,7 @@ export class TareasIA {
     });
   }
 
-  // ── carteles del centro: inicio, cambio de materia y repasos ──
+  // ── carteles del centro: inicio de la clase y repasos (el cambio de materia es caminando, sin cartel) ──
   _cartel({ k, tit, txt, boton, alSeguir, ops = null }) {
     const h = this.hud, el = this.elI;
     if (!el) { if (alSeguir) alSeguir(); return; }
@@ -277,7 +279,7 @@ export class TareasIA {
   progreso() {
     const est = (n) => {
       const r = this.res[n - 1];
-      if (this.activa && !this.fin && this.i === n && !this.interludio) return 'ahora';
+      if (this.activa && !this.fin && this.i === n && !this.interludio && !this.cambio) return 'ahora';
       if (r.auto === 'ok' || r.auto === 'parcial') return 'hecha';
       if (r.salteada) return 'salteada';
       return r.intentos ? 'hecha' : 'pend';
@@ -289,6 +291,7 @@ export class TareasIA {
   // mirar o llamar al tutor en clase: lo que se le puede pedir en ese momento, para elegir con la mirada
   _menuTutor() {
     const h = this.hud, cor = this.corazon, ej = this.ej;
+    if (this.cambio) return; // en el cambio de clase no hay nada que pedir: unos segundos y sigue solo
     if (h.voz && h.vozControl !== false) h.voz.abrirVentana(10);
     const y = (f) => () => { h.cerrarTutor(true); f(); };
     const ops = [];
@@ -370,6 +373,7 @@ export class TareasIA {
     const mesa = h.anclas.find((a) => a.id === 'mesa');
     if (mesa && p.mesaMax != null) mesa.max = p.mesaMax;
     if (this.S) { if (this.S.pilasMesa) this.S.pilasMesa.visible = true; this.S.mesaClase = null; }
+    this._pantalla(ASIENTOS.biologia); // la pantalla vuelve a su mesa, con el proyecto
     h.hoyFijo = null;
     document.body.classList.remove('tareas-ia');
     this.el.card.hidden = true;
@@ -425,6 +429,8 @@ export class TareasIA {
   // ── tareas ──
   empezar(n) {
     if (n < 1 || n > TAREAS_IA.length) return;
+    // el moderador salta a una consigna en medio del cambio de clase: se corta y _preparar lo sienta donde va
+    if (this.cambio) { this.hud.registrar('tarea', 'cambio:cortado'); this._salirCambio(); }
     const ahora = performance.now();
     this._cortarTiempo(ahora);
     this.i = n;
@@ -447,7 +453,8 @@ export class TareasIA {
     c.txt.textContent = T.txt;
     c.estado.textContent = '';
     c.pasar.textContent = 'Pasar a la siguiente →';
-    c.card.classList.remove('fin', 'lograda', 'nueva');
+    c.pasar.hidden = false;
+    c.card.classList.remove('fin', 'lograda', 'nueva', 'cambio');
     void c.card.offsetWidth;
     c.card.classList.add('nueva'); // que se note que cambió la consigna
     this.hud.registrar('tarea', `inicio:${n}`);
@@ -476,7 +483,7 @@ export class TareasIA {
 
   // cuando la tarea está lista, la tarjeta lo muestra y pasa sola a la siguiente
   _avance() {
-    if (!this.i || this.fin) return;
+    if (!this.i || this.fin || this.cambio) return;
     const c = this.el, ahora = performance.now();
     if (!this.cuenta) {
       if (!this._lista(this.i)) return;
@@ -494,7 +501,7 @@ export class TareasIA {
 
   // la persona pasa de tarea (si la tarea no estaba lista, queda anotada como salteada)
   pasar(origen = 'boton') {
-    if (!this.activa || !this.i || this.fin) return;
+    if (!this.activa || !this.i || this.fin || this.cambio) return;
     const r = this.res[this.i - 1];
     if (!this.cuenta) { r.salteada = true; this.hud.registrar('tarea', `${this.i}:salteada:${origen}`); }
     this.siguiente();
@@ -502,6 +509,7 @@ export class TareasIA {
 
   _preparar(n) {
     const h = this.hud, cor = this.corazon, ej = this.ej;
+    this._asiento(n);
     if (h.st.foco) h.setFoco(false);
     h.cerrarPanel(); h.cerrarLanzador();
     if (n <= 3) ej.ocultar();
@@ -530,25 +538,108 @@ export class TareasIA {
   }
 
   _mirarCuaderno() {
-    const nav = this.nav;
+    const nav = this.nav, s = ASIENTOS[this.lugar] || ASIENTOS.matematica;
     nav.vy = nav.vp = 0;
-    nav.settle = { yaw: SENTADO.yaw * D, pitch: SENTADO.pitch * D, t: -0.4 };
+    nav.settle = { yaw: s.yaw * D, pitch: s.pitch * D, t: -0.4 };
+  }
+
+  // lo sienta en la mesa de la materia de esa consigna (Biología: 1 a 3; Matemática: 4 a 6), si no estaba ahí
+  _asiento(n) {
+    const lugar = n <= 3 ? 'biologia' : 'matematica';
+    if (this.lugar === lugar) return;
+    const s = ASIENTOS[lugar], nav = this.nav;
+    this.lugar = lugar;
+    this.camera.position.set(...s.p);
+    nav.yaw = s.yaw * D; nav.pitch = s.pitch * D;
+    nav.vy = nav.vp = 0; nav.settle = null;
+    this.corazon.pos.set(...s.mesa); // si pide el corazón, aparece sobre la mesa donde está
+    this._pantalla(s);
+  }
+
+  // la pantalla de la mesa (con la materia) está en la mesa donde se sienta
+  _pantalla(s) {
+    const pm = this.S && this.S.pantallaMesa;
+    if (!pm) return;
+    pm.position.set(...s.pantalla.p);
+    pm.rotation.y = s.pantalla.giro * D;
   }
 
   siguiente() {
     if (!this.activa || this.interludio) return;
-    if (this.enMundo && this.i === 3 && !this.repasos.bio) {
+    if (this.cambio) return this._terminarCambio(true); // el moderador saltea el cambio de clase
+    if (this.i === 3) {
       this._cortarTiempo(performance.now());
-      return this._repaso('bio', () => this._cartel({
-        k: 'Cambio de materia · 2 de 2',
-        tit: 'Terminó Biología ✓<br>Ahora: Matemática · <em>ecuaciones</em>',
-        txt: 'El corazón se guarda. En tu mesa aparece un cuaderno con una ecuación para resolver.',
-        boton: 'Empezar con Matemática',
-        alSeguir: () => this.empezar(4),
-      }));
+      // Biología cierra con su repaso y después se cambia de clase solo: sin cartel ni botón
+      if (this.enMundo && !this.repasos.bio) return this._repaso('bio', () => this._cambiarDeClase());
+      return this._cambiarDeClase();
     }
     if (this.i < TAREAS_IA.length) this.empezar(this.i + 1);
     else this.terminar();
+  }
+
+  // ── cambio de clase: termina Biología, se levanta y va a la mesa de Matemática (sin tocar nada) ──
+  _cambiarDeClase() {
+    if (!this.activa || this.cambio || this.i !== 3) return;
+    const h = this.hud, c = this.el;
+    this._cortarTiempo(performance.now());
+    this.cuenta = null;
+    this.lugar = null; // en camino: si el moderador salta a otra consigna, _asiento lo vuelve a sentar
+    this.cambio = { t: 0, linea: false, seg: 0 };
+    h.registrar('tarea', 'cambio:inicio');
+    // se guarda lo de Biología: el corazón se cierra y la pantalla con la materia pasa a la mesa de atrás
+    if (h.st.foco) h.setFoco(false);
+    if (this.corazon.abierto) this.corazon.cerrar('tarea', true);
+    this.ej.ocultar();
+    this._clase(4);
+    this._pantalla(ASIENTOS.matematica);
+    h.cerrarPanel(); h.cerrarLanzador(); h.cerrarTutor(true);
+    // decir (no proponer): queda a la vista todo el cambio, hasta que la consigna 4 cierra al tutor
+    h.decir(`Terminó Biología${h._coma()}. Matemática es en la mesa de atrás: te marco el camino.`);
+    // la tarjeta avisa que no es una consigna: no hay nada que hacer
+    c.num.textContent = 'Cambio de clase · Biología → Matemática';
+    c.esc.textContent = 'Terminó Biología. Matemática es en la mesa de atrás: ahí te espera un cuaderno con una ecuación.';
+    c.txt.textContent = `No tenés que hacer nada: en unos segundos empieza la ${this.enMundo ? 'consigna' : 'tarea'} 4.`;
+    c.estado.textContent = '';
+    c.pasar.hidden = true;
+    c.card.hidden = !h.visible;
+    c.card.classList.remove('fin', 'lograda', 'nueva');
+    void c.card.offsetWidth;
+    c.card.classList.add('nueva', 'cambio');
+    this.nav.guion = (dt) => this._pasoCambio(dt);
+    h.cambio();
+    this._pintar();
+  }
+
+  // cuadro a cuadro del cambio de clase (lo llama nav.update mientras dura)
+  _pasoCambio(dt) {
+    const k = this.cambio, h = this.hud, nav = this.nav;
+    if (!k) return false;
+    k.t += dt;
+    const p = pose(k.t);
+    this.camera.position.set(p.x, p.y, p.z);
+    nav.yaw = p.yaw; nav.pitch = p.pitch;
+    // las gafas marcan el camino en el piso mientras camina (si las tiene puestas)
+    const linea = k.t >= TIEMPOS.linea[0] && k.t < TIEMPOS.linea[1] && h.guia.on;
+    if (linea !== k.linea) { k.linea = linea; if (linea) h.guia.trazar(RUTA); else h.guia.set(null); }
+    // la tarjeta cuenta cuánto falta, como cuando una consigna está lista
+    const seg = Math.max(1, Math.ceil(TIEMPOS.fin - k.t));
+    if (seg !== k.seg) { k.seg = seg; this.el.estado.textContent = `Cambiando de mesa · sigue en ${seg}`; }
+    if (k.t >= TIEMPOS.fin) { this._terminarCambio(); return false; }
+    return true;
+  }
+
+  // ya sentado en Matemática (o el moderador lo salteó con ⇧N): arranca la consigna 4
+  _terminarCambio(salteado = false) {
+    if (!this.cambio) return;
+    this.hud.registrar('tarea', salteado ? 'cambio:salteado' : 'cambio:fin');
+    this._salirCambio();
+    this.empezar(4);
+  }
+
+  _salirCambio() {
+    this.cambio = null;
+    this.nav.guion = null;
+    this.hud.guia.set(null);
   }
 
   anterior() { if (this.activa && this.i > 1) this.empezar(this.i - 1); }
@@ -586,7 +677,7 @@ export class TareasIA {
 
   // ── ¿se cumplió? ──
   check() {
-    if (!this.activa || !this.i || this.fin) return;
+    if (!this.activa || !this.i || this.fin || this.cambio) return;
     const r = this.res[this.i - 1];
     if (r.auto === 'ok') return;
     const v = this._evaluar(this.i);
@@ -626,6 +717,8 @@ export class TareasIA {
   // el texto llega normalizado: minúsculas, sin tildes ni signos
   oir(d, dir) {
     const h = this.hud;
+    // en el cambio de clase no hay nada que pedir: la frase queda anotada y no cambia nada
+    if (this.cambio) return () => {};
     if (PASAR.test(d) && this.i && !this.fin) return () => this.pasar('voz');
     if (FOCO_NO.test(d) && h.st.foco) return () => this.foco(false, 'voz');
     if (FOCO_SI.test(d) && !FOCO_NO.test(d)) return () => this.foco(true, 'voz');
@@ -639,7 +732,7 @@ export class TareasIA {
 
   // ¿esta frase corta al tutor aunque no empiece con «Tutor»?
   interrumpe(d) {
-    if (!this.activa || !d || d.split(' ').length > 9 || !CORTE.test(d)) return false;
+    if (!this.activa || this.cambio || !d || d.split(' ').length > 9 || !CORTE.test(d)) return false;
     this.corazon.retener();
     return true;
   }
@@ -689,7 +782,7 @@ export class TareasIA {
       if (this.enMundo && !this.hecha && this.previos.length < 500) this.previos.push({ s: Math.round((r.t - this.tInicio) / 100) / 10, tipo: r.tipo, dato: String(r.dato) });
       return;
     }
-    this.eventos.push({ s: Math.round((r.t - this.t0) / 100) / 10, tarea: this.fin ? 'fin' : this.i, tipo: r.tipo, dato: String(r.dato) });
+    this.eventos.push({ s: Math.round((r.t - this.t0) / 100) / 10, tarea: this.fin ? 'fin' : this.cambio ? 'cambio' : this.i, tipo: r.tipo, dato: String(r.dato) });
     // se guarda sola cada pocos segundos mientras pasan cosas
     if (this.i) { clearTimeout(this._tGuardar); this._tGuardar = setTimeout(() => this._guardarYa(), 2000); }
     if (['voz', 'sugerencia', 'ejercicio', 'corazon', 'tarea', 'foco'].includes(r.tipo) && !this.el.panel.hidden) {
@@ -744,6 +837,8 @@ export class TareasIA {
     if (this.interludio && e.code === 'KeyN') { this.hud.registrar('moderador', 'saltear cartel'); return this._cerrarCartel(true); }
     e.stopPropagation();
     if (e.repeat) return;
+    // en el cambio de clase solo sirven el panel, saltearlo (⇧N) y volver a Biología (⇧B)
+    if (this.cambio && !['KeyM', 'KeyN', 'KeyB'].includes(k[0])) return;
     if (k[0] !== 'KeyM') this.hud.registrar('moderador', `${k[1]} ${k[2]}`);
     k[4](this);
   }
@@ -756,7 +851,7 @@ export class TareasIA {
 
   _indicador() {
     const r = this.i && this.res[this.i - 1];
-    const marca = this.fin ? 'Fin' : r ? `T${this.i}${r.auto === 'ok' ? ' ✓' : r.auto === 'parcial' ? ' ~' : ''}` : '';
+    const marca = this.fin ? 'Fin' : this.cambio ? 'Cambio de clase' : r ? `T${this.i}${r.auto === 'ok' ? ' ✓' : r.auto === 'parcial' ? ' ~' : ''}` : '';
     const txt = `Moderador · ${marca} · ⇧M`;
     if (this.el.btn.textContent !== txt) this.el.btn.textContent = txt;
   }
@@ -791,10 +886,10 @@ export class TareasIA {
     h += this.guardada === false
       ? '<p class="vacio aviso-g">No se pudo guardar en este navegador: descargá los resultados antes de cerrar.</p>'
       : '<p class="vacio">Se guarda sola en este navegador mientras avanza: si se cierra la pestaña, se recupera desde la preparación.</p>';
-    h += `<div class="mod-nav"><button data-m="ant" ${this.i > 1 ? '' : 'disabled'}>← Anterior · ⇧B</button><span>${this.fin ? 'Terminó' : `Tarea ${this.i} de ${TAREAS_IA.length}`}</span><button data-m="sig">${this.i < TAREAS_IA.length || this.fin ? 'Siguiente · ⇧N →' : 'Terminar · ⇧N'}</button></div>`;
+    h += `<div class="mod-nav"><button data-m="ant" ${this.i > 1 ? '' : 'disabled'}>← Anterior · ⇧B</button><span>${this.fin ? 'Terminó' : this.cambio ? 'Cambio de clase' : `Tarea ${this.i} de ${TAREAS_IA.length}`}</span><button data-m="sig">${this.i < TAREAS_IA.length || this.fin ? 'Siguiente · ⇧N →' : 'Terminar · ⇧N'}</button></div>`;
     h += '<ol class="mod-tareas">';
     for (const T of TAREAS_IA) {
-      const r = this.res[T.n - 1], actual = T.n === this.i && !this.fin, ver = actual || this.abiertas.has(T.n);
+      const r = this.res[T.n - 1], actual = T.n === this.i && !this.fin && !this.cambio, ver = actual || this.abiertas.has(T.n);
       const est = r.auto === 'ok' ? '<span class="est ok">✓ Cumplida</span>' : r.auto === 'parcial' ? '<span class="est par">~ Parcial</span>' : actual ? '<span class="est cur">En curso</span>' : r.salteada ? '<span class="est no">Salteada</span>' : r.intentos ? '<span class="est no">Sin cumplir</span>' : '<span class="est">Pendiente</span>';
       const sum = this._resumen(T.n);
       h += `<li class="${actual ? 'actual' : ''} ${r.auto === 'ok' ? 'ok' : ''}">`;
@@ -818,7 +913,7 @@ export class TareasIA {
     h += '</ol>';
     const fr = this._frases();
     h += `<section><h4>Frases de voz <small>${fr.filter((f) => f.ok).length} entendidas · ${fr.filter((f) => !f.ok).length} sin acción</small></h4>`;
-    h += fr.length ? `<ul class="frases">${fr.slice(-14).reverse().map((f) => `<li class="${f.ok ? 'ok' : 'no'}"><span>${mmss(f.s * 1000)} · T${f.tarea}</span>${esc(f.txt)}</li>`).join('')}</ul>` : '<p class="vacio">Todavía nada. Si el micrófono no anda, usá las teclas.</p>';
+    h += fr.length ? `<ul class="frases">${fr.slice(-14).reverse().map((f) => `<li class="${f.ok ? 'ok' : 'no'}"><span>${mmss(f.s * 1000)} · ${f.tarea === 'cambio' ? 'Cambio' : `T${f.tarea}`}</span>${esc(f.txt)}</li>`).join('')}</ul>` : '<p class="vacio">Todavía nada. Si el micrófono no anda, usá las teclas.</p>';
     h += '</section>';
     h += '<section><h4>Teclas del moderador <small>siempre con Shift</small></h4>';
     let grupo = '';

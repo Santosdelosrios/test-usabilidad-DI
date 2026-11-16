@@ -48,6 +48,9 @@ export class Navigator {
     camera.rotation.order = 'YXZ';
     this.yaw = 0; this.pitch = 0; this.vy = 0; this.vp = 0;
     this.current = null; this.walk = null; this.settle = null;
+    // guion(dt): cámara guionada (el cambio de clase del test de tareas). Mientras está, mueve la vista
+    // ella sola y el mouse y las teclas no la tocan; devuelve false cuando termina.
+    this.guion = null;
     this.fovTarget = camera.fov;
     this.ev = {};
     this.ray = new THREE.Raycaster();
@@ -113,7 +116,7 @@ export class Navigator {
         el.classList.add('arrastrando');
         this.emit('interact');
       }
-      if (this.dragging && !this.walk) {
+      if (this.dragging && !this.walk && !this.guion) {
         this.settle = null;
         const k = (this.camera.fov * D) / el.clientHeight;
         this.yaw += dx * k;
@@ -191,7 +194,7 @@ export class Navigator {
 
   _click(x, y) {
     this.emit('interact');
-    if (this.walk) return;
+    if (this.walk || this.guion) return;
     const p = this._pick(x, y);
     if (p.marker) return this.goTo(p.marker.to);
     if (p.floor) {
@@ -311,7 +314,9 @@ export class Navigator {
   // ── cuadro a cuadro ─────────────────────────────────────
   update(dt, t) {
     const cam = this.camera;
-    if (this.walk) {
+    if (this.guion) {
+      if (this.guion(dt) === false) this.guion = null;
+    } else if (this.walk) {
       const w = this.walk;
       w.t += dt;
       const k = Math.min(w.t / w.dur, 1);
@@ -359,7 +364,7 @@ export class Navigator {
     cam.updateMatrixWorld();
 
     // hover (cursor de piso y flechas)
-    if (this.pointerDirty && this.pointer && !this.dragging && !this.walk) {
+    if (this.pointerDirty && this.pointer && !this.dragging && !this.walk && !this.guion) {
       this.pointerDirty = false;
       const p = this._pick(this.pointer.x, this.pointer.y);
       this._hover(p.marker || null);
@@ -368,7 +373,7 @@ export class Navigator {
         this.cursor.position.copy(p.floor.point).add(new THREE.Vector3(0, 0.03, 0));
       } else this.cursor.visible = false;
     }
-    if (this.walk || this.dragging) this.cursor.visible = false;
+    if (this.walk || this.dragging || this.guion) this.cursor.visible = false;
     if (this.cursorPulse > 0) {
       this.cursorPulse -= dt;
       const s = 1 + Math.sin((this.cursorPulse / 0.35) * Math.PI) * 0.35;

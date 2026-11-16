@@ -103,7 +103,7 @@ export const AYUDA = [
   },
   {
     id: 'repaso', p: '¿Qué es este cartel?', si: (x) => x.interludio, peso: () => 8,
-    r: () => ({ txt: 'Es un cambio de materia o un repaso corto. Si es una pregunta, elegí la respuesta que te parezca: te digo enseguida si está bien.' }),
+    r: () => ({ txt: 'Es el inicio de la clase o un repaso corto. Si es una pregunta, elegí la respuesta que te parezca: te digo enseguida si está bien.' }),
   },
   {
     id: 'gafas', p: '¿Qué pasa si me saco las gafas?', si: () => true, peso: () => 1,
