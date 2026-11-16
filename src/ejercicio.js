@@ -314,7 +314,7 @@ export class Ejercicio {
     if (!e.resuelto) {
       this._ops = this._opcionesPaso();
       h += `<div class="elegir"><span>Próximo paso</span>${this._ops.map(([t], i) => `<button type="button" data-dwell="1.3" data-paso="${i}">${esc(t)}</button>`).join('')}</div>`;
-      h += '<div class="pie">Decí cada paso en voz alta o elegilo con la mirada · <button type="button" data-dwell="1.3" data-pista>Pedir una pista</button></div>';
+      h += `<div class="pie">${this.hud.vozControl === false ? 'Elegí cada paso con la mirada' : 'Decí cada paso en voz alta o elegilo con la mirada'} · <button type="button" data-dwell="1.3" data-pista>Pedir una pista</button></div>`;
     }
     this.el.innerHTML = h;
   }

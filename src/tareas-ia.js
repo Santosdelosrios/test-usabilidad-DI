@@ -156,7 +156,7 @@ export class TareasIA {
     h.aj.sugerencias = true;  // la tarea 5 necesita que el tutor pueda sugerir
     h.aj.pausas = false;      // sin recordatorios de pausa visual que se mezclen con las tareas
     // la pista de voz del tutor en reposo no habla de caminar: acá está sentado
-    if (h.voz && h.voz.modo) h.pistaVoz = h.voz.modo === 'claude' ? 'Mantené la barra espaciadora y hablame.' : 'Hablame cuando quieras: empezá con «Tutor…».';
+    if (h.voz && h.voz.modo && h.vozControl !== false) h.pistaVoz = h.voz.modo === 'claude' ? 'Mantené la barra espaciadora y hablame.' : 'Hablame cuando quieras: empezá con «Tutor…».';
     const mesa = h.anclas.find((a) => a.id === 'mesa');
     if (mesa) mesa.max = 0;   // la etiqueta del proyecto de la mesa no aplica en este modo
     // la mesa queda para la clase: sin las prendas ni la pantalla del proyecto de talles

@@ -13,7 +13,7 @@ Prototipo navegable para el test de usabilidad de Diseño de Futuros (UTDT): una
 
 El guión que lee el moderador está en [`guion.md`](guion.md): una sesión de unos 50 minutos con objetivo, hipótesis, preparación, intro, preguntas, escenario con el horario del día (la clase en la mesa primero), proyectos y planillas del observador. La referencia detallada de la clase está en [`guion-tareas-ia.md`](guion-tareas-ia.md).
 
-**Por ahora el test es solo llegar a la escuela y hacer la clase en la mesa (las 6 tareas).** El proyecto, los mensajes de los compañeros y la docente y la presentación están apagados (`SOLO_CLASE` en `src/main.js`). Lo que dice el moderador está en [`guion-moderador.md`](guion-moderador.md).
+**Por ahora el test es solo llegar a la escuela y hacer la clase en la mesa (las 6 tareas).** El proyecto, los mensajes de los compañeros y la docente y la presentación están apagados (`SOLO_CLASE` en `src/main.js`). El control por voz también está apagado: todo se maneja con la mirada, y antes de entrar una bienvenida explica las gafas y hace probar la mirada (`VOZ_CONTROL` en `src/main.js` lo vuelve a prender). Lo que dice el moderador está en [`guion-moderador.md`](guion-moderador.md).
 
 ## La clase en la mesa (tutor que explica)
 

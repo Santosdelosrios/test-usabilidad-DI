@@ -156,6 +156,13 @@ async function start() {
   }
   botonModo.addEventListener('click', alternarModo);
   window.addEventListener('keydown', (e) => { if (e.code === 'KeyH' && !e.repeat) alternarModo(); });
+  // ── cómo es el test por ahora ──
+  // SOLO_CLASE: el test es llegar a la escuela y hacer la clase en su mesa (las 6 consignas);
+  //   con false vuelven el proyecto, los mensajes, la presentación y el resto del día.
+  // VOZ_CONTROL: el participante le habla a las gafas. Apagado: todo se maneja con la mirada
+  //   (el tutor igual habla en voz alta).
+  const SOLO_CLASE = true;
+  const VOZ_CONTROL = false;
   // ── preparación del moderador: voz, mirada, cámara, propuestas ──
   const intro = document.getElementById('intro');
   const $ = (id) => document.getElementById(id);
@@ -225,9 +232,63 @@ async function start() {
   };
   $('prep-sin').addEventListener('click', () => muestra('sin', $('prep-sin')));
   $('prep-con').addEventListener('click', () => muestra('con', $('prep-con')));
-  function empezar() {
-    if (intro.hidden) return;
+  // ── bienvenida guiada: explica las gafas y hace probar la mirada antes de entrar ──
+  const bv = $('bienvenida');
+  let bvPaso = 1, bvPracticado = false, empezado = false;
+  const BV_PASOS = 5;
+  function pintarBienvenida() {
+    bv.querySelectorAll('[data-bv]').forEach((sec) => { sec.hidden = +sec.dataset.bv !== bvPaso; });
+    $('bv-paso').textContent = `${bvPaso} de ${BV_PASOS}`;
+    $('bv-atras').hidden = bvPaso === 1;
+    $('bv-sig').textContent = bvPaso === BV_PASOS ? 'Empezar la prueba →' : 'Siguiente →';
+    // en el paso de la mirada, primero hay que probarla
+    $('bv-sig').disabled = bvPaso === 2 && !bvPracticado;
+    hud.registrar('bienvenida', `paso:${bvPaso}`);
+  }
+  function abrirBienvenida() {
+    if (intro.hidden || empezado) return;
     intro.hidden = true;
+    const nom = $('prep-nombre').value.trim().split(/\s+/)[0];
+    $('bv-nombre').textContent = nom ? `, ${nom}` : '';
+    bvPaso = 1; bvPracticado = false;
+    $('bv-practica').parentElement.classList.remove('ok');
+    $('bv-ok').textContent = 'Probalo con este botón.';
+    bv.hidden = false;
+    pintarBienvenida();
+  }
+  $('bv-sig').addEventListener('click', () => {
+    if ($('bv-sig').disabled) return;
+    if (bvPaso < BV_PASOS) { bvPaso++; pintarBienvenida(); } else empezar();
+  });
+  $('bv-atras').addEventListener('click', () => { if (bvPaso > 1) { bvPaso--; pintarBienvenida(); } });
+  $('bv-practica').addEventListener('click', () => {
+    bvPracticado = true;
+    $('bv-practica').parentElement.classList.add('ok');
+    $('bv-ok').textContent = '¡Eso! Así se elige todo en las gafas.';
+    hud.registrar('bienvenida', 'practico-mirada');
+    pintarBienvenida();
+  });
+  // mirar un botón de la bienvenida un segundo lo elige (también funciona el clic)
+  bv.querySelectorAll('[data-mira]').forEach((b) => {
+    let t0 = 0, raf = 0;
+    const parar = () => { cancelAnimationFrame(raf); raf = 0; b.style.setProperty('--p', 0); };
+    const paso = (t) => {
+      if (b.disabled || b.hidden) return parar();
+      const p = Math.min(1, (t - t0) / 1000);
+      b.style.setProperty('--p', p);
+      if (p >= 1) { parar(); b.click(); return; }
+      raf = requestAnimationFrame(paso);
+    };
+    b.addEventListener('pointerenter', () => { if (raf || b.disabled) return; t0 = performance.now(); raf = requestAnimationFrame(paso); });
+    b.addEventListener('pointerleave', parar);
+    b.addEventListener('click', parar);
+  });
+
+  function empezar() {
+    if (empezado) return;
+    empezado = true;
+    intro.hidden = true;
+    bv.hidden = true;
     ui.hideHint();
     hud.setNombre($('prep-nombre').value);
     hud.setAjuste('sugerencias', propuestas);
@@ -248,11 +309,10 @@ async function start() {
     // la clase es una parada más del día: se arma ahora y empieza cuando se sienta en su mesa
     tareasIA = new TareasIA({ hud, nav, scene, camera, world, enMundo: true });
     hud.clase = tareasIA;
-    // por ahora el test es solo llegar a la escuela y hacer la clase (las 6 tareas).
-    // Con SOLO_CLASE = false vuelven el proyecto, los mensajes, la presentación y el resto del día.
-    const SOLO_CLASE = true;
     if (SOLO_CLASE) {
       hud.soloClase = true;
+      // la clase tiene respuestas escritas; el tutor con IA no se usa en esta versión
+      hud.cerebro = null;
       hud.agenda.splice(0, hud.agenda.length, ...hud.agenda.filter((a) => !a.dest || a.clase));
       // mirar su mesa: sentarse para la clase
       const mesa = hud.anclas.find((a) => a.id === 'mesa');
@@ -265,9 +325,14 @@ async function start() {
     }
     hud.oirAntes = (d) => tareasIA.oirMundo(d);
     if (conCamara && cam.estado === 'sin') setTimeout(() => hud.quitarGafas(), 400);
-    voz.encender();
+    if (VOZ_CONTROL) voz.encender();
+    else {
+      // sin control por voz: el tutor guía hacia la mirada
+      hud.vozControl = false;
+      hud.pistaVoz = 'Mirame un segundo y te muestro lo que podés pedirme.';
+    }
   }
-  $('intro-prueba').addEventListener('click', empezar);
+  $('intro-prueba').addEventListener('click', abrirBienvenida);
   // la clase en su mesa (9:30, lo primero del día): seis consignas cortas con el tutor que explica (tareas-ia.js)
   let tareasIA = null;
   // resultados de la clase que quedaron guardados en este navegador (aunque se haya cerrado la pestaña)
@@ -287,7 +352,8 @@ async function start() {
   });
   window.addEventListener('keydown', (e) => {
     if (e.code !== 'Enter' && e.code !== 'NumpadEnter') return;
-    if (!intro.hidden) { e.preventDefault(); empezar(); return; }
+    if (!intro.hidden) { e.preventDefault(); abrirBienvenida(); return; }
+    if (!bv.hidden) { e.preventDefault(); $('bv-sig').click(); return; }
     // (Enter también da «Empezar» en la clase y pasa de consigna cuando la tarjeta lo ofrece)
     // el moderador pasa a la tarea siguiente con Enter
     const sig = $('t-sig');

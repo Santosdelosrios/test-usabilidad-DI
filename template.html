@@ -302,6 +302,7 @@ body.mirada-on #hud-mira, body.mirada-on #hud-mira-et { display: none; }
 /* ── Intro del escenario ─────────────────────────────── */
 #intro { position: fixed; inset: 0; z-index: 8; display: grid; place-items: center; background: rgba(11,12,14,.62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 #intro[hidden] { display: none; }
+#intro [hidden] { display: none !important; }
 #intro .caja { width: min(640px, calc(100vw - 48px)); background: var(--negro); color: var(--tinta); border: 1px solid rgba(236,235,231,.16); padding: 30px 34px 28px; font-family: var(--mono); }
 #intro .k { font-size: 10px; letter-spacing: calc(.22em * var(--esp-m)); text-transform: uppercase; color: rgba(236,235,231,.55); }
 #intro h1 { font-family: var(--display); font-stretch: var(--estirar); font-weight: var(--peso-d);  font-size: 34px; line-height: 1.02; margin: 10px 0 16px; text-transform: uppercase; }
@@ -314,6 +315,27 @@ body.mirada-on #hud-mira, body.mirada-on #hud-mira-et { display: none; }
 #intro button.prim { background: var(--naranja); border-color: var(--naranja); color: var(--negro); }
 #intro button:hover { border-color: #fff; }
 #intro button:focus-visible { outline: 1px solid var(--naranja); outline-offset: 2px; }
+/* bienvenida guiada: se avanza mirando los botones (o con clic) */
+#bienvenida { position: fixed; inset: 0; z-index: 9; display: grid; place-items: center; background: rgba(11,12,14,.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+#bienvenida[hidden] { display: none; }
+#bienvenida .caja { width: min(620px, calc(100vw - 48px)); background: var(--negro); color: var(--tinta); border: 1px solid rgba(236,235,231,.16); padding: 30px 34px 28px; font-family: var(--mono); }
+#bienvenida .k { font-size: 10px; letter-spacing: calc(.22em * var(--esp-m)); text-transform: uppercase; color: rgba(236,235,231,.55); }
+#bienvenida h1 { font-family: var(--display); font-stretch: var(--estirar); font-weight: var(--peso-d); font-size: 30px; line-height: 1.05; margin: 12px 0 16px; text-transform: uppercase; }
+#bienvenida h1 em { font-style: normal; color: var(--naranja); }
+#bienvenida p { font-family: var(--texto); font-size: 17px; line-height: 1.55; margin: 0 0 12px; color: rgba(236,235,231,.92); }
+#bienvenida p b { color: #fff; font-weight: 600; }
+#bienvenida p.chico { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--naranja); margin-top: 18px; }
+#bienvenida .botones { display: flex; justify-content: space-between; gap: 10px; margin-top: 22px; }
+#bienvenida button { all: unset; position: relative; overflow: hidden; cursor: pointer; padding: 13px 20px; font-size: 12px; letter-spacing: calc(.18em * var(--esp-m)); text-transform: uppercase; border: 1px solid rgba(236,235,231,.35); }
+#bienvenida button.prim { margin-left: auto; background: var(--naranja); border-color: var(--naranja); color: var(--negro); }
+#bienvenida button[disabled] { opacity: .3; cursor: default; }
+#bienvenida button::before { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,.28); transform-origin: left; transform: scaleX(var(--p, 0)); pointer-events: none; }
+#bienvenida button > * { position: relative; }
+#bienvenida .practica { display: flex; align-items: center; gap: 18px; margin-top: 18px; }
+#bienvenida .practica button { padding: 22px 30px; font-size: 13px; border-color: var(--naranja); color: #fff; }
+#bienvenida .practica span { font-size: 12px; letter-spacing: .06em; color: rgba(236,235,231,.7); }
+#bienvenida .practica.ok button { background: var(--naranja); color: var(--negro); }
+#bienvenida .practica.ok span { color: var(--naranja); }
 #intro .caja.prep { width: min(720px, calc(100vw - 40px)); max-height: calc(100vh - 40px); overflow: auto; padding: 26px 30px 24px; }
 #intro .prep h1 { font-size: 30px; margin: 8px 0 8px; }
 #intro .prep .sub { font-size: 14px; color: rgba(236,235,231,.75); margin-bottom: 16px; }
@@ -748,47 +770,80 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
 
 <div id="intro" hidden>
   <div class="caja prep">
-    <div class="k">Tutoría permanente 2040 · Preparación del moderador</div>
+    <div class="k">Tutoría permanente 2040 · Preparación · la hace el moderador</div>
     <h1>Test de usabilidad <em>TUTOR</em></h1>
-    <p class="sub">Mundo libre: el participante recorre la escuela a su ritmo, con el itinerario del día como única referencia, y le habla al tutor de las gafas. No hay pasos ni charlas escritas.</p>
+    <p class="sub"><b>El test todavía no empezó.</b> Esta pantalla la completa el moderador, con ayuda del participante solo para la cámara. Cuando todo esté listo, «Empezar» le muestra al participante una bienvenida que explica cómo se usan las gafas, y después llega a la escuela.</p>
     <div class="paso"><span class="n">1</span><div>
       <b>Participante</b>
       <input id="prep-nombre" type="text" placeholder="Nombre (opcional)" autocomplete="off" spellcheck="false">
       <small>El tutor lo usa para saludar.</small>
-      <div class="linea"><span class="op"><span>Proyecto</span><button type="button" data-proy="" class="on">Lo elige al entrar</button><button type="button" data-proy="talles">Talles</button><button type="button" data-proy="luz">Luz</button><button type="button" data-proy="agua">Agua</button><button type="button" data-proy="viaje">Cómo llegamos</button></span></div>
+      <div class="linea" hidden><span class="op"><span>Proyecto</span><button type="button" data-proy="" class="on">Lo elige al entrar</button><button type="button" data-proy="talles">Talles</button><button type="button" data-proy="luz">Luz</button><button type="button" data-proy="agua">Agua</button><button type="button" data-proy="viaje">Cómo llegamos</button></span></div>
     </div></div>
     <div class="paso"><span class="n">2</span><div>
-      <b>Voz</b>
-      <small id="prep-voz">Revisando el micrófono…</small>
-      <div class="linea"><button type="button" id="prep-probar">Probar el micrófono</button><span class="op"><span>Voz del tutor</span><button type="button" data-tts="1" class="on">Sí</button><button type="button" data-tts="0">No</button></span></div>
-      <div id="prep-oido"></div>
+      <b>Voz del tutor</b>
+<small>El control por voz está apagado: el participante maneja todo con la mirada. El tutor igual habla en voz alta; se puede apagar.</small>
+<small id="prep-voz" hidden>Revisando el micrófono…</small>
+<div class="linea"><button type="button" id="prep-probar" hidden>Probar el micrófono</button><span class="op"><span>Voz del tutor</span><button type="button" data-tts="1" class="on">Sí</button><button type="button" data-tts="0">No</button></span></div>
+<div id="prep-oido" hidden></div>
     </div></div>
-    <div class="paso"><span class="n">3</span><div>
+    <div class="paso" hidden><span class="n">3</span><div>
       <b>Tutor con IA</b>
       <small id="prep-ia-txt">Revisando…</small>
       <div class="linea" id="prep-ia-linea"><input id="prep-clave" type="password" placeholder="Clave de Gemini (gratis en aistudio.google.com/apikey)" autocomplete="off" spellcheck="false"><button type="button" id="prep-ia">Probar el tutor</button></div>
     </div></div>
-    <div class="paso"><span class="n">4</span><div>
+    <div class="paso" hidden><span class="n">4</span><div>
       <b>Mirada con el mouse</b>
       <small>Activada: mover el mouse es mover los ojos y sostener la mirada elige. Desactivada: todo por voz.</small>
       <div class="linea"><span class="op"><button type="button" data-mir="1" class="on">Activada</button><button type="button" data-mir="0">Desactivada</button></span></div>
     </div></div>
-    <div class="paso"><span class="n">5</span><div>
-      <b>Cámara · gafas puestas o sacadas</b>
-      <small id="prep-cam-txt">Activala, tomá una muestra sin gafas y otra con las gafas de utilería puestas.</small>
+    <div class="paso"><span class="n">3</span><div>
+      <b>Cámara · con el participante</b>
+<small id="prep-cam-txt">Sentá al participante frente a la compu y explicale que esto es solo para preparar la prueba. Activá la cámara y tomá una muestra sin gafas y otra con las gafas de utilería puestas, mirando a la cámara (3 segundos cada una).</small>
       <div class="cam" id="prep-cam-caja" hidden><video id="prep-video" muted playsinline></video><canvas id="prep-caja" width="240" height="180"></canvas><div id="prep-cam-estado"></div></div>
       <div class="linea"><button type="button" id="prep-cam">Activar cámara</button><button type="button" id="prep-sin" disabled>Muestra sin gafas · 3 s</button><button type="button" id="prep-con" disabled>Muestra con gafas · 3 s</button></div>
     </div></div>
-    <div class="paso"><span class="n">6</span><div>
+    <div class="paso" hidden><span class="n">6</span><div>
       <b>Iniciativa del tutor</b>
       <small>Encendida: el tutor puede hablar primero (al llegar a un lugar, cuando llega un mensaje). Apagada: solo responde cuando le hablan.</small>
       <div class="linea"><span class="op"><button type="button" data-prop="1" class="on">Encendida</button><button type="button" data-prop="0">Apagada</button></span></div>
     </div></div>
     <div class="botones">
-      <button type="button" class="prim" id="intro-prueba">Empezar el test · Enter</button>
+      <button type="button" class="prim" id="intro-prueba">Listo · Empezar con el participante · Enter</button>
       <button type="button" id="intro-libre">Explorar el mundo (revisión)</button>
     </div>
-    <p class="nota"><b>El test:</b> llega a la escuela y, como primera actividad del día (9:30), se sienta en su mesa del aula-taller para la clase de Biología y Matemática: 6 consignas cortas con un tutor de respuestas guionadas, que se resuelven con la voz o con la mirada. Al terminar aparece el agradecimiento. F8 empieza la clase en cualquier momento. Los resultados de la clase se guardan solos en este navegador, aunque se cierre la pestaña: se descargan con Shift + M o desde acá. <button type="button" id="intro-resultados" class="enlace" hidden>Resultados guardados</button></p>
+    <p class="nota"><b>El test:</b> primero una bienvenida que le explica al participante cómo se usan las gafas y le hace probar la mirada. Después llega a la escuela y, como primera actividad del día (9:30), se sienta en su mesa para la clase de Biología y Matemática: 6 consignas cortas con un tutor de respuestas guionadas, todo con la mirada. Al terminar aparece el agradecimiento. F8 empieza la clase en cualquier momento. Los resultados de la clase se guardan solos en este navegador, aunque se cierre la pestaña: se descargan con Shift + M o desde acá. <button type="button" id="intro-resultados" class="enlace" hidden>Resultados guardados</button></p>
+  </div>
+</div>
+<div id="bienvenida" hidden>
+  <div class="caja">
+    <div class="k">TUTOR 2040 · Prueba de las gafas · <span id="bv-paso">1 de 5</span></div>
+    <section data-bv="1">
+      <h1>Hola<span id="bv-nombre"></span>. <em>Gracias</em> por probar las gafas.</h1>
+      <p>Vas a ver una escuela de 2040 como si tuvieras puestas unas gafas con un tutor que te ayuda a aprender. No te evaluamos a vos: evaluamos las gafas.</p>
+      <p>Mientras la probás, decí en voz alta lo que vas pensando, aunque te parezca obvio.</p>
+      <p class="chico">Para seguir, poné el mouse sobre «Siguiente» y quedate quieto un segundo.</p>
+    </section>
+    <section data-bv="2" hidden>
+      <h1>En las gafas, el mouse <em>son tus ojos</em></h1>
+      <p>Mover el mouse es mover la mirada. Para elegir un botón no hace falta hacer clic: miralo y quedate mirándolo un segundo, hasta que se llene.</p>
+      <div class="practica"><button type="button" data-mira id="bv-practica">Mirame un segundo</button><span id="bv-ok">Probalo con este botón.</span></div>
+    </section>
+    <section data-bv="3" hidden>
+      <h1>Mirar alrededor y <em>moverte</em></h1>
+      <p>Para girar la cabeza, mantené apretado el botón del mouse y arrastrá.</p>
+      <p>Para ir a un lugar no hace falta caminar: cuando el tutor te ofrece «Llevame», miralo y te lleva.</p>
+    </section>
+    <section data-bv="4" hidden>
+      <h1>Tu horario y <em>tu tutor</em></h1>
+      <p><b>Arriba a la izquierda</b> vas a ver tu horario del día. Lo primero es una clase de Biología y Matemática en tu mesa del aula-taller.</p>
+      <p><b>Abajo, en el centro</b>, está el tutor. Si lo mirás un segundo, te muestra lo que podés pedirle. Cuando te propone algo, elegís mirando la opción.</p>
+    </section>
+    <section data-bv="5" hidden>
+      <h1>En la clase, <em>6 consignas</em></h1>
+      <p>Cuando te sientes en tu mesa, arriba te van a aparecer 6 consignas cortas, una por una. Hacelas como si estuvieras solo, con la mirada.</p>
+      <p>Si te trabás en una, podés pasar a la siguiente. No hay respuestas buenas ni malas.</p>
+    </section>
+    <div class="botones"><button type="button" data-mira id="bv-atras" hidden>← Atrás</button><button type="button" data-mira class="prim" id="bv-sig">Siguiente →</button></div>
   </div>
 </div>
 <div id="cam-oculta"></div>
