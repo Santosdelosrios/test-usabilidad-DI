@@ -19,6 +19,7 @@ import { Voz } from './voz.js';
 import { Camara } from './camara.js';
 import { Cerebro } from './ia.js';
 import { TareasIA, sesionesGuardadas, instalarGuardadas, abrirGuardadas } from './tareas-ia.js';
+import { instalarAyuda } from './ayuda.js';
 
 // Acabado de imagen: leve desaturación, sombras frías, viñeta y grano (como las fotos del moodboard)
 const Acabado = {
@@ -235,7 +236,7 @@ async function start() {
   // ── bienvenida guiada: explica las gafas y hace probar la mirada antes de entrar ──
   const bv = $('bienvenida');
   let bvPaso = 1, bvPracticado = false, empezado = false;
-  const BV_PASOS = 5;
+  const BV_PASOS = 6;
   function pintarBienvenida() {
     bv.querySelectorAll('[data-bv]').forEach((sec) => { sec.hidden = +sec.dataset.bv !== bvPaso; });
     $('bv-paso').textContent = `${bvPaso} de ${BV_PASOS}`;
@@ -254,6 +255,8 @@ async function start() {
     $('bv-practica').parentElement.classList.remove('ok');
     $('bv-ok').textContent = 'Probalo con este botón.';
     bv.hidden = false;
+    // la bienvenida se maneja con la misma mirada que las gafas
+    hud.ojos.setActiva(true);
     pintarBienvenida();
   }
   $('bv-sig').addEventListener('click', () => {
@@ -267,21 +270,6 @@ async function start() {
     $('bv-ok').textContent = '¡Eso! Así se elige todo en las gafas.';
     hud.registrar('bienvenida', 'practico-mirada');
     pintarBienvenida();
-  });
-  // mirar un botón de la bienvenida un segundo lo elige (también funciona el clic)
-  bv.querySelectorAll('[data-mira]').forEach((b) => {
-    let t0 = 0, raf = 0;
-    const parar = () => { cancelAnimationFrame(raf); raf = 0; b.style.setProperty('--p', 0); };
-    const paso = (t) => {
-      if (b.disabled || b.hidden) return parar();
-      const p = Math.min(1, (t - t0) / 1000);
-      b.style.setProperty('--p', p);
-      if (p >= 1) { parar(); b.click(); return; }
-      raf = requestAnimationFrame(paso);
-    };
-    b.addEventListener('pointerenter', () => { if (raf || b.disabled) return; t0 = performance.now(); raf = requestAnimationFrame(paso); });
-    b.addEventListener('pointerleave', parar);
-    b.addEventListener('click', parar);
   });
 
   function empezar() {
@@ -329,8 +317,10 @@ async function start() {
     else {
       // sin control por voz: el tutor guía hacia la mirada
       hud.vozControl = false;
-      hud.pistaVoz = 'Mirame un segundo y te muestro lo que podés pedirme.';
+      hud.pistaVoz = '¿Tenés una duda? Mirame un segundo y elegí tu pregunta.';
     }
+    // el tutor siempre se puede consultar: preguntas según el momento (sin IA)
+    if (SOLO_CLASE) instalarAyuda(hud);
   }
   $('intro-prueba').addEventListener('click', abrirBienvenida);
   // la clase en su mesa (9:30, lo primero del día): seis consignas cortas con el tutor que explica (tareas-ia.js)
@@ -430,12 +420,17 @@ async function start() {
   const timer = new THREE.Timer();
   const captura = q.has('captura');
   let first = true, tSim = 0;
-  function step(dt) {
+  // real: el tiempo de verdad desde el cuadro anterior. La mirada lo usa para que «mirar 1 segundo»
+  // sea 1 segundo aunque la compu dibuje pocos cuadros por segundo.
+  function step(dt, real = dt) {
+    hud.dtReal = Math.min(real, 0.3);
     tSim += dt;
     nav.update(dt, tSim);
     for (const f of world.tick) f(tSim, dt);
     vida.tick(tSim, dt);
     hud.update(dt, tSim);
+    // durante la bienvenida (antes de entrar), la mirada también elige
+    if (!bv.hidden) hud.ojos.update(hud.dtReal);
     if (tareasIA) tareasIA.update(dt, tSim);
     acabado.uniforms.uTime.value = tSim;
     if (usarPost) composer.render(dt);
@@ -462,7 +457,7 @@ async function start() {
   function frame() {
     timer.update();
     const d = timer.getDelta();
-    step(Math.min(d, 0.1));
+    step(Math.min(d, 0.1), d);
     if (!captura) adaptar(d);
     requestAnimationFrame(frame);
   }

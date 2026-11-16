@@ -15,6 +15,16 @@ El guión que lee el moderador está en [`guion.md`](guion.md): una sesión de u
 
 **Por ahora el test es solo llegar a la escuela y hacer la clase en la mesa (las 6 tareas).** El proyecto, los mensajes de los compañeros y la docente y la presentación están apagados (`SOLO_CLASE` en `src/main.js`). El control por voz también está apagado: todo se maneja con la mirada, y antes de entrar una bienvenida explica las gafas y hace probar la mirada (`VOZ_CONTROL` en `src/main.js` lo vuelve a prender). Lo que dice el moderador está en [`guion-moderador.md`](guion-moderador.md).
 
+Cambios después del test piloto (16/11):
+
+- **Una sola regla para elegir:** mirar 1 segundo cualquier cosa elegible (botones, opciones del tutor, carteles, flechas del piso); se llena una barra naranja y destella al elegir. Mirar el borde izquierdo o derecho de la pantalla gira la cabeza.
+- **Recorrido guiado** al conectarse las gafas: 3 carteles (progreso, tutor, línea naranja) antes del saludo.
+- **Progreso personalizado** arriba a la izquierda, con el nombre del participante: llegar, sentarse, las 3 consignas de cada materia, los 2 repasos y el porcentaje.
+- **El tutor siempre se puede consultar** (`src/ayuda.js`): al mirarlo ofrece lo que se puede hacer en ese momento y las preguntas más útiles según el contexto (dónde está, si tiene gafas, qué consigna, si el corazón o el cuaderno están abiertos); «Otra pregunta…» muestra todas. Respuestas escritas, sin IA. Si se queda quieto antes de la clase, el tutor le vuelve a ofrecer ayuda (hasta 3 veces).
+- **Cambios de materia marcados** con un cartel en el centro, y un **repaso de 2 preguntas** al terminar Biología y al terminar Matemática, con respuesta inmediata (qué eligió, cuál era la correcta y por qué).
+- Textos más claros: consignas de Matemática sin ambigüedad, qué pasa al sacarse y ponerse las gafas, cómo entrar a la escuela.
+- Los resultados guardan también los repasos, las consultas al tutor y lo que pasó antes de sentarse.
+
 ## La clase en la mesa (tutor que explica)
 
 Es lo primero del día en el recorrido libre: a las 9:30 el tutor le ofrece al participante sentarse en su mesa del aula-taller (o lo lleva hasta ahí). Sentado, hace seis consignas cortas: pedir que le expliquen el corazón (aparece en 3D sobre la mesa), moverse dentro de la explicación, repreguntar, resolver una ecuación con pistas, responder a una sugerencia del tutor y silenciarlo. Durante la clase el reloj de la escuela espera y el tutor tiene las respuestas escritas de antemano (no usa Gemini); al terminar, se levanta y sigue el recorrido. F8 la empieza en cualquier momento. Los resultados de la clase se guardan solos en el navegador (aunque se cierre la pestaña) y se descargan desde un panel escondido (Shift + M) o desde «Resultados guardados» en la pantalla de preparación, que también junta a todos los participantes en un solo CSV. El detalle de cada consigna, las frases de voz y las teclas están en [`guion-tareas-ia.md`](guion-tareas-ia.md).
@@ -50,6 +60,7 @@ Lo que se publica en el link es el `index.html` de la raíz, en las ramas `main`
 | `src/ia.js` | El tutor con IA: qué se le manda al modelo y qué acciones puede hacer |
 | `src/voz.js` | Reconocimiento de voz, voz del tutor y de los compañeros |
 | `src/mirada.js` | Mirada con el mouse (sostener la vista para elegir) |
+| `src/ayuda.js` | Ayuda del tutor según el contexto, recorrido guiado de las gafas y empujón si se queda quieto |
 | `src/camara.js` | Detección de gafas puestas o sacadas con la cámara |
 | `src/oculo.js` | Recorrido de la luz del sol por el hall |
 | `src/tipos.js`, `ui.js`, `tareas.js` | Tipografías, modo revisión (tecla H) y restos de la versión guiada |

@@ -1,10 +1,12 @@
 // Mirada: en la prueba, el puntero simula hacia dónde miran los ojos de Lu
 // (las gafas tienen seguimiento ocular). Arrastrar gira la cabeza; mover el
 // puntero mueve los ojos. Sostener la mirada sobre algo elegible lo elige.
-// El clic queda como atajo (equivale al pellizco).
+// Regla única en toda la prueba: mirar algo elegible 1 segundo lo elige (se llena una barra naranja).
+// El clic sigue andando como respaldo, pero nunca hace falta.
 
-const ELEGIBLE = '#hud button, #hud [data-a], #hud [data-mirar]';
-const AFUERA = '#tarea, #consigna, #pantalla-ia, #moderador, #externos, #intro, .capa, #sin-gafas, #carga';
+const ELEGIBLE = '#hud button, #hud [data-a], #hud [data-mirar], #consigna button, #bienvenida button, #interludio button, #etiquetas .etiqueta';
+const AFUERA = '#tarea, #pantalla-ia, #moderador, #externos, #intro, .capa, #sin-gafas, #carga';
+export const TIEMPO_MIRADA = 1; // segundos, iguales para todo
 
 export class Mirada {
   constructor({ alElegir } = {}) {
@@ -16,7 +18,7 @@ export class Mirada {
     this.activa = false;
     this.habilitada = true; // se puede apagar: entonces se maneja todo con la voz
     this.fuera = false;
-    this.tiempo = 0.85; // segundos de mirada sostenida para elegir
+    this.tiempo = TIEMPO_MIRADA; // segundos de mirada sostenida para elegir (el mismo en todos lados)
     this.obj = null; this.p = 0; this.bloq = null;
     this.req = false; this.mov = 0; this.quieto = 0;
     this.enfriar = 0;
@@ -54,7 +56,7 @@ export class Mirada {
   _pos() { this.el.style.transform = `translate3d(${this.x}px, ${this.y}px, 0)`; }
 
   _soltar() {
-    if (this.obj) this.obj.classList.remove('mirando');
+    if (this.obj) { this.obj.classList.remove('mirando'); this.obj.style.removeProperty('--mp'); }
     this.obj = null; this.p = 0;
     this.el.classList.remove('objetivo');
     this.el.style.setProperty('--p', '0');
@@ -80,7 +82,7 @@ export class Mirada {
     let t = !this.fuera && sobre ? sobre.closest(ELEGIBLE) : null;
     if (t && (t.disabled || t.closest('[hidden], .esperando, .off'))) t = null;
     if (t !== this.obj) {
-      if (this.obj) this.obj.classList.remove('mirando');
+      if (this.obj) { this.obj.classList.remove('mirando'); this.obj.style.removeProperty('--mp'); }
       this.obj = t; this.p = 0;
       // si algo aparece debajo de la mirada (un botón nuevo, una respuesta del tutor) no se elige solo:
       // hay que mover los ojos hacia eso. Solo cuenta como elegido si fueron los ojos los que llegaron.
@@ -95,17 +97,22 @@ export class Mirada {
     this.tObj = (this.tObj || 0) + dt;
     this.movTick = 0;
     const avanza = t && t !== this.bloq && !this.presionado && (!this.req || this.mov > 20) && this.enfriar <= 0;
-    if (avanza) this.p += dt / ((parseFloat(t.dataset.dwell) || 1) * this.tiempo);
+    if (avanza) this.p += dt / this.tiempo;
     else if (t !== this.bloq) this.p = Math.max(0, this.p - dt * 2);
     if (this.p >= 1) {
       this.p = 0;
       this.bloq = t;
       this.enfriar = 0.35;
       t.classList.remove('mirando');
+      t.style.removeProperty('--mp');
+      // aviso de que se eligió: destello en lo elegido y en la mirada
+      t.classList.remove('elegido-flash'); void t.offsetWidth; t.classList.add('elegido-flash');
+      setTimeout(() => t.classList.remove('elegido-flash'), 500);
       this.el.classList.remove('elegido'); void this.el.offsetWidth; this.el.classList.add('elegido');
       if (this.alElegir) this.alElegir(t);
       t.click();
     }
     this.el.style.setProperty('--p', this.p.toFixed(3));
+    if (t) t.style.setProperty('--mp', this.p.toFixed(3));
   }
 }

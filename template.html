@@ -117,6 +117,47 @@ html, body { margin: 0; height: 100%; background: var(--negro); overflow: hidden
 #hud-horario li.hecha { color: rgba(236,235,231,.4); }
 #hud-horario li.hecha .t::after { content: ' ✓'; color: rgba(236,235,231,.6); }
 #hud-horario li.pend .t::after { content: ' · sin hacer'; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: rgba(236,235,231,.55); }
+#hud-hoy .barra { display: none; height: 3px; background: rgba(236,235,231,.14); }
+#hud-hoy.progreso .barra { display: block; }
+#hud-hoy.progreso #hud-horario li .t::after { content: none; }
+#hud-hoy.progreso #hud-horario li { grid-template-columns: 16px 1fr; }
+#hud-hoy .barra i { display: block; height: 100%; width: 0; background: var(--naranja); transition: width .6s; }
+#hud-horario li.salteada { color: rgba(236,235,231,.45); }
+#hud-horario li.pend { color: rgba(236,235,231,.55); }
+#hud-horario .puntos { display: inline-flex; gap: 3px; margin-left: 8px; vertical-align: middle; }
+#hud-horario .puntos b { display: inline-grid; place-items: center; width: 15px; height: 15px; font: 500 9px/1 var(--mono); border: 1px solid rgba(236,235,231,.35); color: rgba(236,235,231,.6); }
+#hud-horario .puntos b.hecha { background: var(--naranja); border-color: var(--naranja); color: var(--negro); }
+#hud-horario .puntos b.ahora { border-color: var(--naranja); color: #fff; }
+#hud-horario .puntos b.salteada { border-style: dashed; }
+/* recorrido guiado de las gafas */
+#guia-tour { position: absolute; width: 340px; padding: 16px 18px; background: rgba(11,12,14,.94); border: 1px solid var(--naranja); color: #fff; pointer-events: auto; z-index: 5; }
+#guia-tour[hidden] { display: none; }
+#guia-tour.centro { left: 50%; top: 42%; transform: translate(-50%, -50%); }
+#guia-tour .k { display: block; font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--naranja); }
+#guia-tour p { margin: 8px 0 12px; font-family: var(--texto); font-size: 15px; line-height: 1.45; text-transform: none; letter-spacing: 0; }
+#guia-tour button { padding: 9px 14px; background: var(--naranja); color: var(--negro); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; }
+.resaltado { outline: 2px solid var(--naranja) !important; outline-offset: 5px; animation: pulsoGuia 1.4s ease-in-out infinite; }
+@keyframes pulsoGuia { 50% { outline-color: rgba(232,116,59,.25); } }
+/* girar la cabeza mirando el borde */
+body.gira-izq::before, body.gira-der::before { content: ''; position: fixed; top: 0; bottom: 0; width: 70px; z-index: 4; pointer-events: none; }
+body.gira-izq::before { left: 0; background: linear-gradient(90deg, rgba(232,116,59,.3), transparent); }
+body.gira-der::before { right: 0; background: linear-gradient(270deg, rgba(232,116,59,.3), transparent); }
+/* carteles del centro de la clase: inicio, cambio de materia y repasos */
+#interludio { position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 7; width: min(560px, calc(100vw - 48px)); padding: 26px 30px; background: rgba(11,12,14,.96); border: 1px solid rgba(236,235,231,.2); border-top: 3px solid var(--naranja); color: var(--tinta); font-family: var(--mono); }
+#interludio[hidden] { display: none; }
+#interludio .k { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--naranja); }
+#interludio h2 { font-family: var(--display); font-stretch: var(--estirar); font-weight: var(--peso-d); font-size: 26px; line-height: 1.1; margin: 10px 0 12px; text-transform: uppercase; }
+#interludio h2 em { font-style: normal; color: var(--naranja); }
+#interludio p { font-family: var(--texto); font-size: 16px; line-height: 1.5; margin: 0 0 14px; color: rgba(236,235,231,.9); }
+#interludio .ops { display: grid; gap: 8px; margin: 6px 0 4px; }
+#interludio button { all: unset; cursor: pointer; display: block; padding: 12px 16px; font-size: 13px; letter-spacing: .04em; border: 1px solid rgba(236,235,231,.35); color: #fff; }
+#interludio button.prim { margin-top: 10px; text-align: center; background: var(--naranja); border-color: var(--naranja); color: var(--negro); letter-spacing: .16em; text-transform: uppercase; font-size: 11px; }
+#interludio button.bien { border-color: #6fbf73; background: rgba(111,191,115,.18); }
+#interludio button.mal { border-color: #d9534f; background: rgba(217,83,79,.16); }
+#interludio button[disabled] { cursor: default; }
+#interludio .devolucion { margin-top: 12px; padding-left: 12px; border-left: 3px solid; }
+#interludio .devolucion.bien { border-color: #6fbf73; }
+#interludio .devolucion.mal { border-color: #d9534f; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 #hud-hoy.pulso { animation: pulso 1.4s ease-in-out 3; }
 @keyframes pulso { 50% { border-color: var(--naranja); box-shadow: 0 0 0 4px rgba(232,116,59,.18); } }
@@ -223,13 +264,17 @@ html, body { margin: 0; height: 100%; background: var(--negro); overflow: hidden
 .oculo-capa .hora-sol.chica { margin-top: -16px; padding: 2px 6px; background: rgba(11,12,14,.78); color: var(--naranja); border: 1px solid rgba(232,116,59,.6); font-size: 10px; font-weight: 500; }
 
 /* mirada: el puntero son los ojos del participante */
-#mirada { position: fixed; left: 0; top: 0; z-index: 6; pointer-events: none; width: 0; height: 0; --p: 0; }
+#mirada { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; width: 0; height: 0; --p: 0; }
 #mirada[hidden], #mirada.fuera { display: none; }
 #mirada::before, #mirada::after { content: ''; position: absolute; left: -12px; top: -12px; width: 24px; height: 24px; border-radius: 50%; transition: all .15s; }
 #mirada::before { border: 1.5px solid rgba(255,255,255,.92); box-shadow: 0 0 0 1px rgba(11,12,14,.5), inset 0 0 0 1px rgba(11,12,14,.3); }
 #mirada::after { left: -13px; top: -13px; width: 26px; height: 26px; background: conic-gradient(var(--naranja) calc(var(--p) * 360deg), transparent 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); }
 #mirada i { position: absolute; left: -2px; top: -2px; width: 4px; height: 4px; border-radius: 50%; background: var(--naranja); box-shadow: 0 0 0 1px rgba(11,12,14,.4); }
 #mirada.objetivo::before { left: -19px; top: -19px; width: 38px; height: 38px; }
+/* regla única: lo que se está mirando muestra una barra naranja que se llena en 1 segundo */
+.mirando { background-image: linear-gradient(var(--naranja), var(--naranja)) !important; background-repeat: no-repeat !important; background-position: left bottom !important; background-size: calc(var(--mp, 0) * 100%) 3px !important; }
+.elegido-flash { animation: elegidoFlash .5s ease-out; }
+@keyframes elegidoFlash { 0% { box-shadow: 0 0 0 0 rgba(232,116,59,.95); } 100% { box-shadow: 0 0 0 12px rgba(232,116,59,0); } }
 #mirada.objetivo::after { left: -20px; top: -20px; width: 40px; height: 40px; }
 #mirada.explorar::before { border-style: dashed; border-radius: 3px; }
 #mirada.elegido::before { animation: elegido .4s ease-out; }
@@ -329,8 +374,6 @@ body.mirada-on #hud-mira, body.mirada-on #hud-mira-et { display: none; }
 #bienvenida button { all: unset; position: relative; overflow: hidden; cursor: pointer; padding: 13px 20px; font-size: 12px; letter-spacing: calc(.18em * var(--esp-m)); text-transform: uppercase; border: 1px solid rgba(236,235,231,.35); }
 #bienvenida button.prim { margin-left: auto; background: var(--naranja); border-color: var(--naranja); color: var(--negro); }
 #bienvenida button[disabled] { opacity: .3; cursor: default; }
-#bienvenida button::before { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,.28); transform-origin: left; transform: scaleX(var(--p, 0)); pointer-events: none; }
-#bienvenida button > * { position: relative; }
 #bienvenida .practica { display: flex; align-items: center; gap: 18px; margin-top: 18px; }
 #bienvenida .practica button { padding: 22px 30px; font-size: 13px; border-color: var(--naranja); color: #fff; }
 #bienvenida .practica span { font-size: 12px; letter-spacing: .06em; color: rgba(236,235,231,.7); }
@@ -716,7 +759,7 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
   <div id="hud-mira"></div>
   <div id="hud-mira-et">E · pellizcar</div>
   <div id="hud-marca"><svg viewBox="0 0 30 18" aria-hidden="true"><path d="M1 3 L16 9 L1 15 M1 9 H24" fill="none" stroke="#ecebe7" stroke-width="1.6"/><circle cx="27" cy="9" r="2.4" fill="#e8743b"/></svg>TUTOR<small id="hud-quien">4° B</small></div>
-  <button id="hud-hoy" class="vidrio" type="button" aria-label="Horario del día"><span class="cab"><em>Hoy</em><span>Martes · horario del día</span></span><ol id="hud-horario"></ol><span id="hud-hoy-txt" class="sr">Horario del día</span></button>
+  <div id="hud-hoy" class="vidrio" role="status" aria-label="Tu progreso"><span class="cab"><em>Hoy</em><span>Martes · horario del día</span></span><span class="barra"><i></i></span><ol id="hud-horario"></ol><span id="hud-hoy-txt" class="sr">Horario del día</span></div>
   <div id="hud-foco" class="vidrio" hidden>Foco <b id="hud-foco-t">00:00</b><span id="hud-foco-av"></span></div>
   <div id="hud-estado">
     <button id="hud-conexion" class="vidrio buscando" type="button"><i class="pt"></i><span>Buscando nodo…</span></button>
@@ -760,11 +803,12 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
 </div>
 
 <div id="consigna" hidden>
-  <div class="cab"><b id="c-num">Tarea 1 de 6</b> · consigna</div>
+  <div class="cab"><b id="c-num">Consigna 1 de 6</b></div>
   <p id="c-esc"></p>
   <p id="c-txt"></p>
   <div class="pie"><span id="c-estado"></span><button id="c-pasar" type="button">Pasar a la siguiente →</button></div>
 </div>
+<div id="interludio" hidden></div>
 <div id="pantalla-ia" hidden></div>
 <aside id="moderador" hidden aria-label="Panel del moderador"></aside>
 
@@ -816,32 +860,37 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
 </div>
 <div id="bienvenida" hidden>
   <div class="caja">
-    <div class="k">TUTOR 2040 · Prueba de las gafas · <span id="bv-paso">1 de 5</span></div>
+    <div class="k">TUTOR 2040 · Prueba de las gafas · <span id="bv-paso">1 de 6</span></div>
     <section data-bv="1">
       <h1>Hola<span id="bv-nombre"></span>. <em>Gracias</em> por probar las gafas.</h1>
       <p>Vas a ver una escuela de 2040 como si tuvieras puestas unas gafas con un tutor que te ayuda a aprender. No te evaluamos a vos: evaluamos las gafas.</p>
       <p>Mientras la probás, decí en voz alta lo que vas pensando, aunque te parezca obvio.</p>
-      <p class="chico">Para seguir, poné el mouse sobre «Siguiente» y quedate quieto un segundo.</p>
+      <p class="chico">Para seguir, mirá «Siguiente» un segundo, sin hacer clic: se llena una barra naranja.</p>
     </section>
     <section data-bv="2" hidden>
-      <h1>En las gafas, el mouse <em>son tus ojos</em></h1>
-      <p>Mover el mouse es mover la mirada. Para elegir un botón no hace falta hacer clic: miralo y quedate mirándolo un segundo, hasta que se llene.</p>
+      <h1>Todo se elige <em>mirando</em></h1>
+      <p>En las gafas, el mouse son tus ojos. Para elegir cualquier botón, miralo y quedate mirándolo un segundo, hasta que se llene la barra naranja. No hace falta hacer clic en ningún momento.</p>
       <div class="practica"><button type="button" data-mira id="bv-practica">Mirame un segundo</button><span id="bv-ok">Probalo con este botón.</span></div>
     </section>
     <section data-bv="3" hidden>
-      <h1>Mirar alrededor y <em>moverte</em></h1>
-      <p>Para girar la cabeza, mantené apretado el botón del mouse y arrastrá.</p>
-      <p>Para ir a un lugar no hace falta caminar: cuando el tutor te ofrece «Llevame», miralo y te lleva.</p>
+      <h1>Moverte y <em>mirar alrededor</em></h1>
+      <p><b>Para ir a un lugar</b>, mirá un segundo una flecha blanca del piso (o su cartel) y vas hasta ahí. Cuando el tutor te ofrece «Llevame», también podés mirarlo y te lleva él: una línea naranja en el piso te marca el camino.</p>
+      <p><b>Para girar la cabeza</b>, llevá la mirada hasta el borde izquierdo o derecho de la pantalla.</p>
     </section>
     <section data-bv="4" hidden>
-      <h1>Tu horario y <em>tu tutor</em></h1>
-      <p><b>Arriba a la izquierda</b> vas a ver tu horario del día. Lo primero es una clase de Biología y Matemática en tu mesa del aula-taller.</p>
-      <p><b>Abajo, en el centro</b>, está el tutor. Si lo mirás un segundo, te muestra lo que podés pedirle. Cuando te propone algo, elegís mirando la opción.</p>
+      <h1>Con gafas y <em>sin gafas</em></h1>
+      <p><b>Con las gafas puestas</b> ves lo digital: tu horario, tu progreso, el tutor, la ruta y los nombres de las cosas.</p>
+      <p><b>Si te las sacás</b>, ves la escuela tal como es, sin nada de eso. Cuando te las volvés a poner, aparece todo de nuevo.</p>
     </section>
     <section data-bv="5" hidden>
-      <h1>En la clase, <em>6 consignas</em></h1>
-      <p>Cuando te sientes en tu mesa, arriba te van a aparecer 6 consignas cortas, una por una. Hacelas como si estuvieras solo, con la mirada.</p>
-      <p>Si te trabás en una, podés pasar a la siguiente. No hay respuestas buenas ni malas.</p>
+      <h1>Tu progreso y <em>tu tutor</em></h1>
+      <p><b>Arriba a la izquierda</b> ves tu día y cuánto avanzaste. Se va completando a medida que hacés cada cosa.</p>
+      <p><b>Abajo, en el centro</b>, está el tutor. Podés consultarlo en cualquier momento: miralo un segundo y elegí tu pregunta.</p>
+    </section>
+    <section data-bv="6" hidden>
+      <h1>La clase: <em>Biología y Matemática</em></h1>
+      <p>Lo primero del día es una clase en tu mesa. Arriba te van a aparecer consignas cortas, una por una: 3 de Biología y 3 de Matemática. Hacelas como si estuvieras solo.</p>
+      <p>Cuando cambia la materia te avisamos, y al final de cada una hay un repaso corto. Si te trabás en una consigna, podés pasar a la siguiente.</p>
     </section>
     <div class="botones"><button type="button" data-mira id="bv-atras" hidden>← Atrás</button><button type="button" data-mira class="prim" id="bv-sig">Siguiente →</button></div>
   </div>

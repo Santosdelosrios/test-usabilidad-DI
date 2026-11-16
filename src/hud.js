@@ -3,6 +3,7 @@ import { Guia } from './guia.js';
 
 import { zona, VE } from './zonas.js';
 import { Mirada } from './mirada.js';
+import { recorridoGuiado } from './ayuda.js';
 import { Oculo } from './oculo.js';
 import { instalarProyectos, estadoInicial } from './proyectos.js';
 export { zona };
@@ -190,7 +191,13 @@ export class HUD {
 
   _saludoClase() {
     if (this.ia) return this.cerebro.evento('Acaba de entrar a la escuela y las gafas se conectaron. Lo primero del día es la clase de Biología y Matemática en su mesa del aula-taller, a las 9:30; después, a las 10:00, arranca un proyecto con Tomi y Ana. Saludalo en una frase, contale qué tiene primero y ofrecé llevarlo a su mesa, sin llevarlo todavía.');
-    this.proponer(`Buen día${this._coma()}. Lo primero es la clase de Biología y Matemática, a las 9:30 en tu mesa del aula-taller.`, [['Llevame', () => this.clase.sentarse('saludo')], ['Ver mi día', () => this.panel('hoy', true)]], 'saludo');
+    const saludo = () => this.proponer(`Buen día${this._coma()}. Lo primero es la clase de Biología y Matemática, en tu mesa del aula-taller.`, [['Llevame', () => this.clase.sentarse('saludo')], ['¿Qué tengo que hacer?', () => this.abrirTutor()]], 'saludo');
+    if (this.soloClase && !this.st.guiado) {
+      this.st.guiado = true;
+      this.guiaAbierta = true;
+      return recorridoGuiado(this, () => { this.guiaAbierta = false; saludo(); });
+    }
+    saludo();
   }
 
   // el proyecto del taller: se elige una sola vez (después de la clase)
@@ -256,12 +263,12 @@ export class HUD {
     return c;
   }
 
-  guiar(dest) {
+  guiar(dest, callado = false) {
     this.st.guia = dest;
     this.guia.on = this.visible && this.puestas;
     this.guia.set(dest);
     this.nav.resaltar(this.guia.on ? this._proximo(this.nav.current, dest) : null);
-    if (dest) {
+    if (dest && !callado) {
       const pts = this.nav.route(this.nav.current, dest);
       let l = 0;
       for (let i = 1; i < pts.length; i++) l += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
@@ -314,7 +321,7 @@ export class HUD {
 
   // Lu mira al tutor: retoma lo que estaba proponiendo o le ofrece lo que sirve acá
   abrirTutor() {
-    if (!this.st.conectada || !this.puestas) return;
+    if (!this.st.conectada || !this.puestas || this.guiaAbierta) return;
     if (this.alAbrirTutor) return this.alAbrirTutor(); // el modo activo decide (test de tareas)
     if (this.ia) { if (this.voz) this.voz.abrirVentana(10); return this.proponer('Te escucho.'); }
     const st = this.st, aca = this.nav.walk ? null : this.nav.current;
@@ -341,6 +348,73 @@ export class HUD {
     const st = this.st;
     const L = AGENDA.filter((a) => !(a.clase && st.claseHecha));
     return L.find((a, i) => a.dest && (m < a.h || (L[i + 1] ? m < L[i + 1].h : true))) || L[L.length - 1];
+  }
+
+  // el progreso de esta sesión, paso por paso, con el nombre del participante (para que vea que avanza)
+  _progreso() {
+    const st = this.st, c = this.clase, P = c.progreso();
+    const sentado = c.activa || c.hecha;
+    const grupo = (a) => (a.every((e) => e === 'hecha' || e === 'salteada') ? 'hecha' : a.includes('ahora') || a.some((e) => e !== 'pend') ? 'ahora' : 'pend');
+    const filas = [
+      ['Llegar a la escuela', st.conectada ? 'hecha' : 'ahora'],
+      ['Sentarte en tu mesa', sentado ? 'hecha' : st.conectada ? 'ahora' : 'pend'],
+      ['Biología · el corazón', grupo(P.bio), P.bio],
+      ['Repaso de Biología', P.repasoBio],
+      ['Matemática · ecuaciones', grupo(P.mate), P.mate],
+      ['Repaso de Matemática', P.repasoMate],
+    ];
+    // si un grupo ya terminó pero el siguiente todavía no empezó, lo que sigue queda marcado como «ahora»
+    if (sentado && !filas.some((f) => f[1] === 'ahora')) { const sig = filas.find((f) => f[1] === 'pend'); if (sig) sig[1] = 'ahora'; }
+    const unidades = [st.conectada, sentado, ...P.bio.map((e) => e === 'hecha' || e === 'salteada'), P.repasoBio === 'hecha', ...P.mate.map((e) => e === 'hecha' || e === 'salteada'), P.repasoMate === 'hecha'];
+    const pct = Math.round((100 * unidades.filter(Boolean).length) / unidades.length);
+    const firma = `${pct}|${filas.map((f) => f[1] + (f[2] || []).join('')).join('/')}|${this.nombre}`;
+    if (firma === this._firmaHorario) return;
+    this._firmaHorario = firma;
+    const ICONO = { hecha: '✓', ahora: '●', pend: '○', salteada: '–' };
+    this.el.hoy.classList.add('progreso');
+    this.el.hoy.querySelector('.cab').innerHTML = `<em>Tu progreso</em><span>${esc(this.nombre || 'Hoy')} · ${pct}%</span>`;
+    this.el.hoy.querySelector('.barra i').style.width = `${pct}%`;
+    this.el.horario.innerHTML = filas.map(([t, e, sub]) => `<li class="${e}"><span class="h">${ICONO[e]}</span><span class="t">${esc(t)}${sub ? `<span class="puntos">${sub.map((x, i) => `<b class="${x}" title="Consigna">${i + 1 + (t.startsWith('Mate') ? 3 : 0)}</b>`).join('')}</span>` : ''}${e === 'ahora' && !sentado && st.conectada ? '<small>Ahora · elegí «Llevame» o mirá al tutor</small>' : ''}</span></li>`).join('');
+    const abajo = this.el.hoy.offsetTop + this.el.hoy.offsetHeight + 12;
+    if (abajo > 80) this.el.avisos.style.top = `${abajo}px`;
+  }
+
+  // mirar el borde izquierdo o derecho de la pantalla gira la cabeza (sin apretar nada)
+  _girarMirando(dt) {
+    const o = this.ojos;
+    let dir = 0;
+    const n = this.nav;
+    if (o.activa && o.hayPuntero && !o.fuera && !o.obj && this.visible && this.puestas && !n.walk && !n.fijo && !n.settle && !this.guiaAbierta && !(this.clase && this.clase.activa)) {
+      const w = innerWidth, borde = Math.max(36, w * 0.05);
+      if (o.x < borde) dir = 1; else if (o.x > w - borde) dir = -1;
+    }
+    if (dir) { n.yaw += dir * 0.75 * dt; n.vy = 0; }
+    if (dir !== this._dirGiro) {
+      this._dirGiro = dir;
+      document.body.classList.toggle('gira-izq', dir === 1);
+      document.body.classList.toggle('gira-der', dir === -1);
+      if (dir) this.registrar('mirada', dir === 1 ? 'girar:izq' : 'girar:der');
+    }
+  }
+
+  // mirar una flecha blanca del piso 1 segundo lleva hacia ahí (como todo lo demás: sin clic)
+  _mirarFlecha(dt) {
+    const o = this.ojos, n = this.nav;
+    const m = o.activa && o.hayPuntero && !o.fuera && !o.obj && !this._dirGiro && !n.walk && !n.fijo && !this.guiaAbierta ? n.hovered : null;
+    if (m !== this._flecha) {
+      if (this._flecha) { this._flecha.label.classList.remove('mirando'); this._flecha.label.style.removeProperty('--mp'); }
+      this._flecha = m; this._tFlecha = 0;
+      if (m) m.label.classList.add('mirando');
+    }
+    if (!m) return;
+    this._tFlecha += dt;
+    m.label.style.setProperty('--mp', Math.min(1, this._tFlecha / o.tiempo).toFixed(3));
+    if (this._tFlecha >= o.tiempo) {
+      m.label.classList.remove('mirando'); m.label.style.removeProperty('--mp');
+      this._flecha = null; this._tFlecha = 0;
+      this.registrar('mirada', `flecha:${m.to}`);
+      n.goTo(m.to);
+    }
   }
 
   _queSigue() {
@@ -701,7 +775,7 @@ export class HUD {
     const b = document.getElementById('poner-gafas');
     const t = document.getElementById('sin-gafas-txt');
     if (b) b.hidden = on;
-    if (t) t.textContent = on ? 'Ponete las gafas para ver su interfaz.' : 'Ves la escuela como es: sin ruta, sin tutor, sin capa social.';
+    if (t) t.textContent = 'Ves la escuela tal como es: sin horario, sin progreso, sin tutor, sin ruta y sin los nombres de las cosas. Ponete las gafas para volver a verlos.';
   }
 
   // pedirle ayuda a un compañero: las gafas respetan a quien está en foco
@@ -814,7 +888,7 @@ export class HUD {
       const b = e.target.closest('[data-acc]');
       if (b) this.dock(b.dataset.acc);
     });
-    this.el.hoy.addEventListener('click', () => this.panel('hoy'));
+    this.el.hoy.addEventListener('click', () => { if (!this.soloClase) this.panel('hoy'); });
     this.el.conexion.addEventListener('click', () => this.panel('conexion'));
     this.el.seguimiento.addEventListener('click', () => this.panel('seguimiento'));
     this.el.tutor.querySelector('[data-cerrar-tutor]').addEventListener('click', () => this.cerrarTutor());
@@ -925,6 +999,7 @@ export class HUD {
 
   quitarGafas() {
     if (!this.puestas || !this.visible) return;
+    this._sacadas = true;
     this.puestas = false;
     this.registrar('gafas', 'sacar');
     this.cerrarPanel(); this.cerrarTutor(true); this.cerrarLanzador();
@@ -969,6 +1044,8 @@ export class HUD {
         this._poniendo = false;
         this.el.hud.classList.remove('quitadas');
         this._guiaVisible();
+        if (this.st.conectada && this._sacadas) this.aviso('Gafas puestas: volvieron tu horario, el tutor y la ruta.', 'Gafas');
+        this._sacadas = false;
         // propuestas de la sala que se perdieron mientras no tenía las gafas
         if (!this.nav.walk && this.nav.current) this._sugerirLugar(this.nav.current);
       }, 1100);
@@ -1127,6 +1204,7 @@ export class HUD {
     const prox = this._prox(m);
     const txt = this.hoyFijo || `${prox.tit} · ${hhmm(prox.h)}`;
     if (this.el.hoyTxt.textContent !== txt) this.el.hoyTxt.textContent = txt;
+    if (this.soloClase && this.clase) return this._progreso();
     const L = AGENDA.filter((a) => a.dest);
     const firma = `${Math.floor(m)}|${prox.tit}|${st.claseHecha ? 1 : 0}|${this.hoyFijo || ''}|${L.map((a) => a.tit).join('/')}`;
     if (firma === this._firmaHorario) return;
@@ -1174,7 +1252,9 @@ export class HUD {
       if (!st.evPres && st.minuto >= 10 * 60 + 40) { st.evPres = true; this.aviso('En 5 minutos presenta tu grupo en la zona de proyección.', 'Horario'); if (this.ia) this.cerebro.evento('Faltan 5 minutos para la presentación de su grupo en la zona de proyección (10:45).'); }
     }
     this.ojos.setActiva(this.ojos.habilitada);
-    this.ojos.update(dt);
+    this.ojos.update(this.dtReal ?? dt);
+    this._girarMirando(dt);
+    this._mirarFlecha(this.dtReal ?? dt);
     this.oculo.update(dt, t, true);
     // bienestar: recordatorio de pausa visual
     this.usoSeg += dt;
@@ -1188,7 +1268,7 @@ export class HUD {
       if (zona(p.x, p.z) !== 'plaza' || (p.z < 8.8 && Math.abs(p.x) < 6)) this.conectar();
       else {
         this.buscando = (this.buscando || 0) + dt;
-        if (this.buscando > 6 && !this.pistaDada) { this.pistaDada = true; this.aviso('Buscando nodo… Entrá a la escuela: las gafas se conectan en la puerta.', 'TUTOR', true); }
+        if (this.buscando > (this.soloClase ? 3 : 6) && !this.pistaDada) { this.pistaDada = true; this.aviso(this.soloClase ? 'Buscando nodo… Para entrar, mirá un segundo la flecha del piso «02 Hall»: las gafas se conectan en la puerta.' : 'Buscando nodo… Entrá a la escuela: las gafas se conectan en la puerta.', 'TUTOR', true); }
       }
     }
     // durante la clase el reloj de la escuela se detiene: la clase dura lo que tarde (ver tareas-ia.js)

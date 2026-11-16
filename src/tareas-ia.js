@@ -7,6 +7,7 @@
 // recarga la pestaña, se recuperan desde la pantalla de preparación («Resultados guardados») o con ⇧M.
 import { Corazon, PASO_VENTRICULO, NOMBRE_PREGUNTA } from './corazon.js';
 import { Ejercicio } from './ejercicio.js';
+import { abrirAyuda } from './ayuda.js';
 
 export const TAREAS_IA = [
   {
@@ -32,15 +33,15 @@ export const TAREAS_IA = [
   },
   {
     n: 4, tit: 'Trabarse en un ejercicio',
-    esc: 'Estás resolviendo una ecuación para matemática y te trabaste en un paso.',
-    txt: 'Seguí con el ejercicio. Podés usar las gafas si te sirven.',
+    esc: 'En Matemática estás resolviendo una ecuación y te trabaste en un paso.',
+    txt: 'Resolvé la ecuación del cuaderno. Si te trabás, podés pedirle ayuda al tutor.',
     exito: 'Pide ayuda y llega al resultado después de las pistas.',
     observar: 'Cuánto tarda en pedir ayuda. Si pide la respuesta directa y cómo reacciona a que no se la den. Cuántas pistas usa.',
   },
   {
     n: 5, tit: 'Una sugerencia que no pidió',
-    esc: '',
-    txt: 'Seguí trabajando con el ejercicio.',
+    esc: 'Ahora tenés otro ejercicio en el cuaderno.',
+    txt: 'Resolvé la nueva ecuación. Si el tutor te sugiere algo, decidí si lo aceptás o no.',
     exito: 'Ve la sugerencia del tutor y la acepta o la descarta.',
     observar: 'Si nota la sugerencia, si la lee, si la acepta o la descarta y por qué. Si la siente ayuda o interrupción.',
   },
@@ -104,18 +105,40 @@ const TECLAS = [
   ['KeyF', '⇧F', '«No me interrumpas»: activa o saca el foco', 'Foco', (m) => m.foco(!m.hud.st.foco, 'tecla')],
 ];
 
+// repasos al final de cada materia: una pregunta, tres opciones, respuesta inmediata
+const REPASOS = {
+  bio: { materia: 'Biología', preguntas: [
+    { p: '¿Por dónde entra al corazón la sangre que vuelve del cuerpo?', ops: ['Por las venas cavas', 'Por la aorta', 'Por las venas pulmonares'], ok: 0,
+      bien: '¡Bien! Entra por las venas cavas a la aurícula derecha.', mal: 'Casi: entra por las venas cavas, a la aurícula derecha. La aorta es la que sale hacia el cuerpo.' },
+    { p: '¿Qué hace un ventrículo?', ops: ['Recibe la sangre que llega', 'Empuja la sangre hacia afuera del corazón', 'Le da oxígeno a la sangre'], ok: 1,
+      bien: '¡Exacto! Los ventrículos empujan la sangre: el derecho a los pulmones y el izquierdo a todo el cuerpo.', mal: 'No: los ventrículos empujan la sangre hacia afuera. Las que reciben son las aurículas, y el oxígeno lo ponen los pulmones.' },
+  ] },
+  mate: { materia: 'Matemática', preguntas: [
+    { p: 'En 4x + 2 = 14, ¿cuál es el primer paso?', ops: ['Dividir por 4 los dos lados', 'Sumar 2 de los dos lados', 'Restar 2 de los dos lados'], ok: 2,
+      bien: '¡Bien! Restás 2 de los dos lados y te queda 4x = 12.', mal: 'Conviene restar 2 de los dos lados primero: así te queda 4x = 12.' },
+    { p: 'Si 3x = 21, ¿cuánto vale x?', ops: ['x = 7', 'x = 18', 'x = 24'], ok: 0,
+      bien: '¡Eso! 21 ÷ 3 = 7.', mal: 'No: dividís los dos lados por 3, y 21 ÷ 3 = 7.' },
+  ] },
+};
+
 export class TareasIA {
   // enMundo: la clase es lo primero del día en el recorrido libre (9:30 en el horario); al terminar, vuelve al recorrido
   constructor({ hud, nav, scene, camera, world, enMundo = false }) {
     this.hud = hud; this.nav = nav; this.camera = camera;
     this.enMundo = enMundo;
     this.hecha = false;
+    this.interludio = null;  // cartel del centro abierto (cambio de materia o repaso)
+    this.repasos = {};       // repasos hechos: bio, mate
+    this.quiz = [];          // respuestas de los repasos (van a los resultados)
+    this.elI = document.getElementById('interludio');
     this.S = world && world.sistema;
     this.corazon = new Corazon({ hud, scene, camera, pos: SOBRE_MESA });
     this.ej = new Ejercicio({ hud });
     this.activa = false;
     this.i = 0;
     this.eventos = [];
+    this.previos = [];                 // lo que pasó antes de sentarse (llegada, recorrido, consultas)
+    this.tInicio = performance.now();
     this.abiertas = new Set();
     this.res = TAREAS_IA.map((T) => ({ n: T.n, auto: null, detalle: '', marca: null, intentos: 0, tAcum: 0, tDesde: null, tLogro: null, tOk: null, salteada: false }));
     const $ = (id) => document.getElementById(id);
@@ -172,28 +195,109 @@ export class TareasIA {
     nav.vy = nav.vp = 0; nav.settle = null;
     // es autoguiado: el panel del moderador queda escondido (se abre con Shift + M si alguien acompaña)
     if (!enMundo) { this._bienvenida(); return; }
-    // en el recorrido no hay pantalla de instrucciones: ya sabe usar las gafas; arranca la clase
-    h.proponer(`Arranca la clase${h._coma()}. Las consignas te aparecen arriba; si te trabás en una, podés pasar a la siguiente.`);
-    this.comenzar();
+    // en el recorrido no hay pantalla de instrucciones: ya sabe usar las gafas; un cartel marca el inicio
+    this._cartel({
+      k: 'Clase en tu mesa · 1 de 2 materias',
+      tit: 'Biología · <em>el corazón</em>',
+      txt: 'Vas a hacer 3 consignas de Biología y después 3 de Matemática. Al terminar cada materia hay un repaso corto de dos preguntas.',
+      boton: 'Empezar con Biología',
+      alSeguir: () => this.comenzar(),
+    });
+  }
+
+  // ── carteles del centro: inicio, cambio de materia y repasos ──
+  _cartel({ k, tit, txt, boton, alSeguir, ops = null }) {
+    const h = this.hud, el = this.elI;
+    if (!el) { if (alSeguir) alSeguir(); return; }
+    this.interludio = { k, alSeguir };
+    this.el.card.hidden = true;
+    if (this.corazon.abierto) this.corazon.cerrar('cartel', true);
+    h.cerrarTutor(true);
+    h.propuesta = null;
+    el.innerHTML = `<div class="k">${esc(k)}</div><h2>${tit}</h2>${txt ? `<p>${esc(txt)}</p>` : ''}<div class="ops"></div>`;
+    const caja = el.querySelector('.ops');
+    const agregar = (texto, fn, cls = '') => { const b = document.createElement('button'); b.type = 'button'; b.className = cls; b.textContent = texto; b.addEventListener('click', fn); caja.appendChild(b); return b; };
+    if (ops) ops.forEach(([t, fn]) => agregar(t, fn, 'op'));
+    if (boton) agregar(boton, () => this._cerrarCartel(), 'prim');
+    el.hidden = false;
+    h.registrar('cartel', k);
+  }
+
+  _cerrarCartel(saltar = false) {
+    const it = this.interludio;
+    this.interludio = null;
+    if (this.elI) this.elI.hidden = true;
+    if (it && it.alSeguir) it.alSeguir(saltar);
+    this.hud.cambio();
+  }
+
+  // repaso de una materia: dos preguntas con respuesta inmediata (lo que elige tiene una respuesta equivalente)
+  _repaso(clave, alTerminar) {
+    const R = REPASOS[clave];
+    let n = 0;
+    const preguntar = () => {
+      const q = R.preguntas[n];
+      const t0 = performance.now();
+      this._cartel({
+        k: `Repaso de ${R.materia} · pregunta ${n + 1} de ${R.preguntas.length}`,
+        tit: esc(q.p),
+        alSeguir: (saltar) => { if (saltar) { this.repasos[clave] = 'salteado'; alTerminar(); } },
+        ops: q.ops.map((txt, i) => [txt, () => {
+          const ok = i === q.ok;
+          this.quiz.push({ materia: R.materia, pregunta: q.p, elegida: txt, correcta: q.ops[q.ok], ok, segundos: Math.round((performance.now() - t0) / 100) / 10 });
+          this.hud.registrar('repaso', `${clave}:${n + 1}:${ok ? 'bien' : 'mal'}`);
+          // la opción elegida se marca, se muestra la correcta y una explicación corta
+          const bs = [...this.elI.querySelectorAll('.ops button.op')];
+          bs.forEach((b, j) => { b.disabled = true; b.classList.toggle('bien', j === q.ok); b.classList.toggle('mal', j === i && !ok); });
+          const p = document.createElement('p');
+          p.className = ok ? 'devolucion bien' : 'devolucion mal';
+          p.textContent = ok ? q.bien : q.mal;
+          this.elI.querySelector('.ops').after(p);
+          const ult = n === R.preguntas.length - 1;
+          const b = document.createElement('button');
+          b.type = 'button'; b.className = 'prim seguir';
+          b.textContent = ult ? 'Terminar el repaso' : 'Siguiente pregunta';
+          b.addEventListener('click', () => {
+            this.interludio = null; this.elI.hidden = true;
+            if (ult) { this.repasos[clave] = 'hecho'; this.hud.cambio(); alTerminar(); } else { n++; preguntar(); }
+          });
+          p.after(b);
+          this._guardarYa();
+        }]),
+      });
+    };
+    preguntar();
+  }
+
+  // texto de la consigna actual y cuántas se cumplieron (para la ayuda del tutor y el progreso)
+  consignaActual() { const T = TAREAS_IA[this.i - 1]; return T ? T.txt : ''; }
+  hechas() { return this.res.filter((r) => r.auto === 'ok' || r.auto === 'parcial').length; }
+
+  // el progreso de la clase, paso por paso (lo dibuja el horario de las gafas)
+  progreso() {
+    const est = (n) => {
+      const r = this.res[n - 1];
+      if (this.activa && !this.fin && this.i === n && !this.interludio) return 'ahora';
+      if (r.auto === 'ok' || r.auto === 'parcial') return 'hecha';
+      if (r.salteada) return 'salteada';
+      return r.intentos ? 'hecha' : 'pend';
+    };
+    const rep = (k) => (this.repasos[k] ? 'hecha' : this.interludio && this.interludio.k.startsWith(`Repaso de ${REPASOS[k].materia}`) ? 'ahora' : 'pend');
+    return { bio: [1, 2, 3].map(est), repasoBio: rep('bio'), mate: [4, 5, 6].map(est), repasoMate: rep('mate') };
   }
 
   // mirar o llamar al tutor en clase: lo que se le puede pedir en ese momento, para elegir con la mirada
   _menuTutor() {
     const h = this.hud, cor = this.corazon, ej = this.ej;
-    if (h.voz) h.voz.abrirVentana(10);
+    if (h.voz && h.vozControl !== false) h.voz.abrirVentana(10);
     const y = (f) => () => { h.cerrarTutor(true); f(); };
     const ops = [];
-    if (ej.activo && ej.e && !ej.e.resuelto) {
-      ops.push(['Dame una pista', y(() => ej.pista('mirada'))]);
-      ops.push(['Decime la respuesta', y(() => ej.pedirRespuesta('mirada'))]);
-    } else if (cor.abierto) {
-      ops.push(['¿Por dónde entra la sangre?', y(() => cor.preguntar('entra', 'mirada'))]);
-      ops.push(['¿Y a dónde va después?', y(() => cor.preguntar('despues', 'mirada'))]);
-    } else if (!ej.activo) ops.push(['Explicame el tema de la clase', y(() => cor.abrir('mirada'))]);
-    ops.push(h.st.foco ? ['Ya podés hablar', y(() => this.foco(false, 'mirada'))] : ['No me interrumpas', y(() => this.foco(true, 'mirada'))]);
-    ops.push(['Nada, gracias', () => h.cerrarTutor()]);
-    h.registrar('tutor', 'abrir');
-    h.decir(`Te escucho${h._coma()}. ¿Qué necesitás?`, ops);
+    if (this.interludio) { /* en un cartel: solo ayuda */ }
+    else if (ej.activo && ej.e && !ej.e.resuelto) ops.push(['Dame una pista', y(() => ej.pista('mirada'))]);
+    else if (cor.abierto) ops.push(['¿Por dónde entra la sangre?', y(() => cor.preguntar('entra', 'mirada'))], ['¿Y a dónde va después?', y(() => cor.preguntar('despues', 'mirada'))]);
+    else if (!ej.activo && this.i && this.i <= 3) ops.push(['Explicame el tema de la clase', y(() => cor.abrir('mirada'))]);
+    if (!this.interludio) ops.push(h.st.foco ? ['Ya podés hablar', y(() => this.foco(false, 'mirada'))] : ['No me interrumpas', y(() => this.foco(true, 'mirada'))]);
+    abrirAyuda(h, ops);
   }
 
   // ── la clase dentro del recorrido libre ──
@@ -235,6 +339,8 @@ export class TareasIA {
     const h = this.hud;
     const mesa = h.anclas.find((a) => a.id === 'mesa');
     this._previo = { alAbrirTutor: h.alAbrirTutor, sugerencias: h.aj.sugerencias, pausas: h.aj.pausas, pistaVoz: h.pistaVoz, mesaMax: mesa ? mesa.max : null };
+    if (h.cerrarGuia) h.cerrarGuia();
+    this.tSentado = performance.now();
     if (h.voz && h.voz._callarTutor) h.voz._callarTutor();
     h.cerrarPanel(); h.cerrarLanzador(); h.cerrarTutor(true);
     h.propuesta = null; h.cola = []; h.pendiente = null;
@@ -311,7 +417,7 @@ export class TareasIA {
 
   // cierre: solo el agradecimiento (los resultados se bajan desde el panel escondido, Shift + M)
   _final() {
-    this.el.pantalla.innerHTML = `<div class="caja"><div class="k">TUTOR 2040 · Prueba de las gafas</div><h1>¡Terminaste las <em>6 tareas</em>!</h1>
+    this.el.pantalla.innerHTML = `<div class="caja"><div class="k">TUTOR 2040 · Prueba de las gafas</div><h1>${this.enMundo ? '¡Terminaste la <em>clase</em>!' : '¡Terminaste las <em>6 tareas</em>!'}</h1>
       <p>Gracias por probar las gafas.</p></div>`;
     this.el.pantalla.hidden = false;
   }
@@ -336,7 +442,7 @@ export class TareasIA {
     const T = TAREAS_IA[n - 1];
     const c = this.el;
     c.card.hidden = !this.hud.visible;
-    c.num.textContent = `Tarea ${n} de ${TAREAS_IA.length}`;
+    c.num.textContent = this.enMundo ? `Consigna ${n} de ${TAREAS_IA.length} · ${n <= 3 ? 'Biología' : 'Matemática'}` : `Tarea ${n} de ${TAREAS_IA.length}`;
     c.esc.textContent = T.esc;
     c.txt.textContent = T.txt;
     c.estado.textContent = '';
@@ -428,7 +534,17 @@ export class TareasIA {
   }
 
   siguiente() {
-    if (!this.activa) return;
+    if (!this.activa || this.interludio) return;
+    if (this.enMundo && this.i === 3 && !this.repasos.bio) {
+      this._cortarTiempo(performance.now());
+      return this._repaso('bio', () => this._cartel({
+        k: 'Cambio de materia · 2 de 2',
+        tit: 'Terminó Biología ✓<br>Ahora: Matemática · <em>ecuaciones</em>',
+        txt: 'El corazón se guarda. En tu mesa aparece un cuaderno con una ecuación para resolver.',
+        boton: 'Empezar con Matemática',
+        alSeguir: () => this.empezar(4),
+      }));
+    }
     if (this.i < TAREAS_IA.length) this.empezar(this.i + 1);
     else this.terminar();
   }
@@ -437,6 +553,11 @@ export class TareasIA {
 
   terminar() {
     this._cortarTiempo(performance.now());
+    if (this.enMundo && !this.repasos.mate && !this.interludio) {
+      this.ej.espontaneas = false;
+      this.ej.ocultar();
+      return this._repaso('mate', () => this.terminar());
+    }
     this.fin = true;
     this.ej.espontaneas = false;
     const c = this.el;
@@ -539,7 +660,7 @@ export class TareasIA {
     const h = this.hud;
     this.corazon.update(dt, t);
     this.ej.update();
-    this.el.card.hidden = !h.visible || !this.i;
+    this.el.card.hidden = !h.visible || !this.i || !!this.interludio;
     // tarea 5: si resolvió antes de ver una sugerencia, el tutor le ofrece practicar más
     if (this.i === 5 && !this.fin && !this.practicaOfrecida && this.ej.e && this.ej.e.resuelto && !this._resumen(5).mostradas
       && performance.now() - this.ej.e.tResuelto > 6000 && !h.tutorAbierto && !h.propuesta) {
@@ -562,7 +683,10 @@ export class TareasIA {
 
   // ── registro de todo lo que pasa ──
   _registro(r) {
-    if (!this.activa) return;
+    if (!this.activa) {
+      if (this.enMundo && !this.hecha && this.previos.length < 500) this.previos.push({ s: Math.round((r.t - this.tInicio) / 100) / 10, tipo: r.tipo, dato: String(r.dato) });
+      return;
+    }
     this.eventos.push({ s: Math.round((r.t - this.t0) / 100) / 10, tarea: this.fin ? 'fin' : this.i, tipo: r.tipo, dato: String(r.dato) });
     // se guarda sola cada pocos segundos mientras pasan cosas
     if (this.i) { clearTimeout(this._tGuardar); this._tGuardar = setTimeout(() => this._guardarYa(), 2000); }
@@ -615,6 +739,7 @@ export class TareasIA {
     const k = TECLAS.find((x) => x[0] === e.code);
     if (!k) return;
     e.preventDefault();
+    if (this.interludio && e.code === 'KeyN') { this.hud.registrar('moderador', 'saltear cartel'); return this._cerrarCartel(true); }
     e.stopPropagation();
     if (e.repeat) return;
     if (k[0] !== 'KeyM') this.hud.registrar('moderador', `${k[1]} ${k[2]}`);
@@ -729,6 +854,9 @@ export class TareasIA {
           frases: { entendidas: s.entendidas, sin_accion: s.sinAccion },
         };
       }),
+      repasos: this.quiz,
+      antes_de_la_clase: this.enMundo ? { segundos_hasta_sentarse: this.tSentado ? Math.round((this.tSentado - this.tInicio) / 1000) : null, eventos: this.previos } : undefined,
+      consultas_al_tutor: [...this.previos.map((e) => ({ ...e, tarea: 'antes' })), ...this.eventos].filter((e) => e.tipo === 'ayuda' && e.dato !== 'todas').map((e) => ({ segundo: e.s, tarea: e.tarea, pregunta: e.dato.split('|')[0], lugar: e.dato.split('|')[1] || '' })),
       ejercicios: this.ej.historial.map((e) => ({ ecuacion: e.ec, resuelto: e.resuelto, comprobado: e.comprobado, tiempo_s: e.tResuelto ? Math.round((e.tResuelto - e.tInicio) / 1000) : null, pistas_pedidas: e.pistas, pistas_por_sugerencia: e.pistasSug, pidio_la_respuesta: e.pidioRespuesta, pasos_equivocados: e.errores })),
       sugerencias: this.ej.sugerencias.map((s) => ({ ecuacion: s.ec, motivo: s.motivo, texto: s.txt, resultado: s.estado === 'mostrada' ? 'sin respuesta' : s.estado })),
       frases: this._frases().map((f) => ({ segundo: f.s, tarea: f.tarea, frase: f.txt, entendida: f.ok })),
@@ -754,6 +882,15 @@ function csvDe(d) {
   for (const t of d.tareas) L.push(filaTarea(d, t));
   L.push('', fila(['ejercicio', 'resuelto', 'comprobado', 'tiempo_s', 'pistas_pedidas', 'pistas_por_sugerencia', 'pidio_la_respuesta', 'pasos_equivocados']));
   for (const e of d.ejercicios) L.push(fila([e.ecuacion, e.resuelto ? 'si' : 'no', e.comprobado ? 'si' : 'no', e.tiempo_s, e.pistas_pedidas, e.pistas_por_sugerencia, e.pidio_la_respuesta, e.pasos_equivocados.length]));
+  if (d.repasos && d.repasos.length) {
+    L.push('', fila(['repaso', 'pregunta', 'elegida', 'correcta', 'bien', 'segundos']));
+    for (const q of d.repasos) L.push(fila([q.materia, q.pregunta, q.elegida, q.correcta, q.ok ? 'si' : 'no', q.segundos]));
+  }
+  if (d.consultas_al_tutor && d.consultas_al_tutor.length) {
+    L.push('', fila(['consulta_al_tutor', 'segundo', 'tarea', 'lugar']));
+    for (const c of d.consultas_al_tutor) L.push(fila([c.pregunta, Math.round(c.segundo), c.tarea, c.lugar]));
+  }
+  if (d.antes_de_la_clase) L.push('', fila(['segundos_hasta_sentarse', d.antes_de_la_clase.segundos_hasta_sentarse ?? '']));
   L.push('', fila(['segundo', 'tarea', 'frase', 'entendida']));
   for (const f of d.frases) L.push(fila([Math.round(f.segundo), f.tarea, f.frase, f.entendida ? 'si' : 'sin accion']));
   return '\ufeff' + L.join('\r\n');

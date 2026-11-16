@@ -28,17 +28,22 @@ Lo que dice el moderador en voz alta, en orden, desde que llega el participante 
 
 ## 3 · Bienvenida en pantalla
 
-> Ahora la pantalla te explica cómo se usan las gafas. Leela con calma y seguí los pasos: todo se hace con el mouse, sin hacer clic.
+> Ahora la pantalla te explica cómo se usan las gafas. Leela con calma y seguí los pasos: todo se elige mirando, sin hacer clic.
 
-[La bienvenida tiene 5 pasos y en uno le hace probar cómo se elige con la mirada. El moderador no explica nada: si el participante pregunta, le dice «Leelo de nuevo, ¿qué te parece que dice?».]
+[La bienvenida tiene 6 pasos: el agradecimiento, cómo se elige mirando (con una práctica), cómo moverse, qué pasa con y sin gafas, dónde están el progreso y el tutor, y cómo es la clase. El moderador no explica nada: si el participante pregunta, le dice «Leelo de nuevo, ¿qué te parece que dice?».]
 
 ## 4 · Al llegar a la escuela
 
 [Cuando termina la bienvenida y aparece la escuela, leer:]
 
-> Es martes, son las 9:22 y estás llegando a tu escuela con las gafas puestas. En las gafas tenés el horario del día: lo primero es una clase de Biología y Matemática en tu mesa del aula-taller. Hacé lo que harías en un día normal y contame en voz alta lo que vas pensando.
+> Es martes, son las 9:22 y estás llegando a tu escuela con las gafas puestas. Lo primero del día es una clase de Biología y Matemática en tu mesa del aula-taller. Hacé lo que harías en un día normal y contame en voz alta lo que vas pensando.
 
-[Desde acá, el moderador no explica ni ayuda: observa.]
+[Desde acá, el moderador no explica ni ayuda: observa. Lo que pasa en pantalla:]
+
+- Si no entra a la escuela, a los pocos segundos las gafas le dicen cómo (mirar la flecha del piso «02 Hall»).
+- Al entrar, las gafas se conectan y muestran un recorrido corto de 3 carteles: su progreso, el tutor y la línea naranja hasta su mesa. Se pasan mirando «Entendido».
+- Después el tutor lo saluda y le ofrece «Llevame». Si se queda sin hacer nada, el tutor le vuelve a ofrecer ayuda (hasta 3 veces).
+- Al sentarse, un cartel en el centro marca el inicio de la clase.
 
 ## 5 · Durante la prueba
 
@@ -46,16 +51,19 @@ El moderador solo habla en estos casos, y solo con estas frases. Nunca dice cóm
 
 | Si el participante… | El moderador dice |
 | --- | --- |
-| Le pregunta algo (cómo se hace, qué tiene que hacer) | «¿Vos qué harías?» |
+| Le pregunta algo (cómo se hace, qué tiene que hacer) | «¿Vos qué harías? Si querés, preguntale al tutor.» |
 | Se queda callado más de 20 segundos | «¿Qué estás pensando?» |
-| Antes de la clase, no sabe qué hacer por más de un minuto | Una sola de estas: «¿Qué harías ahora en tu escuela?», «Fijate qué te ofrece el tutor» o «Fijate en tu horario». |
+| Antes de la clase, no sabe qué hacer por más de un minuto | Una sola de estas: «¿Qué harías ahora en tu escuela?», «Fijate qué te ofrece el tutor» o «Fijate en tu progreso». |
 | A los 6 minutos todavía no se sentó para la clase | «Vamos directo a la clase.» [Apretar F8.] |
 | En la clase, está trabado en una consigna por más de un minuto | «Si querés, podés pasar a la siguiente.» (una sola vez por consigna) |
+| Está trabado en un cartel del centro (cambio de materia o repaso) por más de un minuto | «¿Qué te pide el cartel?» Si sigue trabado: [Shift + N lo saltea]. |
 | Quiere dejar | «Paramos acá. ¡Gracias por todo!» [Ir al cierre.] |
+
+En la clase, el moderador no anuncia nada: las gafas marcan solas el cambio de materia (después de la consigna 3) y los dos repasos (al terminar Biología y al terminar Matemática).
 
 ## 6 · Cierre
 
-[Cuando aparece «¡Terminaste las 6 tareas!»:]
+[Cuando aparece «¡Terminaste la clase!»:]
 
 > ¡Listo, terminaste! Muchas gracias. Todo lo que hiciste y dijiste nos ayuda mucho a mejorar las gafas.
 
