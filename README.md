@@ -17,7 +17,7 @@ El guión que lee el moderador está en [`guion.md`](guion.md): una sesión de u
 
 Cambios después del test piloto (16/11):
 
-- **Una sola regla para elegir:** mirar 1 segundo cualquier cosa elegible (botones, opciones del tutor, carteles, flechas del piso); se llena una barra naranja y destella al elegir. Mirar el borde izquierdo o derecho de la pantalla gira la cabeza.
+- **Una sola regla para elegir: mirar y después mirar el punto.** Mirar algo elegible (botones, opciones del tutor, carteles, flechas del piso) solo lo marca y hace aparecer un punto naranja al costado; mirar ese punto 1 segundo lo elige (se llena el anillo y destella). Así se puede leer sin elegir sin querer. El punto nunca tapa el texto: va a la derecha, o a la izquierda, abajo o arriba si ahí hay otro botón. Mirar el borde izquierdo o derecho de la pantalla gira la cabeza.
 - **Recorrido guiado** al conectarse las gafas: 3 carteles (progreso, tutor, línea naranja) antes del saludo.
 - **Progreso personalizado** arriba a la izquierda, con el nombre del participante: llegar, sentarse, las 3 consignas de cada materia, los 2 repasos y el porcentaje.
 - **El tutor siempre se puede consultar** (`src/ayuda.js`): al mirarlo ofrece lo que se puede hacer en ese momento y las preguntas más útiles según el contexto (dónde está, si tiene gafas, qué consigna, si el corazón o el cuaderno están abiertos); «Otra pregunta…» muestra todas. Respuestas escritas, sin IA. Si se queda quieto antes de la clase, el tutor le vuelve a ofrecer ayuda (hasta 3 veces).
@@ -59,7 +59,7 @@ Lo que se publica en el link es el `index.html` de la raíz, en las ramas `main`
 | `src/proyectos.js` | Los cuatro proyectos que se pueden elegir y su lógica |
 | `src/ia.js` | El tutor con IA: qué se le manda al modelo y qué acciones puede hacer |
 | `src/voz.js` | Reconocimiento de voz, voz del tutor y de los compañeros |
-| `src/mirada.js` | Mirada con el mouse (sostener la vista para elegir) |
+| `src/mirada.js` | Mirada con el mouse: mirar marca, mirar el punto naranja 1 segundo elige |
 | `src/ayuda.js` | Ayuda del tutor según el contexto, recorrido guiado de las gafas y empujón si se queda quieto |
 | `src/camara.js` | Detección de gafas puestas o sacadas con la cámara |
 | `src/oculo.js` | Recorrido de la luz del sol por el hall |

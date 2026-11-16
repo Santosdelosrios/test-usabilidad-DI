@@ -45,7 +45,7 @@ export const AYUDA = [
       if (!x.gafas) return { txt: 'Ponete las gafas para ver tu día.' };
       if (x.pendiente && x.lugar !== 'taller') return { txt: 'Ahora te toca la clase de Biología y Matemática, en tu mesa del aula-taller. Elegí «Llevame a mi mesa» y te llevo.', ops: [llevar(h)] };
       if (x.pendiente) return { txt: 'Tu mesa es esta. Elegí «Sentarme» para empezar la clase.', ops: [sentar(h)] };
-      if (x.interludio) return { txt: 'Estás en el cartel del centro. Elegí una opción mirándola un segundo.' };
+      if (x.interludio) return { txt: 'Estás en el cartel del centro. Para elegir una opción, mirala y después mirá el punto naranja que aparece al costado.' };
       if (x.enClase) return { txt: `Estás en la consigna ${x.tarea} de 6, de ${x.materia}: «${x.consigna}» Si te trabás, podés pasar a la siguiente.` };
       if (x.hecha) return { txt: 'Ya terminaste la clase. ¡Muy bien! Avisale a quien te acompaña.' };
       return { txt: 'Mirá tu progreso, arriba a la izquierda: ahí está lo que sigue.' };
@@ -53,12 +53,12 @@ export const AYUDA = [
   },
   {
     id: 'como-elijo', p: '¿Cómo elijo algo?', si: () => true, peso: () => 3,
-    r: () => ({ txt: 'Mirá el botón un segundo, sin hacer clic: se llena una barra naranja y queda elegido. Así funciona todo en las gafas.' }),
+    r: () => ({ txt: 'Mirá lo que querés elegir: se marca y aparece un punto naranja al costado. Mirá ese punto un segundo, sin hacer clic, y queda elegido. Mirar el botón solo no elige nada, así que podés leer tranquilo.' }),
   },
   {
     id: 'como-muevo', p: '¿Cómo me muevo?', si: (x) => !x.enClase, peso: (x) => (x.pendiente && x.lugar !== 'taller' ? 6 : 2),
     r: (x, h) => ({
-      txt: 'Mirá un segundo una flecha blanca del piso (o su cartel) y vas hasta ahí. Si te ofrezco «Llevame», miralo y te llevo yo por la línea naranja. Para girar la cabeza, llevá la mirada al borde izquierdo o derecho de la pantalla.',
+      txt: 'Mirá una flecha blanca del piso (o su cartel) y después el punto naranja que aparece al lado: vas hasta ahí. Si te ofrezco «Llevame», elegilo igual y te llevo yo por la línea naranja. Para girar la cabeza, llevá la mirada al borde izquierdo o derecho de la pantalla.',
       ops: x.pendiente && x.lugar !== 'taller' ? [llevar(h)] : [],
     }),
   },
@@ -83,7 +83,7 @@ export const AYUDA = [
   },
   {
     id: 'corazon-parte', p: '¿Cómo pregunto por una parte del corazón?', si: (x) => x.corazon, peso: () => 6,
-    r: () => ({ txt: 'Mirá el nombre de la parte un segundo: te digo qué es y sigo donde estábamos.' }),
+    r: () => ({ txt: 'Mirá el nombre de la parte y después el punto que aparece al lado: te digo qué es y sigo donde estábamos.' }),
   },
   {
     id: 'ejercicio', p: '¿Cómo resuelvo el ejercicio?', si: (x) => x.ejercicio, peso: () => 7,
@@ -107,7 +107,7 @@ export const AYUDA = [
   },
   {
     id: 'tutor', p: '¿Qué podés hacer vos?', si: () => true, peso: () => 1,
-    r: () => ({ txt: 'Te explico los temas de la clase, te doy pistas sin darte la respuesta, te llevo a donde tengas que ir y, si querés pensar solo, me callo. Podés consultarme en cualquier momento: mirame un segundo.' }),
+    r: () => ({ txt: 'Te explico los temas de la clase, te doy pistas sin darte la respuesta, te llevo a donde tengas que ir y, si querés pensar solo, me callo. Podés consultarme en cualquier momento: mirame y después mirá el punto que aparece al lado.' }),
   },
 ];
 
@@ -149,7 +149,7 @@ function accionesMundo(h) {
 // ── recorrido guiado de la interfaz, la primera vez que se pone las gafas ──
 const PASOS_TOUR = [
   { sel: '#hud-hoy', lado: 'der', txt: 'Este es tu día y tu progreso. Se va completando a medida que avanzás.' },
-  { sel: '#hud-tutor-yo', lado: 'arriba', txt: 'Este soy yo, tu tutor. Mirame un segundo cuando tengas cualquier duda: te muestro qué podés preguntarme.' },
+  { sel: '#hud-tutor-yo', lado: 'arriba', txt: 'Este soy yo, tu tutor. Cuando tengas una duda, mirame y después mirá el punto que aparece al lado: te muestro qué podés preguntarme.' },
   { sel: null, lado: 'centro', txt: 'La línea naranja del piso te lleva a tu mesa. Para ir directo, elegí «Llevame» cuando te lo ofrezca.' },
 ];
 

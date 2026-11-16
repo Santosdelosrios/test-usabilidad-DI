@@ -246,6 +246,7 @@ body.gira-der::before { right: 0; background: linear-gradient(270deg, rgba(232,1
 #hud.apagado #hud-tutor button { pointer-events: none; opacity: .45; }
 #hud.apagado #hud-tutor p { color: rgba(236,235,231,.6); }
 #hud-opciones { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+body.mirada-on #hud-opciones { column-gap: 46px; } /* lugar para el punto de elegir al costado de cada opción */
 #hud-opciones button { padding: 8px 14px; border: 1px solid rgba(236,235,231,.35); font-size: 11.5px; letter-spacing: calc(.08em * var(--esp-m)); white-space: nowrap; }
 #hud-tutor.reposo #hud-opciones button { padding: 7px 12px; }
 #hud-opciones button:hover { border-color: var(--naranja); color: var(--naranja); }
@@ -271,8 +272,17 @@ body.gira-der::before { right: 0; background: linear-gradient(270deg, rgba(232,1
 #mirada::after { left: -13px; top: -13px; width: 26px; height: 26px; background: conic-gradient(var(--naranja) calc(var(--p) * 360deg), transparent 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px)); }
 #mirada i { position: absolute; left: -2px; top: -2px; width: 4px; height: 4px; border-radius: 50%; background: var(--naranja); box-shadow: 0 0 0 1px rgba(11,12,14,.4); }
 #mirada.objetivo::before { left: -19px; top: -19px; width: 38px; height: 38px; }
-/* regla única: lo que se está mirando muestra una barra naranja que se llena en 1 segundo */
-.mirando { background-image: linear-gradient(var(--naranja), var(--naranja)) !important; background-repeat: no-repeat !important; background-position: left bottom !important; background-size: calc(var(--mp, 0) * 100%) 3px !important; }
+/* regla única: mirar algo lo marca (borde naranja) y aparece un punto al costado; mirar el punto 1 segundo lo elige */
+.mirando { outline: 2px solid var(--naranja) !important; outline-offset: 2px; }
+#mirada-punto { position: fixed; left: 0; top: 0; width: 34px; height: 34px; z-index: 29; display: grid; place-items: center; pointer-events: auto; cursor: pointer; }
+#mirada-punto[hidden] { display: none; }
+#mirada-punto::before { content: ''; position: absolute; inset: 5px; border-radius: 50%; background: rgba(11,12,14,.9); border: 2px solid var(--naranja); box-shadow: 0 0 0 1px rgba(11,12,14,.45), 0 2px 10px rgba(0,0,0,.35); }
+#mirada-punto::after { content: ''; position: absolute; inset: 1px; border-radius: 50%; background: conic-gradient(var(--naranja) calc(var(--p, 0) * 360deg), transparent 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px)); mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px)); }
+#mirada-punto i { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--naranja); animation: puntoLatido 1.1s ease-in-out infinite; }
+#mirada-punto.aparece::before { animation: puntoAparece .3s ease-out; }
+@keyframes puntoAparece { from { transform: scale(.3); opacity: 0; } }
+@keyframes puntoLatido { 50% { transform: scale(1.5); } }
+body.mirada-on #mirada-punto { cursor: none; }
 .elegido-flash { animation: elegidoFlash .5s ease-out; }
 @keyframes elegidoFlash { 0% { box-shadow: 0 0 0 0 rgba(232,116,59,.95); } 100% { box-shadow: 0 0 0 12px rgba(232,116,59,0); } }
 #mirada.objetivo::after { left: -20px; top: -20px; width: 40px; height: 40px; }
@@ -374,7 +384,7 @@ body.mirada-on #hud-mira, body.mirada-on #hud-mira-et { display: none; }
 #bienvenida button { all: unset; position: relative; overflow: hidden; cursor: pointer; padding: 13px 20px; font-size: 12px; letter-spacing: calc(.18em * var(--esp-m)); text-transform: uppercase; border: 1px solid rgba(236,235,231,.35); }
 #bienvenida button.prim { margin-left: auto; background: var(--naranja); border-color: var(--naranja); color: var(--negro); }
 #bienvenida button[disabled] { opacity: .3; cursor: default; }
-#bienvenida .practica { display: flex; align-items: center; gap: 18px; margin-top: 18px; }
+#bienvenida .practica { display: flex; align-items: center; gap: 60px; margin-top: 18px; }
 #bienvenida .practica button { padding: 22px 30px; font-size: 13px; border-color: var(--naranja); color: #fff; }
 #bienvenida .practica span { font-size: 12px; letter-spacing: .06em; color: rgba(236,235,231,.7); }
 #bienvenida .practica.ok button { background: var(--naranja); color: var(--negro); }
@@ -865,16 +875,16 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
       <h1>Hola<span id="bv-nombre"></span>. <em>Gracias</em> por probar las gafas.</h1>
       <p>Vas a ver una escuela de 2040 como si tuvieras puestas unas gafas con un tutor que te ayuda a aprender. No te evaluamos a vos: evaluamos las gafas.</p>
       <p>Mientras la probás, decí en voz alta lo que vas pensando, aunque te parezca obvio.</p>
-      <p class="chico">Para seguir, mirá «Siguiente» un segundo, sin hacer clic: se llena una barra naranja.</p>
+      <p class="chico">Para seguir, mirá «Siguiente»: aparece un punto naranja al costado. Mirá ese punto un segundo, sin hacer clic.</p>
     </section>
     <section data-bv="2" hidden>
       <h1>Todo se elige <em>mirando</em></h1>
-      <p>En las gafas, el mouse son tus ojos. Para elegir cualquier botón, miralo y quedate mirándolo un segundo, hasta que se llene la barra naranja. No hace falta hacer clic en ningún momento.</p>
-      <div class="practica"><button type="button" data-mira id="bv-practica">Mirame un segundo</button><span id="bv-ok">Probalo con este botón.</span></div>
+      <p>En las gafas, el mouse son tus ojos. <b>Mirar un botón no lo elige</b>: lo marca y hace aparecer un punto naranja a su costado. Para elegirlo, mirá ese punto un segundo, hasta que se llene el anillo. Así podés leer todo con calma. No hace falta hacer clic en ningún momento.</p>
+      <div class="practica"><button type="button" data-mira id="bv-practica">Elegime</button><span id="bv-ok">Probalo: mirá el botón y después su punto.</span></div>
     </section>
     <section data-bv="3" hidden>
       <h1>Moverte y <em>mirar alrededor</em></h1>
-      <p><b>Para ir a un lugar</b>, mirá un segundo una flecha blanca del piso (o su cartel) y vas hasta ahí. Cuando el tutor te ofrece «Llevame», también podés mirarlo y te lleva él: una línea naranja en el piso te marca el camino.</p>
+      <p><b>Para ir a un lugar</b>, mirá una flecha blanca del piso (o su cartel) y después su punto: vas hasta ahí. Cuando el tutor te ofrece «Llevame», también podés elegirlo y te lleva él: una línea naranja en el piso te marca el camino.</p>
       <p><b>Para girar la cabeza</b>, llevá la mirada hasta el borde izquierdo o derecho de la pantalla.</p>
     </section>
     <section data-bv="4" hidden>
@@ -885,7 +895,7 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
     <section data-bv="5" hidden>
       <h1>Tu progreso y <em>tu tutor</em></h1>
       <p><b>Arriba a la izquierda</b> ves tu día y cuánto avanzaste. Se va completando a medida que hacés cada cosa.</p>
-      <p><b>Abajo, en el centro</b>, está el tutor. Podés consultarlo en cualquier momento: miralo un segundo y elegí tu pregunta.</p>
+      <p><b>Abajo, en el centro</b>, está el tutor. Podés consultarlo en cualquier momento: miralo, mirá su punto y elegí tu pregunta.</p>
     </section>
     <section data-bv="6" hidden>
       <h1>La clase: <em>Biología y Matemática</em></h1>

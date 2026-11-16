@@ -384,7 +384,7 @@ export class HUD {
     const o = this.ojos;
     let dir = 0;
     const n = this.nav;
-    if (o.activa && o.hayPuntero && !o.fuera && !o.obj && this.visible && this.puestas && !n.walk && !n.fijo && !n.settle && !this.guiaAbierta && !(this.clase && this.clase.activa)) {
+    if (o.activa && o.hayPuntero && !o.fuera && !o.obj && !n.hovered && this.visible && this.puestas && !n.walk && !n.fijo && !n.settle && !this.guiaAbierta && !(this.clase && this.clase.activa)) {
       const w = innerWidth, borde = Math.max(36, w * 0.05);
       if (o.x < borde) dir = 1; else if (o.x > w - borde) dir = -1;
     }
@@ -397,24 +397,10 @@ export class HUD {
     }
   }
 
-  // mirar una flecha blanca del piso 1 segundo lleva hacia ahí (como todo lo demás: sin clic)
-  _mirarFlecha(dt) {
+  // mirar una flecha blanca del piso la marca como a cualquier botón: aparece el punto al lado de su cartel
+  _flechaMirada() {
     const o = this.ojos, n = this.nav;
-    const m = o.activa && o.hayPuntero && !o.fuera && !o.obj && !this._dirGiro && !n.walk && !n.fijo && !this.guiaAbierta ? n.hovered : null;
-    if (m !== this._flecha) {
-      if (this._flecha) { this._flecha.label.classList.remove('mirando'); this._flecha.label.style.removeProperty('--mp'); }
-      this._flecha = m; this._tFlecha = 0;
-      if (m) m.label.classList.add('mirando');
-    }
-    if (!m) return;
-    this._tFlecha += dt;
-    m.label.style.setProperty('--mp', Math.min(1, this._tFlecha / o.tiempo).toFixed(3));
-    if (this._tFlecha >= o.tiempo) {
-      m.label.classList.remove('mirando'); m.label.style.removeProperty('--mp');
-      this._flecha = null; this._tFlecha = 0;
-      this.registrar('mirada', `flecha:${m.to}`);
-      n.goTo(m.to);
-    }
+    return o.activa && o.hayPuntero && !this._dirGiro && !n.walk && !n.fijo && !this.guiaAbierta && n.hovered ? n.hovered.label : null;
   }
 
   _queSigue() {
@@ -1252,9 +1238,9 @@ export class HUD {
       if (!st.evPres && st.minuto >= 10 * 60 + 40) { st.evPres = true; this.aviso('En 5 minutos presenta tu grupo en la zona de proyección.', 'Horario'); if (this.ia) this.cerebro.evento('Faltan 5 minutos para la presentación de su grupo en la zona de proyección (10:45).'); }
     }
     this.ojos.setActiva(this.ojos.habilitada);
+    this.ojos.externo = this._flechaMirada();
     this.ojos.update(this.dtReal ?? dt);
     this._girarMirando(dt);
-    this._mirarFlecha(this.dtReal ?? dt);
     this.oculo.update(dt, t, true);
     // bienestar: recordatorio de pausa visual
     this.usoSeg += dt;
@@ -1268,7 +1254,7 @@ export class HUD {
       if (zona(p.x, p.z) !== 'plaza' || (p.z < 8.8 && Math.abs(p.x) < 6)) this.conectar();
       else {
         this.buscando = (this.buscando || 0) + dt;
-        if (this.buscando > (this.soloClase ? 3 : 6) && !this.pistaDada) { this.pistaDada = true; this.aviso(this.soloClase ? 'Buscando nodo… Para entrar, mirá un segundo la flecha del piso «02 Hall»: las gafas se conectan en la puerta.' : 'Buscando nodo… Entrá a la escuela: las gafas se conectan en la puerta.', 'TUTOR', true); }
+        if (this.buscando > (this.soloClase ? 3 : 6) && !this.pistaDada) { this.pistaDada = true; this.aviso(this.soloClase ? 'Buscando nodo… Para entrar, mirá la flecha del piso «02 Hall» y después el punto naranja que aparece al lado: las gafas se conectan en la puerta.' : 'Buscando nodo… Entrá a la escuela: las gafas se conectan en la puerta.', 'TUTOR', true); }
       }
     }
     // durante la clase el reloj de la escuela se detiene: la clase dura lo que tarde (ver tareas-ia.js)

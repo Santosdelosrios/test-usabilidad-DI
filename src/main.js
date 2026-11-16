@@ -253,7 +253,7 @@ async function start() {
     $('bv-nombre').textContent = nom ? `, ${nom}` : '';
     bvPaso = 1; bvPracticado = false;
     $('bv-practica').parentElement.classList.remove('ok');
-    $('bv-ok').textContent = 'Probalo con este botón.';
+    $('bv-ok').textContent = 'Probalo: mirá el botón y después su punto.';
     bv.hidden = false;
     // la bienvenida se maneja con la misma mirada que las gafas
     hud.ojos.setActiva(true);
@@ -317,7 +317,7 @@ async function start() {
     else {
       // sin control por voz: el tutor guía hacia la mirada
       hud.vozControl = false;
-      hud.pistaVoz = '¿Tenés una duda? Mirame un segundo y elegí tu pregunta.';
+      hud.pistaVoz = '¿Tenés una duda? Mirame, después mirá el punto naranja y elegí tu pregunta.';
     }
     // el tutor siempre se puede consultar: preguntas según el momento (sin IA)
     if (SOLO_CLASE) instalarAyuda(hud);

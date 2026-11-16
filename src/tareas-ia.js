@@ -398,7 +398,7 @@ export class TareasIA {
     const hablar = modo === 'web' ? 'Hablale al tutor en voz alta, como a una persona. Para llamarlo, empezá con «Tutor…».'
       : modo === 'claude' ? 'Para hablarle al tutor, mantené apretada la barra espaciadora mientras hablás.'
         : 'Este navegador no puede escucharte: abrí la prueba en Chrome, con micrófono.';
-    const mirar = this.hud.ojos.habilitada ? 'Mover el mouse es mover los ojos: si mirás un botón de las gafas un momento, lo elegís. Arrastrando, girás la cabeza.' : 'Arrastrando el mouse, mirás alrededor.';
+    const mirar = this.hud.ojos.habilitada ? 'Mover el mouse es mover los ojos: mirar un botón hace aparecer un punto naranja al costado, y mirar ese punto un segundo lo elige. Arrastrando, girás la cabeza.' : 'Arrastrando el mouse, mirás alrededor.';
     this.el.pantalla.innerHTML = `<div class="caja"><div class="k">TUTOR 2040 · Prueba de las gafas</div><h1>Antes de <em>empezar</em></h1>
       <p>Tenés puestas unas gafas con un tutor que te ayuda a aprender. Estás sentado en tu mesa del aula-taller.</p>
       <ul><li><b>Vas a hacer 6 tareas cortas.</b> Cada consigna aparece arriba, en una tarjeta blanca.</li><li>${esc(hablar)}</li><li>${esc(mirar)}</li>

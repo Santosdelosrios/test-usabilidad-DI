@@ -30,7 +30,7 @@ Lo que dice el moderador en voz alta, en orden, desde que llega el participante 
 
 > Ahora la pantalla te explica cómo se usan las gafas. Leela con calma y seguí los pasos: todo se elige mirando, sin hacer clic.
 
-[La bienvenida tiene 6 pasos: el agradecimiento, cómo se elige mirando (con una práctica), cómo moverse, qué pasa con y sin gafas, dónde están el progreso y el tutor, y cómo es la clase. El moderador no explica nada: si el participante pregunta, le dice «Leelo de nuevo, ¿qué te parece que dice?».]
+[La bienvenida tiene 6 pasos: el agradecimiento, cómo se elige (mirar el botón y después el punto naranja que aparece al costado, con una práctica), cómo moverse, qué pasa con y sin gafas, dónde están el progreso y el tutor, y cómo es la clase. El moderador no explica nada: si el participante pregunta, le dice «Leelo de nuevo, ¿qué te parece que dice?».]
 
 ## 4 · Al llegar a la escuela
 
@@ -40,7 +40,7 @@ Lo que dice el moderador en voz alta, en orden, desde que llega el participante 
 
 [Desde acá, el moderador no explica ni ayuda: observa. Lo que pasa en pantalla:]
 
-- Si no entra a la escuela, a los pocos segundos las gafas le dicen cómo (mirar la flecha del piso «02 Hall»).
+- Si no entra a la escuela, a los pocos segundos las gafas le dicen cómo (mirar la flecha del piso «02 Hall» y después su punto).
 - Al entrar, las gafas se conectan y muestran un recorrido corto de 3 carteles: su progreso, el tutor y la línea naranja hasta su mesa. Se pasan mirando «Entendido».
 - Después el tutor lo saluda y le ofrece «Llevame». Si se queda sin hacer nada, el tutor le vuelve a ofrecer ayuda (hasta 3 veces).
 - Al sentarse, un cartel en el centro marca el inicio de la clase.
