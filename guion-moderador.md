@@ -62,7 +62,7 @@ El moderador solo habla en estos casos, y solo con estas frases. Nunca dice cóm
 
 En la clase, el moderador no anuncia nada: las gafas marcan solas los tres repasos (al terminar Biología, Matemática y Arte) y los dos cambios de clase. Después del repaso de Biología, el participante se levanta solo, sigue la línea naranja y se sienta en la mesa de atrás, donde es Matemática; después del repaso de Matemática, hace lo mismo hasta la mesa junto al perchero, donde es Arte. Cada cambio dura unos diez segundos y no tiene que hacer nada (si hace falta, Shift + N lo saltea).
 
-En Arte, el tutor le tira tips para mejorar su dibujo. Si el participante pregunta si tiene que hacerle caso, el moderador no contesta: «¿Vos qué harías?».
+En Arte el participante dibuja un paisaje con el mouse apretado (es lo único que no se elige mirando) y el tutor le tira tips generales mientras dibuja. Si pregunta cómo se dibuja, si tiene que hacerle caso al tutor o si «está bien» lo que dibujó, el moderador no contesta: «¿Vos qué harías?».
 
 ## 6 · Cierre
 

@@ -31,7 +31,7 @@ export function contexto(h) {
     corazon: !!(c && c.corazon.abierto),
     ejercicio: !!(ej && ej.activo && ej.e && !ej.e.resuelto),
     lamina: !!(lam && lam.activo && lam.e && !lam.e.entregado),
-    tip: !!(lam && lam.activo && lam.e && lam.e.tip),
+    hayDibujo: !!(lam && lam.activo && lam.hayDibujo()),
     quedanTips: !!(lam && lam.activo && lam.quedan()),
     foco: !!h.st.foco,
     hechas: c ? c.hechas() : 0,
@@ -94,20 +94,20 @@ export const AYUDA = [
     r: () => ({ txt: 'En el cuaderno, elegí el próximo paso entre las tres opciones. Si no sabés cuál, pedime una pista: te ayudo sin darte la respuesta.' }),
   },
   {
-    id: 'tip', p: '¿Cómo te pido un tip?', si: (x) => x.lamina && !x.tip && x.quedanTips, peso: () => 7,
-    r: () => ({ txt: 'Mirá «Pedir un tip», al lado de tu dibujo, o mirame y elegí «Dame un tip». Te propongo una idea y vos decidís si la usás.' }),
+    id: 'dibujar', p: '¿Cómo dibujo?', si: (x) => x.lamina, peso: (x) => (x.hayDibujo ? 5 : 8),
+    r: () => ({ txt: 'Mantené apretado el botón del mouse sobre la hoja y movelo, como un lápiz. Arriba elegís el color, la goma y el grosor; «Deshacer» borra el último trazo.' }),
   },
   {
-    id: 'tip-opciones', p: '¿Cómo veo cómo queda antes de elegir?', si: (x) => x.tip, peso: () => 7,
-    r: () => ({ txt: 'Mirá una opción del tip, sin mirar su punto: el dibujo te muestra cómo quedaría. Si te gusta, mirá el punto y queda elegida.' }),
+    id: 'tip', p: '¿Cómo te pido un tip?', si: (x) => x.lamina && x.quedanTips, peso: () => 6,
+    r: () => ({ txt: 'Mirá «Pedir un tip», al lado de la hoja, o mirame y elegí «Dame un tip». Son ideas generales: usalas si te sirven.' }),
   },
   {
     id: 'tip-obligado', p: '¿Tengo que hacer lo que me decís?', si: (x) => x.lamina, peso: () => 5,
-    r: () => ({ txt: 'No: es tu dibujo. Mis tips son ideas para probar; si preferís, elegí dejarlo como estaba y no pasa nada.' }),
+    r: () => ({ txt: 'No: es tu dibujo. Mis tips son ideas generales; si no te sirven, seguí a tu manera.' }),
   },
   {
-    id: 'entregar', p: '¿Cómo entrego el dibujo?', si: (x) => x.lamina, peso: (x) => (x.quedanTips || x.tip ? 4 : 8),
-    r: () => ({ txt: 'Cuando te guste cómo quedó, mirá «Entregar», al lado del dibujo, y después su punto.' }),
+    id: 'entregar', p: '¿Cómo entrego el dibujo?', si: (x) => x.lamina, peso: (x) => (x.hayDibujo && !x.quedanTips ? 8 : 4),
+    r: () => ({ txt: 'Cuando te guste cómo quedó, mirá «Entregar», al lado de la hoja, y después su punto.' }),
   },
   {
     id: 'pasar', p: '¿Cómo paso a la siguiente consigna?', si: (x) => x.enClase && !x.interludio, peso: () => 3,

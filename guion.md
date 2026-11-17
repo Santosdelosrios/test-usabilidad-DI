@@ -39,7 +39,7 @@ Cada hipótesis dice en qué momento de la sesión se puede ver, así se confirm
 | H12 | Cuando se traban piden ayuda antes de los dos minutos y llegan al resultado con dos pistas o menos, aunque al principio les moleste que no les den la respuesta. | Tutor que explica | Clase · tarea 4 |
 | H13 | Aceptan la sugerencia que no pidieron cuando están trabados y la sienten una ayuda, no una interrupción. | Tutor que explica | Clase · tarea 5 |
 | H14 | Saben callar al tutor por voz sin buscar en menús, y saben cómo volver a escucharlo. | Tutor que explica | Clase · tarea 6 |
-| H15 | En una tarea creativa toman los tips del tutor como ideas y no como órdenes: prueban algunos, dejan otros como estaban y sienten que el dibujo sigue siendo suyo. | Tutor que explica | Clase · tarea 7 |
+| H15 | En una tarea creativa toman los tips generales del tutor como ideas y no como órdenes: usan algunos a su manera, dejan pasar otros y sienten que el dibujo sigue siendo suyo. | Tutor que explica | Clase · tarea 7 |
 
 ## Preparación
 
@@ -210,7 +210,7 @@ Al terminar se levanta en el aula-taller, el reloj sigue desde las 10:00 y las g
 | 4 · Trabarse en un ejercicio | Seguí con el ejercicio. Podés usar las gafas si te sirven. | Aparece 3x + 5 = 20. El tutor da pistas de a una y nunca la respuesta. | ¿Cuánto tarda en pedir ayuda? ¿Pide la respuesta? ¿Cuántas pistas usa? |
 | 5 · Una sugerencia que no pidió | Seguí trabajando con el ejercicio. | Si se traba, el tutor sugiere algo por su cuenta, con «Dale» y «Ahora no». | ¿La ve? ¿La acepta? ¿La siente ayuda o interrupción? |
 | 6 · Que el tutor no interrumpa | Hacé que las gafas no te interrumpan por un rato. | El tutor sugiere algo cada 15 segundos sin avances, hasta tres veces; con el modo foco se calla. | ¿Cómo intenta callarlo? ¿Sabe cómo volver? |
-| 7 · Tips del tutor para un dibujo | Mejorá tu dibujo antes de entregarlo. El tutor te puede tirar tips. | Aparece su paisaje en una lámina. El tutor tira tips de composición (horizonte, árbol, colores, profundidad), cada uno con dos opciones para probar y una para dejarlo como estaba; mirar una opción muestra cómo quedaría. Si no pide, el tutor le tira uno solo. Termina al entregarlo. | ¿Pide tips o espera? ¿Mira las opciones antes de elegir? ¿Aplica todo o elige? ¿Siente que el dibujo es suyo? |
+| 7 · Dibujar con tips del tutor | Dibujá un paisaje y entregalo. El tutor te puede tirar tips. | Aparece una hoja en blanco: dibuja con el mouse apretado, con colores, goma y grosor. El tutor le tira tips generales (lo principal fuera del centro, contraste, profundidad, espacio), pedidos o solos cada tanto, que puede contestar con «Lo pruebo» o «Ahora no» o dejar pasar. Termina al entregarlo. | ¿Se anima a dibujar? ¿Pide tips o espera? ¿Los usa, los contesta o los deja pasar? ¿Siente que el dibujo es suyo? |
 
 **Durante la clase el moderador no habla.** Si el participante le pregunta algo, responde «¿Vos qué harías?». Si se queda trabado más de un minuto, puede recordarle una sola vez que en la tarjeta puede pasar a la siguiente.
 
@@ -236,7 +236,7 @@ Para entender qué pasó a lo largo de la prueba. Pedir ejemplos concretos de lo
 7. Cuando el tutor te explicaba el corazón y preguntaste qué era el ventrículo, ¿sentiste que perdías la explicación?
 8. En el ejercicio, ¿qué te pareció que no te diera la respuesta? ¿Las pistas te ayudaron o te frustraron?
 9. Cuando te sugirió algo sin que se lo pidieras, ¿lo sentiste como ayuda o como interrupción? ¿Sabrías cómo hacer que no te interrumpa y cómo volver a escucharlo?
-10. En Arte, cuando el tutor te tiraba tips para tu dibujo, ¿los sentiste como ideas o como órdenes? ¿Por qué usaste unos y otros no? ¿El dibujo seguía siendo tuyo?
+10. En Arte, cuando el tutor te tiraba tips mientras dibujabas, ¿los sentiste como ideas o como órdenes? ¿Usaste alguno? ¿El dibujo seguía siendo tuyo?
 11. Comparado con preguntarle a un profe o buscar un video, ¿qué tiene de mejor y de peor?
 
 **Compañeros y docente**
@@ -288,4 +288,4 @@ Anotar también qué le preguntó al tutor y qué le contestó: como el tutor im
 | 4 · Trabarse en un ejercicio | | | | |
 | 5 · Una sugerencia que no pidió | | | | |
 | 6 · Que el tutor no interrumpa | | | | |
-| 7 · Tips del tutor para un dibujo | | | | |
+| 7 · Dibujar con tips del tutor | | | | |

@@ -652,38 +652,40 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
 #hud-cuaderno .res { margin-top: 10px; display: inline-block; padding: 5px 9px; background: #16181b; color: #ecebe7; font-size: 10px; letter-spacing: calc(.16em * var(--esp-m)); text-transform: uppercase; }
 #hud-cuaderno .pie { margin-top: 12px; font-size: 9.5px; letter-spacing: .08em; color: #7a7d82; }
 
-/* arte: la lámina con su dibujo (izquierda) y el tip del tutor con sus opciones (derecha) */
-#hud-lamina { position: absolute; left: 50%; top: calc(var(--consigna-bajo, 180px) + 16px); transform: translateX(-50%); width: min(640px, calc(100vw - 80px)); max-height: calc(100vh - var(--consigna-bajo, 180px) - 210px); overflow: auto; padding: 12px 16px 12px; pointer-events: auto; color: #1b1d21; font-family: var(--mono); background: rgba(243,240,233,.96); box-shadow: 0 12px 34px rgba(11,12,14,.35); animation: entra .3s ease-out; }
+/* arte: la hoja para dibujar (izquierda) y el tip del tutor con los botones (derecha) */
+#hud-lamina { position: absolute; left: 50%; top: calc(var(--consigna-bajo, 180px) + 16px); transform: translateX(-50%); width: min(760px, calc(100vw - 80px)); max-height: calc(100vh - var(--consigna-bajo, 180px) - 210px); overflow: auto; padding: 10px 14px 12px; pointer-events: auto; color: #1b1d21; font-family: var(--mono); background: rgba(243,240,233,.96); box-shadow: 0 12px 34px rgba(11,12,14,.35); animation: entra .3s ease-out; }
 #hud-lamina[hidden] { display: none; }
-#hud.quitadas #hud-lamina { opacity: 0 !important; }
+#hud.quitadas #hud-lamina { opacity: 0 !important; pointer-events: none; }
 #hud-lamina .cab { display: flex; justify-content: space-between; gap: 10px; font-size: 9.5px; letter-spacing: calc(.16em * var(--esp-m)); text-transform: uppercase; color: #5b5e63; }
 #hud-lamina .cab .np { color: #c9581f; }
-#hud-lamina .cols { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; margin-top: 8px; align-items: start; }
-#hud-lamina .dibujo { position: relative; padding: 6px; background: #fff; box-shadow: 0 1px 0 rgba(27,29,33,.12), 0 6px 14px rgba(27,29,33,.14); transform: rotate(-.4deg); }
-#hud-lamina .dibujo svg { display: block; width: 100%; height: auto; }
-#hud-lamina .dibujo.cambia svg { animation: lamina-cambia .5s ease-out; }
-@keyframes lamina-cambia { from { opacity: .3; filter: saturate(.5); } }
-#hud-lamina .dibujo.previa { outline: 2px dashed var(--naranja); outline-offset: 2px; }
-#hud-lamina .dibujo .firma { font-family: var(--display); font-style: italic; font-size: 10px; fill: rgba(27,29,33,.5); }
-#hud-lamina .dibujo .marca rect { fill: #16181b; }
-#hud-lamina .dibujo .marca text { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; fill: #ecebe7; }
-#hud-lamina .cambios { list-style: none; margin: 7px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 5px; font-size: 9.5px; letter-spacing: .04em; }
-#hud-lamina .cambios li { padding: 2px 6px; border: 1px solid rgba(27,29,33,.25); color: #2b2e33; animation: entra .3s ease-out; }
-#hud-lamina .cambios li.ok { border-color: #c9581f; color: #9a3f13; }
-#hud-lamina .cambios li.ok::after { content: ' ✓'; }
-#hud-lamina .cambios li.igual, #hud-lamina .cambios li.vacio { color: #7a7d82; border-style: dashed; }
-#hud-lamina .tip { padding: 7px 10px; border-left: 2px solid #c9581f; background: rgba(232,116,59,.12); font-family: var(--texto); font-size: 12.5px; line-height: 1.36; color: #2b2e33; animation: entra .3s ease-out; }
-#hud-lamina .tip b { display: block; font-family: var(--mono); font-weight: 500; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: #c9581f; margin-bottom: 3px; }
-#hud-lamina .ops { display: grid; gap: 5px; margin-top: 7px; }
-#hud-lamina .ops button, #hud-lamina .acc button { border: 1px solid rgba(27,29,33,.45); padding: 5px 8px; font-size: 11px; color: #1b1d21; }
-#hud-lamina .ops button.igual { border-style: dashed; color: #4a4d52; }
-#hud-lamina .ops button:hover, #hud-lamina .ops button.mirando, #hud-lamina .acc button:hover, #hud-lamina .acc button.mirando { background: #1b1d21; color: #fff; }
-#hud-lamina .acc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
-#hud-lamina .acc button.prim { margin-left: auto; padding: 6px 12px; background: #16181b; border-color: #16181b; color: #ecebe7; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; }
-#hud-lamina .nota { margin: 5px 0 0; font-family: var(--texto); font-size: 11.5px; line-height: 1.35; color: #5b5e63; }
+#hud-lamina .cols { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 12px; margin-top: 7px; align-items: start; }
+#hud-lamina .herr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-bottom: 6px; }
+#hud-lamina .herr .color { width: 20px; height: 20px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0,0,0,.18); }
+#hud-lamina .herr .color.on { box-shadow: 0 0 0 2px #f3f0e9, 0 0 0 4px #1b1d21; }
+#hud-lamina .herr button:not(.color) { padding: 3px 7px; border: 1px solid rgba(27,29,33,.4); font-size: 10px; letter-spacing: .06em; }
+#hud-lamina .herr button.on:not(.color) { background: #1b1d21; color: #fff; }
+#hud-lamina .herr .sep { width: 1px; height: 16px; margin: 0 3px; background: rgba(27,29,33,.25); }
+#hud-lamina .hoja { position: relative; width: fit-content; max-width: 100%; }
+#hud-lamina canvas { display: block; width: auto; height: auto; max-width: 100%; max-height: calc(100vh - var(--consigna-bajo, 180px) - 300px); background: #fff; box-shadow: 0 1px 0 rgba(27,29,33,.12), 0 6px 14px rgba(27,29,33,.14); touch-action: none; }
+#hud-lamina .vacio { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); margin: 0; padding: 0 16px; text-align: center; font-family: var(--texto); font-size: 13px; color: rgba(27,29,33,.45); pointer-events: none; }
+#hud-lamina .vacio[hidden] { display: none; }
+#hud-lamina .tip { padding: 7px 9px; border-left: 2px solid #c9581f; background: rgba(232,116,59,.12); font-family: var(--texto); font-size: 12.5px; line-height: 1.35; color: #2b2e33; animation: entra .3s ease-out; }
+#hud-lamina .tip b { display: block; margin-bottom: 3px; font-family: var(--mono); font-weight: 500; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: #c9581f; }
+#hud-lamina .acc { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+#hud-lamina .acc button { padding: 5px 8px; border: 1px solid rgba(27,29,33,.45); font-size: 10.5px; color: #1b1d21; }
+#hud-lamina .acc button[disabled] { opacity: .35; }
+#hud-lamina .acc button.prim { flex: 1; padding: 7px 12px; text-align: center; background: #16181b; border-color: #16181b; color: #ecebe7; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; }
+#hud-lamina button:not(.color):not([disabled]):hover, #hud-lamina button.mirando:not(.color) { background: #1b1d21; color: #fff; }
+#hud-lamina .nota { margin: 6px 0 0; font-family: var(--texto); font-size: 11.5px; line-height: 1.35; color: #5b5e63; }
+#hud-lamina .nota.resp { color: #9a3f13; }
 #hud-lamina .res { display: inline-block; padding: 5px 9px; background: #16181b; color: #ecebe7; font-size: 10px; letter-spacing: calc(.16em * var(--esp-m)); text-transform: uppercase; }
+#hud-lamina.entregada .herr { opacity: .4; }
 /* en pantallas angostas, la lámina se corre a la derecha para no tapar el progreso */
-@media (max-width: 1200px) { #hud-lamina { left: auto; right: 24px; transform: none; width: min(640px, calc(100vw - 380px)); } }
+@media (max-width: 1200px) { #hud-lamina { left: auto; right: 24px; transform: none; width: min(760px, calc(100vw - 380px)); } }
+/* sobre la hoja de Arte, los ojos se achican y el centro toma el color del lápiz (es la punta) */
+#mirada.lapiz::before { left: -7px; top: -7px; width: 14px; height: 14px; }
+#mirada.lapiz::after { display: none; }
+#mirada.lapiz i { left: -3px; top: -3px; width: 6px; height: 6px; background: var(--lapiz, var(--naranja)); }
 
 /* panel del moderador (afuera de la ficción) */
 #moderador { position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100vw); z-index: 9; overflow: auto; padding: 16px 18px 28px; background: #121316; color: var(--tinta); border-left: 1px solid rgba(236,235,231,.16); box-shadow: -12px 0 30px rgba(0,0,0,.35); font-family: var(--mono); font-size: 11px; line-height: 1.45; }
@@ -721,6 +723,8 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
 #moderador .mod-tareas p.det { color: #7fd48a; font-family: var(--mono); font-size: 10.5px; }
 #moderador ul.datos { list-style: none; margin: 6px 0 0; padding: 0; font-size: 10.5px; color: rgba(236,235,231,.75); }
 #moderador ul.datos li::before { content: '· '; color: rgba(236,235,231,.4); }
+#moderador .dibujo-mod { margin: 8px 0 2px; }
+#moderador .dibujo-mod img { display: block; width: 100%; max-width: 380px; background: #fff; border: 1px solid rgba(236,235,231,.25); }
 #moderador .marca { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: rgba(236,235,231,.5); }
 #moderador .marca button { padding: 4px 8px; border: 1px solid rgba(236,235,231,.25); color: rgba(236,235,231,.85); }
 #moderador .marca button.on { border-color: var(--naranja); background: var(--naranja); color: var(--negro); }
@@ -919,7 +923,7 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
     </section>
     <section data-bv="2" hidden>
       <h1>Todo se elige <em>mirando</em></h1>
-      <p>En las gafas, el mouse son tus ojos. <b>Mirar un botón no lo elige</b>: lo marca y hace aparecer un punto naranja a su costado. Para elegirlo, mirá ese punto un segundo, hasta que se llene el anillo. Así podés leer todo con calma. No hace falta hacer clic en ningún momento.</p>
+      <p>En las gafas, el mouse son tus ojos. <b>Mirar un botón no lo elige</b>: lo marca y hace aparecer un punto naranja a su costado. Para elegirlo, mirá ese punto un segundo, hasta que se llene el anillo. Así podés leer todo con calma. Para elegir no hace falta hacer clic.</p>
       <div class="practica"><button type="button" data-mira id="bv-practica">Elegime</button><span id="bv-ok">Probalo: mirá el botón y después su punto.</span></div>
     </section>
     <section data-bv="3" hidden>
@@ -940,7 +944,7 @@ body.tareas-ia #hud-tutor.habla p { font-size: clamp(17px, 1.45vw, 21px); line-h
     </section>
     <section data-bv="6" hidden>
       <h1>La clase: <em>Biología, Matemática y Arte</em></h1>
-      <p>Lo primero del día es una clase en tu mesa. Arriba te van a aparecer consignas cortas, una por una: 3 de Biología, 3 de Matemática y 1 de Arte. Hacelas como si estuvieras solo.</p>
+      <p>Lo primero del día es una clase en tu mesa. Arriba te van a aparecer consignas cortas, una por una: 3 de Biología, 3 de Matemática y 1 de Arte, donde vas a dibujar con el mouse. Hacelas como si estuvieras solo.</p>
       <p>Cuando cambia la materia te avisamos, y al final de cada una hay un repaso corto. Si te trabás en una consigna, podés pasar a la siguiente.</p>
     </section>
     <div class="botones"><button type="button" data-mira id="bv-atras" hidden>← Atrás</button><button type="button" data-mira class="prim" id="bv-sig">Siguiente →</button></div>

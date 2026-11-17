@@ -18,7 +18,7 @@ En concreto, queremos aprender:
 - **Ayuda en un ejercicio:** si piden ayuda cuando se traban, cómo toman que el tutor dé pistas y no la respuesta, y cuántas pistas necesitan.
 - **Sugerencias que no pidieron:** si las ven, si las aceptan o las descartan, y si las sienten ayuda o interrupción.
 - **Que el tutor no interrumpa:** si saben cómo silenciarlo un rato y cómo volver.
-- **Tips en una tarea creativa (Arte):** si piden tips o esperan a que el tutor se los tire, si miran cómo quedaría antes de elegir, si aplican todo o eligen, y si sienten que el dibujo sigue siendo suyo.
+- **Tips en una tarea creativa (Arte):** si se animan a dibujar, si piden tips o esperan a que el tutor se los tire, si los usan a su manera, los contestan o los dejan pasar, y si sienten que el dibujo sigue siendo suyo.
 
 Lo social (compañeros, docente, pizarrón compartido) lo mide el resto del recorrido. Si un participante comenta sobre eso, se anota pero no se profundiza.
 
@@ -34,7 +34,7 @@ Son las hipótesis H9 a H15 de [`guion.md`](guion.md). Cada una dice en qué tar
 | H12 | Cuando se traban piden ayuda antes de los dos minutos. Al principio les molesta que no les den la respuesta, pero llegan al resultado con dos pistas o menos. | 4 | `tiempo_hasta_logro_s`, `pistas_pedidas` ≤ 2 y `pidio_la_respuesta`. |
 | H13 | Ven la sugerencia que no pidieron y la aceptan si están trabados; la sienten una ayuda, no una interrupción. | 5 | `sugerencias_aceptadas` frente a `sugerencias_descartadas`, y pregunta final 5. |
 | H14 | Saben callar al tutor por voz («no me interrumpas») sin buscar en menús, y entienden cómo volver a escucharlo. | 6 | Tarea 6 en «ok» con «por voz» en el detalle, y pregunta final 6. |
-| H15 | En una tarea creativa, sin respuesta correcta, toman los tips del tutor como ideas y no como órdenes: prueban algunos, dejan otros como estaban y sienten que el dibujo sigue siendo suyo. | 7 | Tarea 7 con `tips_aplicados` y `tips_dejados` (no todos aplicados), opciones miradas antes de elegir (eventos `mira` del JSON) y pregunta final 10 de [`guion.md`](guion.md). |
+| H15 | En una tarea creativa, sin respuesta correcta, toman los tips generales del tutor como ideas y no como órdenes: usan algunos a su manera, dejan pasar otros y sienten que el dibujo sigue siendo suyo. | 7 | Tarea 7: `tips_lo_pruebo` frente a `tips_ahora_no` y a los que quedaron sin respuesta, `trazos_despues` de cada tip (tabla de tips del CSV), el dibujo entregado y la pregunta final 10 de [`guion.md`](guion.md). |
 
 ## Cómo empieza la clase
 
@@ -125,15 +125,15 @@ Durante el cambio de clase solo funcionan Shift + M (panel), Shift + N (lo salte
 - **Pasa a la siguiente:** cuando el foco lleva diez segundos activo (o cinco segundos después de apagar la iniciativa del tutor). Después vienen el repaso de Matemática y el cambio de clase a la mesa de Arte.
 - **Tecla de respaldo, si alguien acompaña:** Shift + F.
 
-### 7 · Tips del tutor para un dibujo
+### 7 · Dibujar con tips del tutor
 
-- **Escenario:** En Arte estás terminando un paisaje para entregar y sentís que le falta algo.
-- **Consigna:** Mejorá tu dibujo antes de entregarlo. El tutor te puede tirar tips. (A propósito, no dice que los tips son opcionales ni cómo pedirlos.)
-- **Éxito:** usa al menos un tip del tutor (lo aplica o elige dejarlo como estaba) y entrega el dibujo. Si lo entrega sin usar ningún tip, queda «parcial»; si usa tips pero no lo entrega, también.
-- **Qué pasa:** ya sentado en la mesa junto al perchero (la pantalla de la mesa dice «Arte · Tu paisaje»), aparece en las gafas una lámina con su dibujo: un paisaje con el horizonte justo en el medio, un árbol en el centro exacto y colores apagados, firmado con su nombre. Al costado hay dos botones: «Pedir un tip» y «Entregar». El tutor tiene cuatro tips de composición, siempre en el mismo orden: el horizonte (correrlo a un tercio), el árbol (sacarlo del centro), los colores (un cálido sobre un frío) y la profundidad (algo lejano, más chico y más claro). Cada tip trae tres opciones: dos para probar y una para dejarlo como estaba (por ejemplo «Bajarlo · más cielo», «Subirlo · más campo» y «Dejarlo en el medio»). **Mirar una opción, sin mirar su punto, muestra en el dibujo cómo quedaría** («Vista previa»); mirar el punto la elige. En los tips del horizonte y del árbol las gafas marcan las líneas de los tercios sobre el dibujo. No hay opciones correctas: elija lo que elija, el tutor le contesta qué cambia («Ahora el cielo tiene más lugar…» o «Dale, es tu dibujo…»), y debajo del dibujo queda anotada cada decisión. Si pasan 12 segundos sin que pida un tip, el tutor le tira uno por su cuenta («Te tiro un tip: …») y, después, uno cada 20 segundos sin actividad mientras queden; con «No me interrumpas» no tira ninguno (quedan retenidos). Cuando vio los cuatro, le recuerda una vez cómo entregarlo. Al entregar, el tutor cierra con una frase («Probaste 2 cambios y elegiste vos cuáles: quedó muy tuyo»).
-- **Qué observar:** si pide tips o espera a que el tutor se los tire. Si mira las opciones antes de elegir (la vista previa). Si aplica todo lo que le dicen o elige, y si alguna vez lo deja como estaba. Si siente que el dibujo sigue siendo suyo o que el tutor le dice qué hacer.
+- **Escenario:** En Arte tenés que dibujar un paisaje y entregarlo.
+- **Consigna:** Dibujá un paisaje y entregalo. El tutor te puede tirar tips. (A propósito, no dice que los tips son opcionales ni cómo pedirlos.)
+- **Éxito:** dibuja algo, ve al menos un tip del tutor (pedido o tirado por el tutor) y entrega el dibujo. Si entrega la hoja en blanco o sin haber visto ningún tip, queda «parcial»; mientras dibuja sin entregar, también.
+- **Qué pasa:** ya sentado en la mesa junto al perchero (la pantalla de la mesa dice «Arte · Tu paisaje»), aparece en las gafas una hoja en blanco con el aviso «Mantené apretado el mouse y dibujá: es tu lápiz». Es lo único de la prueba que no se elige mirando: se dibuja con el mouse apretado, y sobre la hoja el anillo de la mirada se achica y toma el color del lápiz. Arriba de la hoja hay 8 colores (negro, azul, celeste, verde, amarillo, naranja, rojo, marrón), la goma y dos grosores; al costado, «Pedir un tip», «Deshacer» (el último trazo), «Borrar todo» (también se deshace) y «Entregar». El tutor tiene seis tips generales y cortos, que no tocan el dibujo: «Podés empezar por lo más grande…» (solo si la hoja sigue en blanco), «Probá no poner lo más importante justo en el medio», «Para que algo se vea primero, usá un color que contraste…», «Lo que está lejos se dibuja más chico y más claro», «Dejá algo de espacio libre…» y «Repetir un color en distintas partes une el dibujo». Los da de a uno y en ese orden: cuando los pide («Pedir un tip» u «Otro tip», o mirando al tutor) o solo, a los 15 segundos y después cada 30, hasta tres por su cuenta. Con «No me interrumpas» no tira ninguno (quedan retenidos). Cada tip se puede contestar con «Lo pruebo» o «Ahora no» (el tutor responde «Dale, probalo a tu manera» o «Dale, es tu dibujo»), o dejar pasar y seguir dibujando. El tutor no ve el dibujo. Si quiere entregar la hoja en blanco, el tutor le pregunta antes. Al entregar, la hoja queda bloqueada y el tutor cierra con «¡Entregado! Quedó muy tuyo». Si el moderador vuelve a la tarea sin que la haya entregado, sigue la misma hoja.
+- **Qué observar:** si se anima a dibujar y cómo se arregla con las herramientas. Si pide tips o espera a que el tutor se los tire. Si los usa a su manera, los contesta o los deja pasar. Si siente que el tutor lo interrumpe o lo ayuda. Si siente que el dibujo sigue siendo suyo.
 - **Pasa a la siguiente:** tres segundos después de entregar el dibujo. Después vienen el repaso de Arte y el cierre.
-- **Teclas de respaldo, si alguien acompaña:** Shift + T (pide un tip), I (el tutor tira un tip ahora), Q y W (elige la primera o la segunda opción), J (lo deja como estaba), 6 (entrega).
+- **Teclas de respaldo, si alguien acompaña:** Shift + T (pide un tip), I (el tutor tira un tip ahora), Q y W (contesta «Lo pruebo» o «Ahora no»), 6 (entrega, aunque la hoja esté en blanco). Dibujar, no: el lápiz es del participante.
 
 ## Preguntas finales, cierre y planilla
 
@@ -160,9 +160,11 @@ El tutor entiende por palabras clave, sin tildes ni mayúsculas, y tolera varian
 | Responder una sugerencia | «dale», «sí» · «ahora no», «no, gracias» |
 | Silenciar al tutor | «no me interrumpas», «dejame pensar», «silencio un rato», «callate», «necesito concentrarme», «modo foco» |
 | Volver a escucharlo | «ya podés hablar», «salí del foco», «volvé a ayudarme» |
-| Pedir un tip (Arte) | «dame un tip», «otro tip», «¿qué le cambio?», «¿cómo lo mejoro?», «un consejo», «ayudame» |
-| Elegir una opción del tip | «bajalo», «más cielo», «subilo», «a la izquierda», «a la derecha», «sol naranja», «atardecer», «montañas», «un camino» · «dejalo así», «no, gracias» (lo deja como estaba) |
-| Entregar el dibujo | «entregalo», «lo entrego» |
+| Pedir un tip (Arte) | «dame un tip», «otro tip», «¿qué le cambio?», «una idea», «un consejo», «no sé qué dibujar» |
+| Contestar el tip | «lo pruebo», «dale», «me sirve» · «ahora no», «no, gracias» |
+| Cambiar el lápiz | «azul», «verde», «amarillo»… · «la goma» · «más fino», «más grueso» |
+| Corregir | «deshacé», «borrá lo último» · «borrá todo», «empiezo de nuevo» |
+| Entregar el dibujo | «entregalo», «lo entrego», «ya terminé» |
 
 Lo que no se entiende queda anotado en el panel como «sin acción», con la frase textual. Si el participante piensa en voz alta sin hablarle al tutor, también queda ahí.
 
@@ -195,9 +197,8 @@ Todas van con **Shift**, para no chocar con las teclas de las gafas. La misma li
 | Shift + F | Activa o saca el foco («no me interrumpas») |
 | Shift + T | Arte: «Dame un tip» (el tutor da el siguiente) |
 | Shift + I | Arte: el tutor tira un tip por su cuenta, ahora |
-| Shift + Q / W | Arte: elige la primera / la segunda opción del tip |
-| Shift + J | Arte: lo deja como estaba (última opción del tip) |
-| Shift + 6 | Arte: entrega el dibujo |
+| Shift + Q / W | Arte: contesta el tip «Lo pruebo» / «Ahora no» |
+| Shift + 6 | Arte: entrega el dibujo (aunque la hoja esté en blanco) |
 
 Las teclas de siempre siguen igual: G pone o saca las gafas, H pasa al modo revisión, F es el foco de las gafas y la barra espaciadora sirve para hablar en claude.ai.
 
@@ -214,7 +215,7 @@ Las sesiones quedan solo en ese navegador de esa compu: si la prueba se hace en 
 
 Qué traen los archivos:
 
-- **CSV** (separado por punto y coma, se abre en Excel o en Google Sheets): una fila por tarea con el participante, la fecha, si terminó la sesión, el estado automático, el detalle, si la salteó, la marca del moderador (si alguien acompañó), los intentos, el tiempo hasta cumplirla y el tiempo total, las pistas, las sugerencias (mostradas, aceptadas, descartadas y retenidas por el foco), los controles y preguntas del corazón, y cuántas frases entendió y cuántas no. Al final de cada fila van la materia y lo de Arte: tips pedidos, tips que tiró el tutor, aplicados, dejados como estaban, retenidos por el foco y si entregó el dibujo (las columnas anteriores no se corrieron). Abajo, una tabla por ejercicio, una tabla con cada tip de Arte (quién lo trajo, qué eligió y en cuántos segundos) y cómo quedó el dibujo, los repasos y la lista de frases de voz con el segundo y la tarea.
+- **CSV** (separado por punto y coma, se abre en Excel o en Google Sheets): una fila por tarea con el participante, la fecha, si terminó la sesión, el estado automático, el detalle, si la salteó, la marca del moderador (si alguien acompañó), los intentos, el tiempo hasta cumplirla y el tiempo total, las pistas, las sugerencias (mostradas, aceptadas, descartadas y retenidas por el foco), los controles y preguntas del corazón, y cuántas frases entendió y cuántas no. Al final de cada fila van la materia y lo de Arte: tips pedidos, tips que tiró el tutor, «Lo pruebo», «Ahora no», retenidos por el foco, trazos, colores y si entregó el dibujo (las columnas anteriores no se corrieron). Abajo, una tabla por ejercicio, el dibujo de Arte en números (trazos, colores, deshacer, borrar todo, segundos hasta entregar) y una tabla con cada tip (el texto, quién lo trajo, qué contestó y cuántos trazos hizo después), los repasos y la lista de frases de voz con el segundo y la tarea.
 - **JSON** con todo lo anterior y además el registro crudo de eventos, segundo a segundo.
 
-Los cambios de clase no suman tiempo a ninguna tarea. Lo que pasa mientras duran queda en los eventos con «cambio» en lugar del número de tarea, con su inicio y cómo terminó, y la materia a la que va (`mate` o `arte`): `cambio:inicio:arte`, `cambio:fin:arte`, `cambio:salteado:arte` (Shift + N) o `cambio:cortado:arte` (se saltó a otra tarea). En el JSON, `arte` trae cada tip, la opción elegida y cómo quedó el dibujo; los eventos `mira` dicen qué opciones miró antes de elegir.
+Los cambios de clase no suman tiempo a ninguna tarea. Lo que pasa mientras duran queda en los eventos con «cambio» en lugar del número de tarea, con su inicio y cómo terminó, y la materia a la que va (`mate` o `arte`): `cambio:inicio:arte`, `cambio:fin:arte`, `cambio:salteado:arte` (Shift + N) o `cambio:cortado:arte` (se saltó a otra tarea). En el JSON, `arte` trae todo eso y además **el dibujo como imagen** (`imagen`, un JPEG chico); el panel del moderador lo muestra en la tarea 7 y lo baja con «Bajar el dibujo». Cada trazo queda en los eventos (`trazo:color`), con su segundo.

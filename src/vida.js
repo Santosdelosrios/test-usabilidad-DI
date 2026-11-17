@@ -219,7 +219,7 @@ function dibujarMesa(g, W, H, d, t) {
 const MESA_CLASE = {
   bio: ['BIOLOGÍA · 4° B', 'EL CORAZÓN', 'SISTEMA CIRCULATORIO', 'CIRCULACIÓN MAYOR Y MENOR', true],
   mate: ['MATEMÁTICA · 4° B', 'ECUACIONES', 'DE PRIMER GRADO', 'DESPEJAR X · COMPROBAR', false],
-  arte: ['ARTE · 4° B', 'TU PAISAJE', 'COMPOSICIÓN', 'TERCIOS · CONTRASTE · PROFUNDIDAD', true],
+  arte: ['ARTE · 4° B', 'TU PAISAJE', 'DIBUJO LIBRE', 'COLOR · ESPACIO · PROFUNDIDAD', true],
 };
 function dibujarMesaClase(g, W, H, t, clase) {
   const [arriba, tit, sub, detalle, naranja] = MESA_CLASE[clase] || MESA_CLASE.bio;
