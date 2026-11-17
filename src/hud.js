@@ -13,8 +13,8 @@ const EN = { entrada: 'la entrada', hall: 'el hall', taller: 'el aula-taller', p
 
 const AGENDA = [
   { h: 9 * 60 + 20, tit: 'Llegada', lugar: 'Escuela-nodo', dest: null },
-  // lo primero del día: la clase en su mesa, seis consignas cortas con el tutor que explica (tareas-ia.js)
-  { h: 9 * 60 + 30, tit: 'Clase en tu mesa · Biología y Matemática', lugar: 'Aula-taller · tu mesa', dest: 'taller', clase: true },
+  // lo primero del día: la clase en su mesa, siete consignas cortas con el tutor que explica (tareas-ia.js)
+  { h: 9 * 60 + 30, tit: 'Clase en tu mesa · Biología, Matemática y Arte', lugar: 'Aula-taller · tu mesa', dest: 'taller', clase: true },
   { h: 10 * 60, tit: 'Taller · proyecto del grupo', lugar: 'Aula-taller', dest: 'taller', proy: true },
   { h: 10 * 60 + 45, tit: 'Presentación al grupo', lugar: 'Zona de proyección', dest: 'proyeccion' },
   { h: 11 * 60 + 15, tit: 'Bloque de foco', lugar: 'Rincón tranquilo', dest: 'rincon' },
@@ -190,8 +190,8 @@ export class HUD {
   }
 
   _saludoClase() {
-    if (this.ia) return this.cerebro.evento('Acaba de entrar a la escuela y las gafas se conectaron. Lo primero del día es la clase de Biología y Matemática en su mesa del aula-taller, a las 9:30; después, a las 10:00, arranca un proyecto con Tomi y Ana. Saludalo en una frase, contale qué tiene primero y ofrecé llevarlo a su mesa, sin llevarlo todavía.');
-    const saludo = () => this.proponer(`Buen día${this._coma()}. Lo primero es la clase de Biología y Matemática, en tu mesa del aula-taller.`, [['Llevame', () => this.clase.sentarse('saludo')], ['¿Qué tengo que hacer?', () => this.abrirTutor()]], 'saludo');
+    if (this.ia) return this.cerebro.evento('Acaba de entrar a la escuela y las gafas se conectaron. Lo primero del día es la clase de Biología, Matemática y Arte, que empieza en su mesa del aula-taller a las 9:30; después, a las 10:00, arranca un proyecto con Tomi y Ana. Saludalo en una frase, contale qué tiene primero y ofrecé llevarlo a su mesa, sin llevarlo todavía.');
+    const saludo = () => this.proponer(`Buen día${this._coma()}. Lo primero es la clase de Biología, Matemática y Arte, en tu mesa del aula-taller.`, [['Llevame', () => this.clase.sentarse('saludo')], ['¿Qué tengo que hacer?', () => this.abrirTutor()]], 'saludo');
     if (this.soloClase && !this.st.guiado) {
       this.st.guiado = true;
       this.guiaAbierta = true;
@@ -354,27 +354,26 @@ export class HUD {
   _progreso() {
     const st = this.st, c = this.clase, P = c.progreso();
     const sentado = c.activa || c.hecha;
-    const grupo = (a) => (a.every((e) => e === 'hecha' || e === 'salteada') ? 'hecha' : a.includes('ahora') || a.some((e) => e !== 'pend') ? 'ahora' : 'pend');
+    const listo = (e) => e === 'hecha' || e === 'salteada';
+    const grupo = (a) => (a.every(listo) ? 'hecha' : a.includes('ahora') || a.some((e) => e !== 'pend') ? 'ahora' : 'pend');
     const filas = [
       ['Llegar a la escuela', st.conectada ? 'hecha' : 'ahora'],
       ['Sentarte en tu mesa', sentado ? 'hecha' : st.conectada ? 'ahora' : 'pend'],
-      ['Biología · el corazón', grupo(P.bio), P.bio],
-      ['Repaso de Biología', P.repasoBio],
-      ['Matemática · ecuaciones', grupo(P.mate), P.mate],
-      ['Repaso de Matemática', P.repasoMate],
     ];
+    // cada materia: sus consignas (con su número) y su repaso
+    for (const m of P) filas.push([`${m.nombre} · ${m.tema.toLowerCase()}`, grupo(m.consignas.map((x) => x.est)), m.consignas], [`Repaso de ${m.nombre}`, m.repaso]);
     // si un grupo ya terminó pero el siguiente todavía no empezó, lo que sigue queda marcado como «ahora»
     if (sentado && !filas.some((f) => f[1] === 'ahora')) { const sig = filas.find((f) => f[1] === 'pend'); if (sig) sig[1] = 'ahora'; }
-    const unidades = [st.conectada, sentado, ...P.bio.map((e) => e === 'hecha' || e === 'salteada'), P.repasoBio === 'hecha' || P.repasoBio === 'salteada', ...P.mate.map((e) => e === 'hecha' || e === 'salteada'), P.repasoMate === 'hecha' || P.repasoMate === 'salteada'];
+    const unidades = [st.conectada, sentado, ...P.flatMap((m) => [...m.consignas.map((x) => listo(x.est)), listo(m.repaso)])];
     const pct = Math.round((100 * unidades.filter(Boolean).length) / unidades.length);
-    const firma = `${pct}|${filas.map((f) => f[1] + (f[2] || []).join('')).join('/')}|${this.nombre}`;
+    const firma = `${pct}|${filas.map((f) => f[1] + (f[2] || []).map((x) => x.est).join('')).join('/')}|${this.nombre}`;
     if (firma === this._firmaHorario) return;
     this._firmaHorario = firma;
     const ICONO = { hecha: '✓', ahora: '●', pend: '○', salteada: '–' };
     this.el.hoy.classList.add('progreso');
     this.el.hoy.querySelector('.cab').innerHTML = `<em>Tu progreso</em><span>${esc(this.nombre || 'Hoy')} · ${pct}%</span>`;
     this.el.hoy.querySelector('.barra i').style.width = `${pct}%`;
-    this.el.horario.innerHTML = filas.map(([t, e, sub]) => `<li class="${e}"><span class="h">${ICONO[e]}</span><span class="t">${esc(t)}${sub ? `<span class="puntos">${sub.map((x, i) => `<b class="${x}" title="Consigna">${i + 1 + (t.startsWith('Mate') ? 3 : 0)}</b>`).join('')}</span>` : ''}${e === 'ahora' && !sentado && st.conectada ? '<small>Ahora · elegí «Llevame» o pedíselo al tutor</small>' : ''}</span></li>`).join('');
+    this.el.horario.innerHTML = filas.map(([t, e, sub]) => `<li class="${e}"><span class="h">${ICONO[e]}</span><span class="t">${esc(t)}${sub ? `<span class="puntos">${sub.map((x) => `<b class="${x.est}" title="Consigna">${x.n}</b>`).join('')}</span>` : ''}${e === 'ahora' && !sentado && st.conectada ? '<small>Ahora · elegí «Llevame» o pedíselo al tutor</small>' : ''}</span></li>`).join('');
     const abajo = this.el.hoy.offsetTop + this.el.hoy.offsetHeight + 12;
     if (abajo > 80) this.el.avisos.style.top = `${abajo}px`;
   }
@@ -410,7 +409,7 @@ export class HUD {
     // la clase: se sienta en su mesa (o lo lleva hasta ahí)
     if (prox.clase && this.clase && this.clase.pendiente()) {
       const aca = !this.nav.walk && this.nav.current === prox.dest;
-      return this.decir(`${aca ? 'Ahora' : `A las ${hhmm(prox.h)}`} tenés clase en tu mesa: Biología y Matemática${aca ? '' : `, en ${EN[prox.dest]}`}.`, [[aca ? 'Sentarme' : 'Llevame', () => { this.cerrarTutor(); this.clase.sentarse('tutor'); }], verDia]);
+      return this.decir(`${aca ? 'Ahora' : `A las ${hhmm(prox.h)}`} tenés clase en tu mesa: Biología, Matemática y Arte${aca ? '' : `, en ${EN[prox.dest]}`}.`, [[aca ? 'Sentarme' : 'Llevame', () => { this.cerrarTutor(); this.clase.sentarse('tutor'); }], verDia]);
     }
     if (!this.nav.walk && this.nav.current === prox.dest) return this.decir(`Ahora te toca ${prox.tit.toLowerCase()}, y ya estás en ${EN[prox.dest]}.`, [verDia, ['Gracias', () => this.cerrarTutor()]]);
     this.decir(`A las ${hhmm(prox.h)} tenés ${prox.tit.toLowerCase()}, en ${EN[prox.dest]}.`, [['Llevame', () => { this.cerrarTutor(); this.guiar(prox.dest); }], verDia]);

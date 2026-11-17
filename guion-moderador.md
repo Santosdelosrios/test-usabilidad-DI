@@ -36,7 +36,7 @@ Lo que dice el moderador en voz alta, en orden, desde que llega el participante 
 
 [Cuando termina la bienvenida y aparece la escuela, leer:]
 
-> Es martes, son las 9:22 y estás llegando a tu escuela con las gafas puestas. Lo primero del día es una clase de Biología y Matemática en tu mesa del aula-taller. Hacé lo que harías en un día normal y contame en voz alta lo que vas pensando.
+> Es martes, son las 9:22 y estás llegando a tu escuela con las gafas puestas. Lo primero del día es una clase de Biología, Matemática y Arte, que empieza en tu mesa del aula-taller. Hacé lo que harías en un día normal y contame en voz alta lo que vas pensando.
 
 [Desde acá, el moderador no explica ni ayuda: observa. Lo que pasa en pantalla:]
 
@@ -60,7 +60,9 @@ El moderador solo habla en estos casos, y solo con estas frases. Nunca dice cóm
 | Está trabado en un cartel del centro (un repaso) por más de un minuto | «¿Qué te pide el cartel?» Si sigue trabado: [Shift + N lo saltea]. |
 | Quiere dejar | «Paramos acá. ¡Gracias por todo!» [Ir al cierre.] |
 
-En la clase, el moderador no anuncia nada: las gafas marcan solas los dos repasos (al terminar Biología y al terminar Matemática) y el cambio de clase. Después del repaso de Biología, el participante se levanta solo, sigue la línea naranja y se sienta en la mesa de atrás, donde es Matemática: dura unos diez segundos y no tiene que hacer nada (si hace falta, Shift + N lo saltea).
+En la clase, el moderador no anuncia nada: las gafas marcan solas los tres repasos (al terminar Biología, Matemática y Arte) y los dos cambios de clase. Después del repaso de Biología, el participante se levanta solo, sigue la línea naranja y se sienta en la mesa de atrás, donde es Matemática; después del repaso de Matemática, hace lo mismo hasta la mesa junto al perchero, donde es Arte. Cada cambio dura unos diez segundos y no tiene que hacer nada (si hace falta, Shift + N lo saltea).
+
+En Arte, el tutor le tira tips para mejorar su dibujo. Si el participante pregunta si tiene que hacerle caso, el moderador no contesta: «¿Vos qué harías?».
 
 ## 6 · Cierre
 

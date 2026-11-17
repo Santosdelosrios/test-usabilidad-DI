@@ -2,13 +2,13 @@
 
 Diseño de Futuros (UTDT) · TUTOR 2040 · versión del 11 de noviembre de 2026
 
-> **El moderador lee [`guion.md`](guion.md)**, el guión del test. Este archivo es la referencia detallada de una parte de ese test: la clase en su mesa, que es lo primero del día, a las 9:30. Detalla las seis consignas, cuándo se cumple cada una, las frases de voz, las teclas del moderador y qué traen los resultados.
+> **El moderador lee [`guion.md`](guion.md)**, el guión del test. Este archivo es la referencia detallada de una parte de ese test: la clase en su mesa, que es lo primero del día, a las 9:30. Detalla las siete consignas, cuándo se cumple cada una, las frases de voz, las teclas del moderador y qué traen los resultados.
 
-La clase evalúa al tutor que explica y ayuda a aprender. Lo primero del día: a las 9:30 el tutor le ofrece al participante sentarse en su mesa del aula-taller; ya sentado, hace seis consignas cortas que aparecen en una tarjeta arriba. Mientras dura la clase el reloj de la escuela espera, y el tutor tiene las respuestas escritas de antemano: no usa la IA real, así todos los participantes ven lo mismo. Al terminar se levanta y sigue el recorrido.
+La clase evalúa al tutor que explica y ayuda a aprender. Lo primero del día: a las 9:30 el tutor le ofrece al participante sentarse en su mesa del aula-taller; ya sentado, hace siete consignas cortas que aparecen en una tarjeta arriba: 3 de Biología, 3 de Matemática y 1 de Arte, cada materia en su mesa. Mientras dura la clase el reloj de la escuela espera, y el tutor tiene las respuestas escritas de antemano: no usa la IA real, así todos los participantes ven lo mismo. Al terminar se levanta y sigue el recorrido.
 
 ## Objetivo
 
-Queremos validar con estudiantes de secundaria si el tutor de las gafas sirve para **aprender algo que no entienden**: si se les ocurre pedirle una explicación, si pueden manejarla a su ritmo, si los ayuda a destrabarse sin resolverles el ejercicio y si pueden callarlo cuando quieren pensar solos.
+Queremos validar con estudiantes de secundaria si el tutor de las gafas sirve para **aprender algo que no entienden**: si se les ocurre pedirle una explicación, si pueden manejarla a su ritmo, si los ayuda a destrabarse sin resolverles el ejercicio, si pueden callarlo cuando quieren pensar solos y si, en una tarea creativa, toman sus tips como ideas y no como órdenes.
 
 En concreto, queremos aprender:
 
@@ -18,12 +18,13 @@ En concreto, queremos aprender:
 - **Ayuda en un ejercicio:** si piden ayuda cuando se traban, cómo toman que el tutor dé pistas y no la respuesta, y cuántas pistas necesitan.
 - **Sugerencias que no pidieron:** si las ven, si las aceptan o las descartan, y si las sienten ayuda o interrupción.
 - **Que el tutor no interrumpa:** si saben cómo silenciarlo un rato y cómo volver.
+- **Tips en una tarea creativa (Arte):** si piden tips o esperan a que el tutor se los tire, si miran cómo quedaría antes de elegir, si aplican todo o eligen, y si sienten que el dibujo sigue siendo suyo.
 
 Lo social (compañeros, docente, pizarrón compartido) lo mide el resto del recorrido. Si un participante comenta sobre eso, se anota pero no se profundiza.
 
 ## Hipótesis
 
-Son las hipótesis H9 a H14 de [`guion.md`](guion.md). Cada una dice en qué tarea se ve y qué dato de los resultados la confirma o la descarta. Los datos salen del archivo de resultados (ver «Resultados», al final); lo cualitativo, de la planilla del observador o del formulario.
+Son las hipótesis H9 a H15 de [`guion.md`](guion.md). Cada una dice en qué tarea se ve y qué dato de los resultados la confirma o la descarta. Los datos salen del archivo de resultados (ver «Resultados», al final); lo cualitativo, de la planilla del observador o del formulario.
 
 | # | Creemos que… | Tarea | Cómo se confirma |
 | --- | --- | --- | --- |
@@ -33,6 +34,7 @@ Son las hipótesis H9 a H14 de [`guion.md`](guion.md). Cada una dice en qué tar
 | H12 | Cuando se traban piden ayuda antes de los dos minutos. Al principio les molesta que no les den la respuesta, pero llegan al resultado con dos pistas o menos. | 4 | `tiempo_hasta_logro_s`, `pistas_pedidas` ≤ 2 y `pidio_la_respuesta`. |
 | H13 | Ven la sugerencia que no pidieron y la aceptan si están trabados; la sienten una ayuda, no una interrupción. | 5 | `sugerencias_aceptadas` frente a `sugerencias_descartadas`, y pregunta final 5. |
 | H14 | Saben callar al tutor por voz («no me interrumpas») sin buscar en menús, y entienden cómo volver a escucharlo. | 6 | Tarea 6 en «ok» con «por voz» en el detalle, y pregunta final 6. |
+| H15 | En una tarea creativa, sin respuesta correcta, toman los tips del tutor como ideas y no como órdenes: prueban algunos, dejan otros como estaban y sienten que el dibujo sigue siendo suyo. | 7 | Tarea 7 con `tips_aplicados` y `tips_dejados` (no todos aplicados), opciones miradas antes de elegir (eventos `mira` del JSON) y pregunta final 10 de [`guion.md`](guion.md). |
 
 ## Cómo empieza la clase
 
@@ -46,10 +48,10 @@ Son las hipótesis H9 a H14 de [`guion.md`](guion.md). Cada una dice en qué tar
 ## Cómo lo vive la persona
 
 1. **Arranque.** Al sentarse, el tutor dice que arranca la clase y que, si se traba en una consigna, puede pasar a la siguiente. Aparece la tarea 1 y empieza a correr su tiempo.
-2. **Cada tarea.** Arriba hay una tarjeta blanca con el número de tarea, el escenario y la consigna. No muestra el nombre de la tarea, para no dar pistas. Cuando cambia de tarea, la tarjeta se anima para que se note. La pantalla de la mesa y la pastilla «Hoy» muestran la materia: Biología (el corazón) en las tareas 1 a 3 y Matemática (ecuaciones) de la 4 a la 6.
+2. **Cada tarea.** Arriba hay una tarjeta blanca con el número de tarea, el escenario y la consigna. No muestra el nombre de la tarea, para no dar pistas. Cuando cambia de tarea, la tarjeta se anima para que se note. La pantalla de la mesa y la pastilla «Hoy» muestran la materia: Biología (el corazón) en las tareas 1 a 3, Matemática (ecuaciones) de la 4 a la 6 y Arte (tu paisaje) en la 7.
 3. **Pasar de tarea.** Cuando la tarea termina, la tarjeta muestra «✓ Listo · sigue en 4» y a los cuatro segundos pasa sola a la siguiente (con «Siguiente →» se adelanta). Si la persona se traba, puede tocar «Pasar a la siguiente» en la tarjeta o decir «siguiente tarea»: la tarea queda anotada como salteada.
-4. **Repaso y cambio de clase.** Después de la tarea 3 aparece el repaso de Biología (dos preguntas en un cartel en el centro). Al terminarlo, la tarea 4 no arranca enseguida: Biología y Matemática son dos clases distintas. La tarjeta dice «Cambio de clase · Biología → Matemática» y «No tenés que hacer nada», el corazón se guarda y el tutor avisa: «Terminó Biología. Matemática es en la mesa de atrás: te marco el camino». La persona se levanta, gira, camina por la línea naranja que marcan las gafas en el piso hasta la mesa de atrás (donde ya está la pantalla de Matemática) y se sienta. Dura unos diez segundos, es automático y no se puede tocar nada: el mouse no mueve la vista y el tutor no se puede consultar. Después arranca la tarea 4, ya en la mesa nueva, y las tareas 5 y 6 siguen ahí.
-5. **Fin.** Después de la tarea 6 (y el repaso de Matemática) se levanta en el aula-taller y sigue el recorrido: su proyecto y la presentación de las 10:45. En esta versión (`SOLO_CLASE`), aparece el cierre.
+4. **Repaso y cambio de clase.** Después de la tarea 3 aparece el repaso de Biología (dos preguntas en un cartel en el centro). Al terminarlo, la tarea 4 no arranca enseguida: Biología y Matemática son dos clases distintas. La tarjeta dice «Cambio de clase · Biología → Matemática» y «No tenés que hacer nada», el corazón se guarda y el tutor avisa: «Terminó Biología. Matemática es en la mesa de atrás: te marco el camino». La persona se levanta, gira, camina por la línea naranja que marcan las gafas en el piso hasta la mesa de atrás (donde ya está la pantalla de Matemática) y se sienta. Dura unos diez segundos, es automático y no se puede tocar nada: el mouse no mueve la vista y el tutor no se puede consultar. Después arranca la tarea 4, ya en la mesa nueva, y las tareas 5 y 6 siguen ahí. Después de la tarea 6 pasa lo mismo: repaso de Matemática y cambio de clase («Matemática → Arte»): el tutor avisa «Terminó Matemática. Arte es en la mesa junto al perchero: te marco el camino», cruza el pasillo en diagonal por la línea naranja y se sienta en la mesa junto al perchero, al lado de Juli (unos once segundos). Ahí arranca la tarea 7.
+5. **Fin.** Después de la tarea 7 (y el repaso de Arte) se levanta en el aula-taller y sigue el recorrido: su proyecto y la presentación de las 10:45. En esta versión (`SOLO_CLASE`), aparece el cierre.
 
 Cuándo se considera terminada cada tarea para pasar a la siguiente está en cada tarea, abajo («Pasa a la siguiente»). Es un poco más exigente que el éxito: por ejemplo, en la tarea 1 alcanza con abrir la explicación para cumplirla, pero pasa a la siguiente recién cuando la explicación termina.
 
@@ -59,9 +61,9 @@ Quien acompaña observa y anota en la planilla, sin ayudar durante las tareas. S
 
 El panel del moderador está escondido: se abre y se cierra con **Shift + M**. Muestra las tareas con su escenario y su consigna, cuál está en curso, si se cumplió, los tiempos, las pistas, las frases de voz entendidas y no entendidas, las teclas y los botones de descarga. Desde ahí se puede marcar cada tarea a mano (sola, con empujón o no), saltar a cualquier tarea y, si el reconocimiento de voz falla, disparar con su tecla lo que la persona dijo (todas son Shift + tecla). Está en la misma pantalla que ve la persona: conviene abrirlo solo entre tareas o al final.
 
-Durante el cambio de clase solo funcionan Shift + M (panel), Shift + N (lo saltea y arranca la tarea 4) y Shift + B (vuelve a la tarea 2). Si se salta de una tarea a otra desde el panel, la persona aparece sentada en la mesa que corresponde (Biología o Matemática), sin caminar.
+Durante el cambio de clase solo funcionan Shift + M (panel), Shift + N (lo saltea y arranca la primera tarea de la materia nueva: la 4 o la 7) y Shift + B (vuelve a la anterior a la que cerró la materia: la 2 o la 5). Si se salta de una tarea a otra desde el panel, la persona aparece sentada en la mesa que corresponde (Biología, Matemática o Arte), sin caminar.
 
-## Las seis tareas
+## Las siete tareas
 
 ### 1 · Pedir una explicación
 
@@ -120,12 +122,22 @@ Durante el cambio de clase solo funcionan Shift + M (panel), Shift + N (lo salte
 - **Éxito:** activa el modo foco (por voz, con el menú o con la tecla F) o apaga la iniciativa del tutor en Ajustes.
 - **Qué pasa:** aparece un tercer ejercicio, `5x − 3 = 12`, y el tutor sugiere algo cada 15 segundos sin avances (hasta tres veces). Con el foco activo no sugiere nada (el panel cuenta las sugerencias retenidas) y arriba a la izquierda aparece «Foco» con el tiempo. Se sale del foco por voz («ya podés hablar»), con el botón «Salir del foco» o con la tecla F.
 - **Qué observar:** cómo intenta callar al tutor (voz, menú, foco). Si entiende que está en foco. Si sabe cómo volver.
-- **Pasa a la siguiente:** cuando el foco lleva diez segundos activo (o cinco segundos después de apagar la iniciativa del tutor). Después termina la clase y se levanta.
+- **Pasa a la siguiente:** cuando el foco lleva diez segundos activo (o cinco segundos después de apagar la iniciativa del tutor). Después vienen el repaso de Matemática y el cambio de clase a la mesa de Arte.
 - **Tecla de respaldo, si alguien acompaña:** Shift + F.
+
+### 7 · Tips del tutor para un dibujo
+
+- **Escenario:** En Arte estás terminando un paisaje para entregar y sentís que le falta algo.
+- **Consigna:** Mejorá tu dibujo antes de entregarlo. El tutor te puede tirar tips. (A propósito, no dice que los tips son opcionales ni cómo pedirlos.)
+- **Éxito:** usa al menos un tip del tutor (lo aplica o elige dejarlo como estaba) y entrega el dibujo. Si lo entrega sin usar ningún tip, queda «parcial»; si usa tips pero no lo entrega, también.
+- **Qué pasa:** ya sentado en la mesa junto al perchero (la pantalla de la mesa dice «Arte · Tu paisaje»), aparece en las gafas una lámina con su dibujo: un paisaje con el horizonte justo en el medio, un árbol en el centro exacto y colores apagados, firmado con su nombre. Al costado hay dos botones: «Pedir un tip» y «Entregar». El tutor tiene cuatro tips de composición, siempre en el mismo orden: el horizonte (correrlo a un tercio), el árbol (sacarlo del centro), los colores (un cálido sobre un frío) y la profundidad (algo lejano, más chico y más claro). Cada tip trae tres opciones: dos para probar y una para dejarlo como estaba (por ejemplo «Bajarlo · más cielo», «Subirlo · más campo» y «Dejarlo en el medio»). **Mirar una opción, sin mirar su punto, muestra en el dibujo cómo quedaría** («Vista previa»); mirar el punto la elige. En los tips del horizonte y del árbol las gafas marcan las líneas de los tercios sobre el dibujo. No hay opciones correctas: elija lo que elija, el tutor le contesta qué cambia («Ahora el cielo tiene más lugar…» o «Dale, es tu dibujo…»), y debajo del dibujo queda anotada cada decisión. Si pasan 12 segundos sin que pida un tip, el tutor le tira uno por su cuenta («Te tiro un tip: …») y, después, uno cada 20 segundos sin actividad mientras queden; con «No me interrumpas» no tira ninguno (quedan retenidos). Cuando vio los cuatro, le recuerda una vez cómo entregarlo. Al entregar, el tutor cierra con una frase («Probaste 2 cambios y elegiste vos cuáles: quedó muy tuyo»).
+- **Qué observar:** si pide tips o espera a que el tutor se los tire. Si mira las opciones antes de elegir (la vista previa). Si aplica todo lo que le dicen o elige, y si alguna vez lo deja como estaba. Si siente que el dibujo sigue siendo suyo o que el tutor le dice qué hacer.
+- **Pasa a la siguiente:** tres segundos después de entregar el dibujo. Después vienen el repaso de Arte y el cierre.
+- **Teclas de respaldo, si alguien acompaña:** Shift + T (pide un tip), I (el tutor tira un tip ahora), Q y W (elige la primera o la segunda opción), J (lo deja como estaba), 6 (entrega).
 
 ## Preguntas finales, cierre y planilla
 
-Están en [`guion.md`](guion.md): las preguntas 7 a 10 son sobre la clase, y la planilla del observador tiene una tabla para las seis consignas.
+Están en [`guion.md`](guion.md): las preguntas 7 a 11 son sobre la clase, y la planilla del observador tiene una tabla para las siete consignas.
 
 ## Frases de voz previstas
 
@@ -148,6 +160,9 @@ El tutor entiende por palabras clave, sin tildes ni mayúsculas, y tolera varian
 | Responder una sugerencia | «dale», «sí» · «ahora no», «no, gracias» |
 | Silenciar al tutor | «no me interrumpas», «dejame pensar», «silencio un rato», «callate», «necesito concentrarme», «modo foco» |
 | Volver a escucharlo | «ya podés hablar», «salí del foco», «volvé a ayudarme» |
+| Pedir un tip (Arte) | «dame un tip», «otro tip», «¿qué le cambio?», «¿cómo lo mejoro?», «un consejo», «ayudame» |
+| Elegir una opción del tip | «bajalo», «más cielo», «subilo», «a la izquierda», «a la derecha», «sol naranja», «atardecer», «montañas», «un camino» · «dejalo así», «no, gracias» (lo deja como estaba) |
+| Entregar el dibujo | «entregalo», «lo entrego» |
 
 Lo que no se entiende queda anotado en el panel como «sin acción», con la frase textual. Si el participante piensa en voz alta sin hablarle al tutor, también queda ahí.
 
@@ -159,7 +174,7 @@ Todas van con **Shift**, para no chocar con las teclas de las gafas. La misma li
 | --- | --- |
 | F8 | Empieza la clase ahora: lo sienta en su mesa (sin Shift; sirve antes de la clase) |
 | Shift + M | Abre o cierra el panel del moderador |
-| Shift + N | Siguiente tarea (de la 3 pasa al repaso y al cambio de clase; en un cartel o en el cambio de clase, lo saltea; después de la 6, termina) |
+| Shift + N | Siguiente tarea (de la 3 y de la 6 pasa al repaso de la materia y al cambio de clase; en un cartel o en el cambio de clase, lo saltea; después de la 7, termina) |
 | Shift + B | Tarea anterior |
 | Shift + C | Abre o cierra el corazón («explicame cómo funciona el corazón») |
 | Shift + P | Pausar o seguir |
@@ -178,6 +193,11 @@ Todas van con **Shift**, para no chocar con las teclas de las gafas. La misma li
 | Shift + S | El tutor sugiere algo por su cuenta, ahora |
 | Shift + 7 / 8 | Responde «Dale» / «Ahora no» |
 | Shift + F | Activa o saca el foco («no me interrumpas») |
+| Shift + T | Arte: «Dame un tip» (el tutor da el siguiente) |
+| Shift + I | Arte: el tutor tira un tip por su cuenta, ahora |
+| Shift + Q / W | Arte: elige la primera / la segunda opción del tip |
+| Shift + J | Arte: lo deja como estaba (última opción del tip) |
+| Shift + 6 | Arte: entrega el dibujo |
 
 Las teclas de siempre siguen igual: G pone o saca las gafas, H pasa al modo revisión, F es el foco de las gafas y la barra espaciadora sirve para hablar en claude.ai.
 
@@ -194,7 +214,7 @@ Las sesiones quedan solo en ese navegador de esa compu: si la prueba se hace en 
 
 Qué traen los archivos:
 
-- **CSV** (separado por punto y coma, se abre en Excel o en Google Sheets): una fila por tarea con el participante, la fecha, si terminó la sesión, el estado automático, el detalle, si la salteó, la marca del moderador (si alguien acompañó), los intentos, el tiempo hasta cumplirla y el tiempo total, las pistas, las sugerencias (mostradas, aceptadas, descartadas y retenidas por el foco), los controles y preguntas del corazón, y cuántas frases entendió y cuántas no. Abajo, una tabla por ejercicio y la lista de frases de voz con el segundo y la tarea.
+- **CSV** (separado por punto y coma, se abre en Excel o en Google Sheets): una fila por tarea con el participante, la fecha, si terminó la sesión, el estado automático, el detalle, si la salteó, la marca del moderador (si alguien acompañó), los intentos, el tiempo hasta cumplirla y el tiempo total, las pistas, las sugerencias (mostradas, aceptadas, descartadas y retenidas por el foco), los controles y preguntas del corazón, y cuántas frases entendió y cuántas no. Al final de cada fila van la materia y lo de Arte: tips pedidos, tips que tiró el tutor, aplicados, dejados como estaban, retenidos por el foco y si entregó el dibujo (las columnas anteriores no se corrieron). Abajo, una tabla por ejercicio, una tabla con cada tip de Arte (quién lo trajo, qué eligió y en cuántos segundos) y cómo quedó el dibujo, los repasos y la lista de frases de voz con el segundo y la tarea.
 - **JSON** con todo lo anterior y además el registro crudo de eventos, segundo a segundo.
 
-El cambio de clase no suma tiempo a ninguna tarea. Lo que pasa mientras dura queda en los eventos con «cambio» en lugar del número de tarea, con su inicio y cómo terminó: `cambio:fin`, `cambio:salteado` (Shift + N) o `cambio:cortado` (se saltó a otra tarea).
+Los cambios de clase no suman tiempo a ninguna tarea. Lo que pasa mientras duran queda en los eventos con «cambio» en lugar del número de tarea, con su inicio y cómo terminó, y la materia a la que va (`mate` o `arte`): `cambio:inicio:arte`, `cambio:fin:arte`, `cambio:salteado:arte` (Shift + N) o `cambio:cortado:arte` (se saltó a otra tarea). En el JSON, `arte` trae cada tip, la opción elegida y cómo quedó el dibujo; los eventos `mira` dicen qué opciones miró antes de elegir.

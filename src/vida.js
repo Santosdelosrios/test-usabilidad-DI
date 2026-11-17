@@ -215,30 +215,36 @@ function dibujarMesa(g, W, H, d, t) {
 }
 
 // mesa del test de tareas: la materia de la clase, en vez del proyecto de talles
+// [arriba, título, subtítulo, detalle, subtítulo en naranja]
+const MESA_CLASE = {
+  bio: ['BIOLOGÍA · 4° B', 'EL CORAZÓN', 'SISTEMA CIRCULATORIO', 'CIRCULACIÓN MAYOR Y MENOR', true],
+  mate: ['MATEMÁTICA · 4° B', 'ECUACIONES', 'DE PRIMER GRADO', 'DESPEJAR X · COMPROBAR', false],
+  arte: ['ARTE · 4° B', 'TU PAISAJE', 'COMPOSICIÓN', 'TERCIOS · CONTRASTE · PROFUNDIDAD', true],
+};
 function dibujarMesaClase(g, W, H, t, clase) {
-  const bio = clase === 'bio';
+  const [arriba, tit, sub, detalle, naranja] = MESA_CLASE[clase] || MESA_CLASE.bio;
   fondoMesa(g, W, H);
   g.strokeStyle = 'rgba(236,235,231,0.55)';
   g.lineWidth = 1.5;
   g.strokeRect(6, 6, W - 12, H - 12);
   g.font = MONO(15);
   g.fillStyle = 'rgba(236,235,231,0.8)';
-  letras(g, bio ? 'BIOLOGÍA · 4° B' : 'MATEMÁTICA · 4° B', 22, 34, 2);
+  letras(g, arriba, 22, 34, 2);
   g.fillStyle = NARANJA;
   g.globalAlpha = 0.55 + 0.45 * Math.sin(t * 3);
   g.beginPath(); g.arc(W - 30, 29, 5, 0, Math.PI * 2); g.fill();
   g.globalAlpha = 1;
   estirar(g, 'expanded');
-  encajar(g, bio ? 'EL CORAZÓN' : 'ECUACIONES', 54, W - 48);
+  encajar(g, tit, 54, W - 48);
   g.fillStyle = '#ecebe7';
-  g.fillText(bio ? 'EL CORAZÓN' : 'ECUACIONES', 22, 112);
+  g.fillText(tit, 22, 112);
   estirar(g, 'normal');
   g.font = MONO(13);
-  g.fillStyle = bio ? NARANJA : 'rgba(236,235,231,0.75)';
-  letras(g, bio ? 'SISTEMA CIRCULATORIO' : 'DE PRIMER GRADO', 24, 146, 1.8);
+  g.fillStyle = naranja ? NARANJA : 'rgba(236,235,231,0.75)';
+  letras(g, sub, 24, 146, 1.8);
   g.fillStyle = 'rgba(208,210,214,0.55)';
   g.font = MONO(12);
-  letras(g, bio ? 'CIRCULACIÓN MAYOR Y MENOR' : 'DESPEJAR X · COMPROBAR', 24, 170, 1.4);
+  letras(g, detalle, 24, 170, 1.4);
   g.strokeStyle = 'rgba(236,235,231,0.25)';
   g.beginPath(); g.moveTo(22, H - 40.5); g.lineTo(W - 22, H - 40.5); g.stroke();
   g.fillStyle = 'rgba(208,210,214,0.5)';
@@ -285,7 +291,7 @@ export function buildVida({ scene, world, camera }) {
   const pm = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 0.52).rotateZ(Math.PI).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: mesaLu.t, transparent: true, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2 }));
   pm.position.set(-12.0, 0.777, 3.33);
   vida.add(pm);
-  S.pantallaMesa = pm; // la clase la cambia de mesa cuando pasa a Matemática (tareas-ia.js)
+  S.pantallaMesa = pm; // la clase la cambia de mesa cuando pasa a Matemática y a Arte (tareas-ia.js)
   const mesaB = lienzo(512, 230);
   const pb = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.5).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: mesaB.t, transparent: true, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -2 }));
   pb.position.set(-17.6, 0.777, -3.75);

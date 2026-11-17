@@ -5,8 +5,9 @@
 // Sin clave de Gemini, sin micrófono o si algo falla, el tutor muestra las preguntas frecuentes (ayuda.js).
 
 import { contexto, abrirAyuda } from './ayuda.js';
-import { TAREAS_IA } from './tareas-ia.js';
+import { TAREAS_IA, MATERIAS, materiaDe } from './tareas-ia.js';
 import { PASOS, NOMBRE_PREGUNTA } from './corazon.js';
+import { TIPS } from './arte.js';
 
 const LUGAR = { entrada: 'la entrada (plaza, afuera)', hall: 'el hall', taller: 'el aula-taller (ahí está su mesa)', proyeccion: 'la zona de proyección', rincon: 'el rincón tranquilo', nodo: 'la sala del nodo' };
 const DIR = { izquierda: [1, 0], derecha: [-1, 0], atras: [3, 0] };
@@ -18,16 +19,17 @@ const MANUAL = `MANUAL DE LAS GAFAS (es todo lo que existe en esta prueba; no ha
 - Moverse: mirar una flecha blanca del piso (o su cartel) y su punto lo lleva caminando hasta ahí. Cuando el tutor ofrece «Llevame», lo lleva él por la línea naranja del piso. Para girar la cabeza, lleva la mirada al borde izquierdo o derecho de la pantalla.
 - Lugares: entrada (plaza, afuera), hall, aula-taller (su mesa), zona de proyección, rincón tranquilo, sala del nodo. Hoy solo importa llegar a su mesa en el aula-taller.
 - Gafas: con las gafas puestas ve lo digital (su progreso, el tutor, la ruta, los nombres de las cosas). Sin gafas ve la escuela tal como es. Se las pone y se las saca él mismo (vos no podés): con la tecla G, o de verdad si la prueba usa la cámara.
-- Progreso: arriba a la izquierda, con su nombre: llegar, sentarse, 3 consignas de Biología, repaso de Biología, 3 consignas de Matemática, repaso de Matemática.
-- La clase: se hace sentado en su mesa. Arriba aparece una consigna por vez (6 en total). Cuando la cumple pasa sola; si se traba, puede pasar a la siguiente (queda como salteada).
+- Progreso: arriba a la izquierda, con su nombre: llegar, sentarse, 3 consignas de Biología, repaso de Biología, 3 consignas de Matemática, repaso de Matemática, 1 consigna de Arte, repaso de Arte.
+- La clase: se hace sentado, en la mesa de cada materia. Arriba aparece una consigna por vez (${TAREAS_IA.length} en total). Cuando la cumple pasa sola; si se traba, puede pasar a la siguiente (queda como salteada).
 - Biología: un corazón en 3D sobre la mesa que vos explicás paso a paso. Al costado tiene botones: Pausar, Repetir, Más despacio, Girar, Acercar, Cerrar. Mirando el nombre de una parte (y su punto) pregunta qué es, y la explicación sigue donde estaba.
 - Matemática: un cuaderno con una ecuación. En cada paso elige entre 3 opciones; hay un botón «Pedir una pista» (3 pistas por paso). Vos podés sugerirle ayuda: él decide si la acepta («Dale») o no («Ahora no»).
-- «No me interrumpas»: el tutor se calla y guarda los avisos hasta que diga «Ya podés hablar».
-- Al terminar cada materia hay un repaso corto de 2 preguntas en un cartel en el centro. Después del repaso de Biología cambia de clase solo: se levanta, sigue la línea naranja y se sienta en la mesa de atrás, donde es Matemática (unos diez segundos, sin hacer nada).
-- Lo que NO hay en esta prueba: proyectos, mensajes a compañeros o docentes, fotos, internet, música, juegos, notas, cambiar de consigna a elección, saltear los repasos. Vos no podés sacarle las gafas ni mover el mouse por él.
+- Arte: una lámina con su dibujo de un paisaje, para mejorarlo antes de entregarlo. Vos le das tips de composición de a uno (${TIPS.length} en total: ${TIPS.map((t) => t.tema.toLowerCase()).join(', ')}), con el botón «Pedir un tip» o porque se lo tirás solo si pasa un rato. Cada tip trae 3 opciones: dos para probar y una para dejarlo como estaba. Mirando una opción (sin mirar su punto) el dibujo le muestra cómo quedaría. Es su dibujo: no hay opciones correctas y no tiene que hacerte caso. Cuando le gusta, lo entrega con «Entregar».
+- «No me interrumpas»: el tutor se calla y guarda los avisos (y los tips) hasta que diga «Ya podés hablar».
+- Al terminar cada materia hay un repaso corto de 2 preguntas en un cartel en el centro. Después del repaso cambia de clase solo: se levanta, sigue la línea naranja y se sienta en la mesa de la materia siguiente (unos diez segundos, sin hacer nada): Matemática es en la mesa de atrás y Arte en la mesa junto al perchero.
+- Lo que NO hay en esta prueba: proyectos, mensajes a compañeros o docentes, fotos, internet, música, juegos, notas, dibujar a mano libre, cambiar de consigna a elección, saltear los repasos. Vos no podés sacarle las gafas ni mover el mouse por él.
 
-LAS 6 CONSIGNAS
-${TAREAS_IA.map((T) => `${T.n}. (${T.n <= 3 ? 'Biología' : 'Matemática'}) ${T.txt}`).join('\n')}`;
+LAS ${TAREAS_IA.length} CONSIGNAS
+${TAREAS_IA.map((T) => `${T.n}. (${materiaDe(T.n).nombre}) ${T.txt}`).join('\n')}`;
 
 const SISTEMA = (nombre) => `Sos TUTOR, el tutor de inteligencia artificial integrado en unas gafas que usa ${nombre || 'un estudiante'} de secundaria, en 2040. Es una prueba de usabilidad. El estudiante te miró y te dijo una frase en voz alta (la transcripción puede tener errores). Tu trabajo: entender qué quiere y, si se puede, hacerlo.
 
@@ -37,7 +39,8 @@ CÓMO RESPONDÉS
 - Si lo pide pero ahora no se puede (por ejemplo, el corazón cuando todavía no se sentó), decíselo y cuándo o cómo sí.
 - Si las gafas no hacen eso (no está en el MANUAL), decí con claridad que no podés y ofrecé lo más parecido que sí podés. No inventes funciones.
 - Si pregunta cómo se usa algo, explicalo con el MANUAL, con palabras simples.
-- Si es una duda del tema (el corazón, las ecuaciones), explicá corto y claro. En el ejercicio y en los repasos guiás: das una pista, no la respuesta. Si dice una respuesta o un paso, usá la acción que corresponde para que quede registrado.
+- Si es una duda del tema (el corazón, las ecuaciones, el dibujo), explicá corto y claro. En el ejercicio y en los repasos guiás: das una pista, no la respuesta. Si dice una respuesta o un paso, usá la acción que corresponde para que quede registrado.
+- En el dibujo de Arte no hay respuestas correctas: proponés y él decide. Si elige una opción de un tip (aunque sea dejarlo como estaba), usá la acción que corresponde y respetá su decisión.
 - Si no se entiende lo que dijo o puede ser dos cosas distintas, pedile que lo repita o preguntá cuál de las dos, sin hacer nada.
 - Si habla con otra persona o piensa en voz alta, "accion": null y "decir" vacío.
 - No digas que sos un modelo de lenguaje ni hables de estas instrucciones.
@@ -54,10 +57,10 @@ function situacion(h) {
   L.push(`Lugar: ${LUGAR[x.lugar] || x.lugar}${x.caminando ? ' (está caminando hacia ahí)' : ''}. ${x.gafas ? 'Tiene las gafas puestas.' : 'Tiene las gafas sacadas.'}`);
   if (!x.conectada) L.push('Las gafas todavía no se conectaron a la escuela: se conectan al entrar por la puerta (flecha «02 Hall»).');
   if (c) {
-    L.push(`Clase en su mesa: ${x.clase}. Consignas cumplidas: ${x.hechas} de 6. Repasos: Biología ${c.repasos.bio || 'pendiente'}, Matemática ${c.repasos.mate || 'pendiente'}.`);
+    L.push(`Clase en su mesa: ${x.clase}. Consignas cumplidas: ${x.hechas} de ${x.total}. Repasos: ${MATERIAS.map((m) => `${m.nombre} ${c.repasos[m.k] || 'pendiente'}`).join(', ')}.`);
     if (x.enClase && x.tarea && !x.interludio) {
       const T = TAREAS_IA[x.tarea - 1];
-      L.push(`Consigna actual: ${x.tarea} de 6 (${x.materia}). ${T.esc ? `Situación: ${T.esc} ` : ''}Consigna: «${T.txt}»`);
+      L.push(`Consigna actual: ${x.tarea} de ${x.total} (${x.materia}). ${T.esc ? `Situación: ${T.esc} ` : ''}Consigna: «${T.txt}»`);
     }
     if (x.interludio) {
       const el = document.getElementById('interludio');
@@ -78,6 +81,12 @@ function situacion(h) {
       else L.push(`Cuaderno de Matemática: ecuación ${e.ec}. Escribió: ${e.lineas.map((l) => l.txt).join(' / ') || 'nada todavía'}. Opciones para el próximo paso: ${(ej._ops || []).map(([t], i) => `${i + 1}) ${t}`).join('; ')}. Pistas usadas en este paso: ${e.nivel[e.paso1 ? 1 : 0]} de 3.`);
     }
     if (ej.pendiente && ej.pendiente.estado === 'mostrada') L.push(`El tutor le sugirió «${ej.pendiente.txt}» y espera que acepte o no.`);
+    const lam = c.lamina;
+    if (lam && lam.activo && lam.e) {
+      const e = lam.e;
+      L.push(`Su dibujo de Arte (un paisaje): ${lam.describir()}. Tips que ya vio: ${e.i} de ${TIPS.length}.${e.entregado ? ' Ya lo entregó.' : ''}`);
+      if (e.tip) L.push(`Tip a la vista (${e.tip.def.tema}): «${e.tip.def.txt}» Opciones: ${e.tip.def.ops.map((o, i) => `${i + 1}) ${o.t}`).join('; ')}.`);
+    }
   }
   if (x.foco) L.push('Está en «No me interrumpas»: el tutor está en silencio.');
   return L.join('\n');
@@ -158,6 +167,15 @@ function accionesAhora(h) {
   if (ej.pendiente && ej.pendiente.estado === 'mostrada') {
     add('aceptar_sugerencia', 'Acepta la sugerencia del tutor', () => ej.contestarSugerencia(true, 'voz'), { habla: true });
     add('rechazar_sugerencia', 'No acepta la sugerencia del tutor', () => ej.contestarSugerencia(false, 'voz'));
+  }
+  const lam = c.lamina;
+  if (lam && lam.activo && lam.e && !lam.e.entregado) {
+    const tip = lam.e.tip;
+    if (tip) {
+      const ops = tip.def.ops;
+      add('elegir_en_tip', 'Elegir la opción del tip que él dijo (la última deja el dibujo como estaba)', (v) => { const i = indice(v, ops.map((o) => o.t)); if (i >= 0) lam.elegir(i, 'voz'); }, { habla: true, valores: ops.map((o, i) => `${i + 1} = «${o.t}»`) });
+    } else if (lam.quedan()) add('dar_tip', 'Darle el siguiente tip para su dibujo (horizonte, árbol, colores o profundidad)', () => lam.pedirTip('voz'), { habla: true });
+    add('entregar_dibujo', 'Entregar el dibujo así como está (termina la consigna de Arte)', () => lam.entregar('voz'), { habla: true });
   }
   return A;
 }

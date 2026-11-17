@@ -6,13 +6,13 @@ Diseño de Futuros (UTDT) · versión del 11 de noviembre de 2026
 
 ## Objetivo
 
-Queremos validar tres cosas de TUTOR 2040 con estudiantes de secundaria: las gafas en sí, el tutor de IA integrado y la interacción social cuando compañeros y docentes también usan gafas. El participante recorre libremente la escuela con un itinerario del día; una de las paradas es una clase en su mesa, con seis consignas cortas y el tutor que explica. La escuela-nodo y sus espacios son el escenario de la prueba, no lo que evaluamos.
+Queremos validar tres cosas de TUTOR 2040 con estudiantes de secundaria: las gafas en sí, el tutor de IA integrado y la interacción social cuando compañeros y docentes también usan gafas. El participante recorre libremente la escuela con un itinerario del día; una de las paradas es una clase en su mesa, con siete consignas cortas y el tutor que explica. La escuela-nodo y sus espacios son el escenario de la prueba, no lo que evaluamos.
 
 En concreto, queremos aprender:
 
 - **Las gafas:** si hablarles (y, como opción, mirar) se entiende solo, y qué cambia al ponérselas y sacárselas.
 - **El tutor integrado:** si guía sin resolver por el alumno, si lo sienten una ayuda o una orden, y si sus propuestas ayudan o molestan.
-- **El tutor que explica (la clase en la mesa):** si les sirve para entender algo que no saben, si pueden manejar la explicación a su ritmo, si los destraba sin darles la respuesta y si pueden callarlo.
+- **El tutor que explica (la clase en la mesa):** si les sirve para entender algo que no saben, si pueden manejar la explicación a su ritmo, si los destraba sin darles la respuesta, si pueden callarlo y si, en Arte, toman sus tips como ideas y no como órdenes.
 - **Entre compañeros:** si leen el estado de los demás (disponible, en foco) antes de pedir ayuda, y cómo comparten lo que aprendieron.
 - **Con la docente:** si entienden qué ve de su proceso, si confían en eso y qué decidirían ocultar.
 - **Todos con gafas:** qué les parece ver información de los demás y que los demás vean la suya.
@@ -21,7 +21,7 @@ Queda afuera la arquitectura de la escuela, sus espacios y el nodo técnico. Si 
 
 ## Hipótesis
 
-Cada hipótesis dice en qué momento de la sesión se puede ver, así se confirma o descarta con lo que anota el observador. H9 a H14 se ven en la clase en su mesa, donde además la prueba anota sola tiempos, pistas y frases.
+Cada hipótesis dice en qué momento de la sesión se puede ver, así se confirma o descarta con lo que anota el observador. H9 a H15 se ven en la clase en su mesa, donde además la prueba anota sola tiempos, pistas, tips y frases.
 
 | # | Creemos que… | Qué evalúa | Dónde se ve |
 | --- | --- | --- | --- |
@@ -39,6 +39,7 @@ Cada hipótesis dice en qué momento de la sesión se puede ver, así se confirm
 | H12 | Cuando se traban piden ayuda antes de los dos minutos y llegan al resultado con dos pistas o menos, aunque al principio les moleste que no les den la respuesta. | Tutor que explica | Clase · tarea 4 |
 | H13 | Aceptan la sugerencia que no pidieron cuando están trabados y la sienten una ayuda, no una interrupción. | Tutor que explica | Clase · tarea 5 |
 | H14 | Saben callar al tutor por voz sin buscar en menús, y saben cómo volver a escucharlo. | Tutor que explica | Clase · tarea 6 |
+| H15 | En una tarea creativa toman los tips del tutor como ideas y no como órdenes: prueban algunos, dejan otros como estaban y sienten que el dibujo sigue siendo suyo. | Tutor que explica | Clase · tarea 7 |
 
 ## Preparación
 
@@ -48,7 +49,7 @@ Cada sesión dura unos 50 minutos: 5 de intro, 5 de preguntas previas, unos 30 d
 | --- | --- | --- |
 | 1 · Intro | 5 | Lee la intro y pide permiso para grabar. |
 | 2 · Preguntas previas | 5 | Hace las preguntas previas. |
-| 3 · Recorrido libre | 30 aprox. | Lee el escenario y observa, sin ayudar. Lo primero es la clase en su mesa (9:30, unos 10 minutos); después, el proyecto. Termina después de la presentación de las 10:45. |
+| 3 · Recorrido libre | 30 aprox. | Lee el escenario y observa, sin ayudar. Lo primero es la clase en su mesa (9:30, unos 12 minutos); después, el proyecto. Termina después de la presentación de las 10:45. |
 | 4 · Preguntas finales | 8 a 10 | Hace las preguntas finales. |
 | 5 · Cierre | 2 | Lee el cierre, baja los resultados de la clase y corta la grabación. |
 
@@ -152,7 +153,7 @@ El test es un mundo libre: no hay tareas en pantalla ni pasos a seguir. El parti
 
 | Hora | Qué | Dónde |
 | --- | --- | --- |
-| 9:30 | Clase en tu mesa · Biología y Matemática | Aula-taller · su mesa |
+| 9:30 | Clase en tu mesa · Biología, Matemática y Arte | Aula-taller · su mesa |
 | 10:00 | Taller · el proyecto que eligió, con Tomi y Ana | Aula-taller |
 | 10:45 | Presentación al grupo | Zona de proyección |
 | 11:15 | Bloque de foco | Rincón tranquilo |
@@ -197,7 +198,7 @@ Los cuatro terminan igual: un gráfico o una tabla y una conclusión escrita con
 
 Al entrar, el tutor le dice que lo primero es la clase. A las 9:30 (o antes, si ya llegó al aula-taller) le ofrece sentarse en su mesa y, si no está ahí, llevarlo. Puede tocar «Sentarme» o decir «vamos a la clase»; si no va, el moderador aprieta F8.
 
-Ya sentado, hace seis consignas cortas que aparecen en una tarjeta arriba, en unos 10 minutos. Pasan solas cuando se cumplen y, si se traba, puede saltearlas. Durante la clase el reloj de la escuela espera y el tutor tiene respuestas escritas de antemano, así todos ven lo mismo.
+Ya sentado, hace siete consignas cortas que aparecen en una tarjeta arriba, en unos 12 minutos: 3 de Biología en su mesa, 3 de Matemática en la mesa de atrás y 1 de Arte en la mesa junto al perchero. Cada materia cierra con un repaso de dos preguntas, y entre una y otra se cambia de mesa caminando, sin tocar nada. Pasan solas cuando se cumplen y, si se traba, puede saltearlas. Durante la clase el reloj de la escuela espera y el tutor tiene respuestas escritas de antemano, así todos ven lo mismo.
 
 Al terminar se levanta en el aula-taller, el reloj sigue desde las 10:00 y las gafas le muestran los cuatro proyectos para elegir. La presentación es a las 10:45.
 
@@ -209,6 +210,7 @@ Al terminar se levanta en el aula-taller, el reloj sigue desde las 10:00 y las g
 | 4 · Trabarse en un ejercicio | Seguí con el ejercicio. Podés usar las gafas si te sirven. | Aparece 3x + 5 = 20. El tutor da pistas de a una y nunca la respuesta. | ¿Cuánto tarda en pedir ayuda? ¿Pide la respuesta? ¿Cuántas pistas usa? |
 | 5 · Una sugerencia que no pidió | Seguí trabajando con el ejercicio. | Si se traba, el tutor sugiere algo por su cuenta, con «Dale» y «Ahora no». | ¿La ve? ¿La acepta? ¿La siente ayuda o interrupción? |
 | 6 · Que el tutor no interrumpa | Hacé que las gafas no te interrumpan por un rato. | El tutor sugiere algo cada 15 segundos sin avances, hasta tres veces; con el modo foco se calla. | ¿Cómo intenta callarlo? ¿Sabe cómo volver? |
+| 7 · Tips del tutor para un dibujo | Mejorá tu dibujo antes de entregarlo. El tutor te puede tirar tips. | Aparece su paisaje en una lámina. El tutor tira tips de composición (horizonte, árbol, colores, profundidad), cada uno con dos opciones para probar y una para dejarlo como estaba; mirar una opción muestra cómo quedaría. Si no pide, el tutor le tira uno solo. Termina al entregarlo. | ¿Pide tips o espera? ¿Mira las opciones antes de elegir? ¿Aplica todo o elige? ¿Siente que el dibujo es suyo? |
 
 **Durante la clase el moderador no habla.** Si el participante le pregunta algo, responde «¿Vos qué harías?». Si se queda trabado más de un minuto, puede recordarle una sola vez que en la tarjeta puede pasar a la siguiente.
 
@@ -218,7 +220,7 @@ Al terminar se levanta en el aula-taller, el reloj sigue desde las 10:00 y las g
 
 ## Preguntas finales
 
-Para entender qué pasó a lo largo de la prueba. Pedir ejemplos concretos de lo que vivieron. Si falta tiempo, priorizar la 1, 3, 5, 8, 11, 13 y 16.
+Para entender qué pasó a lo largo de la prueba. Pedir ejemplos concretos de lo que vivieron. Si falta tiempo, priorizar la 1, 3, 5, 8, 10, 12, 14 y 17.
 
 **Las gafas**
 
@@ -234,19 +236,20 @@ Para entender qué pasó a lo largo de la prueba. Pedir ejemplos concretos de lo
 7. Cuando el tutor te explicaba el corazón y preguntaste qué era el ventrículo, ¿sentiste que perdías la explicación?
 8. En el ejercicio, ¿qué te pareció que no te diera la respuesta? ¿Las pistas te ayudaron o te frustraron?
 9. Cuando te sugirió algo sin que se lo pidieras, ¿lo sentiste como ayuda o como interrupción? ¿Sabrías cómo hacer que no te interrumpa y cómo volver a escucharlo?
-10. Comparado con preguntarle a un profe o buscar un video, ¿qué tiene de mejor y de peor?
+10. En Arte, cuando el tutor te tiraba tips para tu dibujo, ¿los sentiste como ideas o como órdenes? ¿Por qué usaste unos y otros no? ¿El dibujo seguía siendo tuyo?
+11. Comparado con preguntarle a un profe o buscar un video, ¿qué tiene de mejor y de peor?
 
 **Compañeros y docente**
 
-11. ¿Te sirvió ver si un compañero estaba disponible o en foco? ¿Te gustaría que los demás vean el tuyo?
-12. ¿Cómo te sentiste compartiendo con Santi y mostrando en el pizarrón frente a la clase? ¿Qué te dio más confianza o más vergüenza?
-13. ¿Qué pensás de que tu docente vea tu proceso? ¿Hay algo que no querrías que viera?
-14. Si todos en tu curso usaran estas gafas, ¿qué cambiaría en cómo se ayudan y se hablan entre ustedes? ¿Y con la docente?
+12. ¿Te sirvió ver si un compañero estaba disponible o en foco? ¿Te gustaría que los demás vean el tuyo?
+13. ¿Cómo te sentiste compartiendo con Santi y mostrando en el pizarrón frente a la clase? ¿Qué te dio más confianza o más vergüenza?
+14. ¿Qué pensás de que tu docente vea tu proceso? ¿Hay algo que no querrías que viera?
+15. Si todos en tu curso usaran estas gafas, ¿qué cambiaría en cómo se ayudan y se hablan entre ustedes? ¿Y con la docente?
 
 **Para cerrar**
 
-15. ¿Usarías estas gafas todo el día? ¿Qué te preocuparía?
-16. Del 1 al 5, ¿qué tan fácil fue usarlas? ¿Y qué tan útiles te parecieron para entender algo?
+16. ¿Usarías estas gafas todo el día? ¿Qué te preocuparía?
+17. Del 1 al 5, ¿qué tan fácil fue usarlas? ¿Y qué tan útiles te parecieron para entender algo?
 
 ## Cierre y registro
 
@@ -285,3 +288,4 @@ Anotar también qué le preguntó al tutor y qué le contestó: como el tutor im
 | 4 · Trabarse en un ejercicio | | | | |
 | 5 · Una sugerencia que no pidió | | | | |
 | 6 · Que el tutor no interrumpa | | | | |
+| 7 · Tips del tutor para un dibujo | | | | |

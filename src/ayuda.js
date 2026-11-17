@@ -12,7 +12,7 @@ const LUGAR = { entrada: 'la entrada', hall: 'el hall', taller: 'el aula-taller'
 export function contexto(h) {
   const nav = h.nav, c = h.clase;
   const enClase = !!(c && c.activa && !c.fin);
-  const ej = c && c.ej;
+  const ej = c && c.ej, lam = c && c.lamina;
   const lugar = nav.walk ? (nav.walk.to || 'caminando') : (nav.current || 'entrada');
   return {
     lugar,
@@ -25,10 +25,14 @@ export function contexto(h) {
     enClase,
     interludio: !!(c && c.interludio),
     tarea: enClase ? c.i : 0,
-    materia: enClase && c.i ? (c.i <= 3 ? 'Biología' : 'Matemática') : null,
+    total: c ? c.total() : 0,
+    materia: enClase && c.i ? c.materia().nombre : null,
     consigna: enClase && c.i ? c.consignaActual() : null,
     corazon: !!(c && c.corazon.abierto),
     ejercicio: !!(ej && ej.activo && ej.e && !ej.e.resuelto),
+    lamina: !!(lam && lam.activo && lam.e && !lam.e.entregado),
+    tip: !!(lam && lam.activo && lam.e && lam.e.tip),
+    quedanTips: !!(lam && lam.activo && lam.quedan()),
     foco: !!h.st.foco,
     hechas: c ? c.hechas() : 0,
   };
@@ -43,10 +47,10 @@ export const AYUDA = [
     id: 'que-hago', p: '¿Qué tengo que hacer ahora?', si: () => true, peso: (x) => (x.enClase && !x.interludio ? 5 : 10),
     r: (x, h) => {
       if (!x.gafas) return { txt: 'Ponete las gafas para ver tu día.' };
-      if (x.pendiente && x.lugar !== 'taller') return { txt: 'Ahora te toca la clase de Biología y Matemática, en tu mesa del aula-taller. Elegí «Llevame a mi mesa» y te llevo.', ops: [llevar(h)] };
+      if (x.pendiente && x.lugar !== 'taller') return { txt: 'Ahora te toca la clase de Biología, Matemática y Arte, en tu mesa del aula-taller. Elegí «Llevame a mi mesa» y te llevo.', ops: [llevar(h)] };
       if (x.pendiente) return { txt: 'Tu mesa es esta. Elegí «Sentarme» para empezar la clase.', ops: [sentar(h)] };
       if (x.interludio) return { txt: 'Estás en el cartel del centro. Para elegir una opción, mirala y después mirá el punto naranja que aparece al costado.' };
-      if (x.enClase) return { txt: `Estás en la consigna ${x.tarea} de 6, de ${x.materia}: «${x.consigna}» Si te trabás, podés pasar a la siguiente.` };
+      if (x.enClase) return { txt: `Estás en la consigna ${x.tarea} de ${x.total}, de ${x.materia}: «${x.consigna}» Si te trabás, podés pasar a la siguiente.` };
       if (x.hecha) return { txt: 'Ya terminaste la clase. ¡Muy bien! Avisale a quien te acompaña.' };
       return { txt: 'Mirá tu progreso, arriba a la izquierda: ahí está lo que sigue.' };
     },
@@ -73,8 +77,8 @@ export const AYUDA = [
     id: 'progreso', p: '¿Cuánto me falta?', si: (x) => x.conectada, peso: (x) => (x.enClase ? 4 : 1),
     r: (x) => ({
       txt: x.pendiente ? 'Todavía no empezó la clase: te falta llegar a tu mesa y sentarte. Tu progreso está arriba a la izquierda.'
-        : x.hecha ? 'Terminaste todo: la clase y los dos repasos.'
-        : `Hiciste ${x.hechas} de 6 consignas. Arriba a la izquierda ves tu progreso completo.`,
+        : x.hecha ? 'Terminaste todo: la clase y los tres repasos.'
+        : `Hiciste ${x.hechas} de ${x.total} consignas. Arriba a la izquierda ves tu progreso completo.`,
     }),
   },
   {
@@ -88,6 +92,22 @@ export const AYUDA = [
   {
     id: 'ejercicio', p: '¿Cómo resuelvo el ejercicio?', si: (x) => x.ejercicio, peso: () => 7,
     r: () => ({ txt: 'En el cuaderno, elegí el próximo paso entre las tres opciones. Si no sabés cuál, pedime una pista: te ayudo sin darte la respuesta.' }),
+  },
+  {
+    id: 'tip', p: '¿Cómo te pido un tip?', si: (x) => x.lamina && !x.tip && x.quedanTips, peso: () => 7,
+    r: () => ({ txt: 'Mirá «Pedir un tip», al lado de tu dibujo, o mirame y elegí «Dame un tip». Te propongo una idea y vos decidís si la usás.' }),
+  },
+  {
+    id: 'tip-opciones', p: '¿Cómo veo cómo queda antes de elegir?', si: (x) => x.tip, peso: () => 7,
+    r: () => ({ txt: 'Mirá una opción del tip, sin mirar su punto: el dibujo te muestra cómo quedaría. Si te gusta, mirá el punto y queda elegida.' }),
+  },
+  {
+    id: 'tip-obligado', p: '¿Tengo que hacer lo que me decís?', si: (x) => x.lamina, peso: () => 5,
+    r: () => ({ txt: 'No: es tu dibujo. Mis tips son ideas para probar; si preferís, elegí dejarlo como estaba y no pasa nada.' }),
+  },
+  {
+    id: 'entregar', p: '¿Cómo entrego el dibujo?', si: (x) => x.lamina, peso: (x) => (x.quedanTips || x.tip ? 4 : 8),
+    r: () => ({ txt: 'Cuando te guste cómo quedó, mirá «Entregar», al lado del dibujo, y después su punto.' }),
   },
   {
     id: 'pasar', p: '¿Cómo paso a la siguiente consigna?', si: (x) => x.enClase && !x.interludio, peso: () => 3,
@@ -111,7 +131,7 @@ export const AYUDA = [
   },
   {
     id: 'tutor', p: '¿Qué podés hacer vos?', si: () => true, peso: () => 1,
-    r: (x, h) => ({ txt: `Te explico los temas de la clase, te doy pistas sin darte la respuesta, te llevo a donde tengas que ir y, si querés pensar solo, me callo. Podés consultarme en cualquier momento: mirame y después mirá el punto que aparece al lado${h.tutorVoz && h.tutorVoz.puede() ? '; ahí te escucho y me decís qué necesitás' : ''}.` }),
+    r: (x, h) => ({ txt: `Te explico los temas de la clase, te doy pistas sin darte la respuesta, te tiro tips para tu dibujo, te llevo a donde tengas que ir y, si querés pensar solo, me callo. Podés consultarme en cualquier momento: mirame y después mirá el punto que aparece al lado${h.tutorVoz && h.tutorVoz.puede() ? '; ahí te escucho y me decís qué necesitás' : ''}.` }),
   },
 ];
 

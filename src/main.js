@@ -161,7 +161,7 @@ async function start() {
   const escribiendo = (e) => !!(e.target && /input|textarea|select/i.test(e.target.tagName));
   window.addEventListener('keydown', (e) => { if (e.code === 'KeyH' && !e.repeat && !escribiendo(e)) alternarModo(); });
   // ── cómo es el test por ahora ──
-  // SOLO_CLASE: el test es llegar a la escuela y hacer la clase en su mesa (las 6 consignas);
+  // SOLO_CLASE: el test es llegar a la escuela y hacer la clase en su mesa (las 7 consignas);
   //   con false vuelven el proyecto, los mensajes, la presentación y el resto del día.
   // VOZ_CONTROL: el participante le habla a las gafas. Apagado: todo se maneja con la mirada
   //   (el tutor igual habla en voz alta).
@@ -327,7 +327,7 @@ async function start() {
       const mesa = hud.anclas.find((a) => a.id === 'mesa');
       if (mesa) {
         mesa.tit = 'Tu mesa';
-        mesa.det = () => (tareasIA.hecha ? 'Clase terminada' : 'Clase · Biología y Matemática · 9:30');
+        mesa.det = () => (tareasIA.hecha ? 'Clase terminada' : 'Clase · Biología, Matemática y Arte · 9:30');
         mesa.acc = [['Sentarme para la clase', () => tareasIA.sentarse('mesa')]];
         hud._pintarAcc(mesa);
       }
@@ -349,7 +349,7 @@ async function start() {
     }
   }
   $('intro-prueba').addEventListener('click', abrirBienvenida);
-  // la clase en su mesa (9:30, lo primero del día): seis consignas cortas con el tutor que explica (tareas-ia.js)
+  // la clase en su mesa (9:30, lo primero del día): siete consignas cortas con el tutor que explica (tareas-ia.js)
   let tareasIA = null;
   // resultados de la clase que quedaron guardados en este navegador (aunque se haya cerrado la pestaña)
   instalarGuardadas($('moderador'));
