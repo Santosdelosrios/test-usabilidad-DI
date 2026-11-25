@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>El futuro del aprendizaje hacia 2040 · Grupo 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   THEME — "Cuaderno": hoja rayada, birome azul, lapicera roja, resaltador.
+   Cambiá estos valores para cambiar todo el deck.
+   ===================================================================== */
+:root {
+  --paper: #FBF9F3;          /* hoja */
+  --rule: #CFDDEB;           /* renglones (cada 48px) */
+  --grid: #DDE7F1;           /* cuadriculado */
+  --margin: #E07C7C;         /* línea de margen */
+  --blue: #22399E;           /* birome azul: títulos y acentos */
+  --ink: #24272D;            /* grafito: texto */
+  --muted: #6A6E77;
+  --faint: #A3A8B2;
+  --off: #CDD2DB;            /* caminos no elegidos del backcasting */
+  --pen: #D9382E;            /* lapicera roja: solo marcas */
+  --hl: rgba(255, 214, 40, .5);  /* resaltador */
+  --stage-bg: #E7E3D9;
+  --slide-bg: var(--paper);
+  --f: 'Jost', 'Century Gothic', 'Futura', sans-serif;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* =====================================================================
+   FIXED 16:9 STAGE (viewport-base.css, completo)
+   ===================================================================== */
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-viewport { position: fixed; inset: 0; overflow: hidden; background: var(--stage-bg, #000); }
+.deck-stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; background: var(--slide-bg, #fff); }
+.slide { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; display: block; visibility: hidden; opacity: 0; pointer-events: none; background: var(--slide-bg, #fff); }
+.slide.active, .slide.visible { visibility: visible; opacity: 1; pointer-events: auto; z-index: 1; }
+img, video, canvas, svg { max-width: 100%; max-height: 100%; }
+.deck-controls { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 1000; }
+@media print {
+  html, body { width: 1920px; height: auto; overflow: visible; background: #fff; }
+  .deck-viewport { position: static; overflow: visible; background: #fff; }
+  .deck-stage { position: static; width: auto; height: auto; transform: none !important; background: none; }
+  .slide { position: relative; display: block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; width: 1920px; height: 1080px; break-after: page; page-break-after: always; }
+  .slide:last-child { break-after: auto; page-break-after: auto; }
+  .deck-controls { display: none !important; }
+  /* everything in its final state when printing */
+  .rv, .hl { opacity: 1 !important; transform: none !important; }
+  .cover-photo { transform: rotate(-1.6deg) !important; }
+  .glasses { transform: rotate(-1deg) !important; }
+  .mark path { stroke-dashoffset: 0 !important; }
+  .deck-ui, .notes-box { display: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .2s !important; }
+}
+
+/* =====================================================================
+   PAPER: renglones, cuadriculado, margen, número de página
+   Los renglones caen en y = 191 + 48k; las líneas base del texto se apoyan ahí.
+   ===================================================================== */
+body { font-family: var(--f); color: var(--ink); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.slide > * { position: absolute; }
+.ruled { left: 0; right: 0; top: 144px; bottom: 0;
+  background: repeating-linear-gradient(to bottom, transparent 0 46px, var(--rule) 46px 47.5px, transparent 47.5px 48px); }
+.grid-paper { left: 200px; right: 0; top: 144px; bottom: 0;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 46px, var(--grid) 46px 47.5px, transparent 47.5px 48px),
+    repeating-linear-gradient(to right, transparent 0 46px, var(--grid) 46px 47.5px, transparent 47.5px 48px); }
+.margin-line { top: 0; bottom: 0; left: 198px; width: 2px; background: var(--margin); }
+.pg { top: 62px; right: 96px; font-size: 24px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; }
+.notes { display: none !important; }
+.layer { position: absolute; inset: 0; }
+.layer > * { position: absolute; }
+.nw { white-space: nowrap; }
+
+/* =====================================================================
+   MOTION: aparición escalonada + trazos que se dibujan
+   ===================================================================== */
+.rv { opacity: 0; transform: translateY(20px); transition: opacity .7s var(--ease) var(--d, 0s), transform .9s var(--ease) var(--d, 0s); }
+.slide.visible .rv { opacity: 1; transform: none; }
+
+/* Marcas de lapicera roja (SVG). pathLength=1 permite animar con dashoffset */
+.mark { position: relative; display: inline-block; }
+.mark svg { position: absolute; overflow: visible; pointer-events: none; max-width: none; max-height: none; }
+.mark path { fill: none; stroke: var(--pen); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1s cubic-bezier(.65, 0, .35, 1) var(--d, .7s); }
+.slide.visible .mark path { stroke-dashoffset: 0; }
+.mark.under svg { left: -1%; width: 102%; bottom: -16px; height: 26px; }
+.big .mark.ring svg { left: -46px; top: 4px; width: calc(100% + 92px); height: calc(100% - 14px); }
+.quad .mark.ring svg { left: -44px; top: -24px; width: calc(100% + 88px); height: calc(100% + 44px); }
+.slide > .mark.box, .slide > .mark.vmark { position: absolute; }
+.mark.box svg, .mark.vmark svg, .mark.led svg { left: 0; top: 0; width: 100%; height: 100%; }
+
+/* Resaltador amarillo */
+.hl { background: var(--hl); mix-blend-mode: multiply; border-radius: 12px 5px 14px 6px / 6px 14px 5px 12px;
+  transition: transform .8s cubic-bezier(.65, 0, .35, 1) var(--d, .5s); }
+.hl-v { transform: scaleY(0); transform-origin: 50% 0; }
+.hl-h { transform: scaleX(0); transform-origin: 0 50%; }
+.slide.visible .hl { transform: none; }
+.hl.soft { background: rgba(255, 214, 40, .34); }
+
+/* Foto pegada en la hoja */
+.photo { background: #fff; padding: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 14px 30px rgba(40,35,25,.14); margin: 0; }
+.photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* =====================================================================
+   TIPOGRAFÍA
+   ===================================================================== */
+.title { left: 248px; top: 111px; font-size: 84px; font-weight: 600; line-height: 96px; letter-spacing: -.02em; color: var(--blue); white-space: nowrap; }
+.flow > * { position: static; }
+.h-author { font-size: 36px; font-weight: 600; line-height: 48px; color: var(--blue); }
+.book { font-size: 26px; font-style: italic; line-height: 48px; color: var(--muted); }
+.h-step { font-size: 30px; font-weight: 600; line-height: 48px; color: var(--blue); }
+.concept { font-size: 28px; font-weight: 600; line-height: 48px; }
+.author { font-size: 24px; font-style: italic; line-height: 48px; color: var(--muted); }
+.small { font-size: 26px; line-height: 48px; }
+.muted { color: var(--muted); }
+.h-col { font-size: 34px; font-weight: 600; line-height: 48px; color: var(--blue); white-space: nowrap; }
+.big-h { font-size: 40px; }
+.key { font-size: 30px; font-weight: 600; line-height: 48px; }
+.txt, .txt-f { font-size: 28px; line-height: 48px; }
+.txt b, .txt-f b { font-weight: 600; }
+.lead { color: var(--blue); }
+ul.dash { list-style: none; }
+ul.dash li { position: relative; padding-left: 30px; font-size: 30px; line-height: 48px; }
+ul.dash li::before { content: "–"; position: absolute; left: 0; color: var(--blue); font-weight: 600; }
+.sources { left: 248px; font-size: 18px; line-height: 48px; color: var(--muted); }
+.big { font-size: 180px; font-weight: 500; line-height: 168px; letter-spacing: -.03em; }
+.num { font-size: 80px; font-weight: 500; line-height: 80px; letter-spacing: -.02em; }
+
+/* =====================================================================
+   01 · PORTADA
+   ===================================================================== */
+.cover-title { left: 248px; top: 169px; width: 1440px; font-size: 120px; font-weight: 600; line-height: 144px; letter-spacing: -.02em; color: var(--blue); }
+.cover-photo { right: 120px; top: 596px; width: 664px; height: 384px; }
+.cover-photo.rv { transform: rotate(-4deg) translateY(30px); }
+.slide.visible .cover-photo.rv { transform: rotate(-1.6deg); }
+.cover-course { left: 248px; top: 778px; font-size: 30px; font-weight: 500; line-height: 48px; color: var(--blue); }
+.cover-names { left: 248px; top: 826px; width: 860px; font-size: 28px; line-height: 48px; }
+
+/* 04 · clipart sin fondo blanco */
+.clip { object-fit: contain; mix-blend-mode: multiply; }
+
+/* =====================================================================
+   06 · ESCENARIOS (ejes sobre cuadriculado)
+   ===================================================================== */
+.axes { pointer-events: none; }
+.axis-l { font-size: 26px; font-weight: 600; line-height: 40px; color: var(--muted); white-space: nowrap; }
+.quad { font-size: 52px; font-weight: 500; line-height: 64px; text-align: center; }
+.quad.chosen { color: var(--blue); font-weight: 600; }
+
+/* =====================================================================
+   07–10, 13 · STORYBOARDS
+   ===================================================================== */
+.board { left: 248px; top: 218px; width: 1576px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 28px; }
+.board figure { margin: 0; position: relative; }
+.board .photo { padding: 6px; height: 196px; box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 6px 16px rgba(40,35,25,.10); position: relative; }
+.board.b43 .photo img { object-position: 50% 38%; }
+.board figcaption { margin-top: 10px; font-size: 19px; line-height: 24px; min-height: 48px; }
+.board.b13 { gap: 18px 28px; }
+.board.b13 .photo { height: 184px; }
+.board.b13 figcaption { margin-top: 8px; font-size: 18px; line-height: 23px; min-height: 69px; color: #3a3d44; }
+.board.b13 figcaption b { display: block; font-size: 19px; font-weight: 600; color: var(--ink); }
+.badge { position: absolute; top: 14px; left: 14px; width: 40px; height: 40px; border-radius: 50%; background: #fff; color: var(--blue);
+  font-size: 19px; font-weight: 600; line-height: 40px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.28); }
+.board figure:nth-child(1){--d:.05s}.board figure:nth-child(2){--d:.1s}.board figure:nth-child(3){--d:.15s}.board figure:nth-child(4){--d:.2s}
+.board figure:nth-child(5){--d:.25s}.board figure:nth-child(6){--d:.3s}.board figure:nth-child(7){--d:.35s}.board figure:nth-child(8){--d:.4s}
+.board figure:nth-child(9){--d:.45s}.board figure:nth-child(10){--d:.5s}.board figure:nth-child(11){--d:.55s}.board figure:nth-child(12){--d:.6s}
+
+/* =====================================================================
+   11, 12, 19 · TABLAS sobre los renglones
+   ===================================================================== */
+.th { font-size: 24px; font-weight: 600; line-height: 48px; color: var(--blue); text-align: center; }
+.th.lab { text-align: left; font-size: 26px; }
+.td { font-size: 28px; line-height: 48px; text-align: center; font-variant-numeric: tabular-nums; }
+.td.lab { text-align: left; font-weight: 500; white-space: nowrap; }
+.td.tot { font-weight: 700; }
+.td.no { color: var(--muted); }
+.td.star { font-weight: 600; }
+.dbl { height: 8px; border-top: 2px solid var(--blue); border-bottom: 2px solid var(--blue); }
+.th2 { font-size: 32px; font-weight: 600; line-height: 48px; color: var(--blue); }
+.td2 { font-size: 30px; line-height: 48px; }
+.td2.lab { font-weight: 600; }
+.stat-v { font-size: 64px; font-weight: 600; line-height: 80px; letter-spacing: -.02em; color: var(--blue); white-space: nowrap; }
+
+/* =====================================================================
+   14–16 · BACKCASTING (cuadriculado)
+   ===================================================================== */
+.bc .ln { stroke-linecap: round; }
+.bc .ln.on { stroke: var(--blue); stroke-width: 5; }
+.bc .ln.off { stroke: var(--off); stroke-width: 4; }
+.bc .q-conn { stroke: #B9C0CC; stroke-width: 1.5; stroke-dasharray: 4 5; }
+.bc .dot.on { fill: var(--blue); } .bc .dot.off { fill: var(--off); }
+.bc .dia.on { fill: var(--ink); } .bc .dia.off { fill: var(--off); }
+.bc .endc.on { fill: var(--blue); } .bc .endc.off { fill: var(--off); }
+.backcast p, .backcast .end { position: absolute; }
+.ev { width: 184px; font-size: 19px; line-height: 24px; text-align: center; }
+.ev.above { transform: translateY(-100%); }
+.ev.on { color: var(--ink); } .ev.off { color: var(--faint); }
+.q { width: 460px; text-align: center; font-size: 21px; font-weight: 600; line-height: 28px; }
+.q.on { color: var(--ink); } .q.off { color: var(--faint); }
+.end { width: 290px; }
+.end b { display: block; font-size: 28px; font-weight: 600; line-height: 34px; }
+.end span { display: block; font-size: 19px; line-height: 24px; margin-top: 2px; }
+.end.on b { color: var(--blue); } .end.on span { color: var(--ink); }
+.end.off { color: var(--faint); }
+.yr { top: 986px; width: 80px; text-align: center; font-size: 20px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* =====================================================================
+   17 · IDEAS
+   ===================================================================== */
+.idea { width: 290px; }
+.idea > * { position: static; }
+.idea .photo { padding: 6px; height: 362px; }
+.idea h3 { margin-top: 20px; font-size: 30px; font-weight: 600; line-height: 36px; color: var(--blue); }
+.idea p { margin-top: 8px; font-size: 24px; line-height: 34px; }
+.chosen-note { font-size: 26px; font-weight: 600; line-height: 40px; color: var(--pen); }
+
+/* =====================================================================
+   18 · PRODUCTO
+   ===================================================================== */
+.glasses-link { left: 248px; top: 236px; display: block; }
+.glasses { width: 800px; height: 470px; transform: rotate(-1deg); }
+.glasses-link.rv { transform: translateY(20px); }
+.ph-in { position: relative; width: 100%; height: 100%; }
+.mark.led { position: absolute; left: 62.6%; top: 38.7%; width: 74px; height: 62px; transform: translate(-50%, -50%); }
+.h-product { font-size: 44px; font-weight: 600; line-height: 48px; color: var(--blue); }
+.caption { font-size: 24px; font-style: italic; line-height: 48px; color: var(--muted); }
+.video-link, .ink-link { color: var(--blue); text-decoration: underline; text-underline-offset: 6px; text-decoration-thickness: 2px; }
+.video-link { font-size: 28px; font-weight: 600; line-height: 48px; }
+
+/* 20 · tablero */
+.dash-shot { left: 248px; top: 226px; width: 1576px; height: 727px; }
+.dash-shot img { object-fit: contain; background: #fff; }
+
+/* 21 · test */
+ul.dash.q-list li { font-size: 36px; }
+.detail { font-size: 28px; line-height: 48px; color: var(--muted); }
+.placeholder { font-size: 28px; line-height: 48px; color: var(--muted); }
+
+/* 23 · cierre */
+.closing { left: 248px; font-size: 120px; font-weight: 600; line-height: 144px; letter-spacing: -.02em; color: var(--blue); }
+
+/* =====================================================================
+   UI fuera de la diapo: contador, notas, edición
+   ===================================================================== */
+.deck-controls { font: 500 13px/1 var(--f); color: var(--ink); background: rgba(251,249,243,.92); padding: 8px 14px; border-radius: 99px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.12); opacity: .85; transition: opacity .4s; white-space: nowrap; }
+.deck-controls.hide { opacity: 0; }
+.notes-box { position: fixed; left: 50%; bottom: 64px; transform: translateX(-50%); width: min(980px, 92vw); max-height: 34vh; overflow: auto;
+  background: rgba(24, 26, 32, .94); color: #EEE; font: 400 16px/1.55 var(--f); padding: 16px 22px; border-radius: 10px; white-space: pre-wrap; z-index: 1001; display: none; }
+.notes-box.show { display: block; }
+.edit-hotzone { position: fixed; top: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
+.edit-toggle { position: fixed; top: 16px; left: 16px; z-index: 10001; font: 600 14px/1 var(--f); color: var(--blue); background: #fff; border: 1.5px solid var(--blue);
+  border-radius: 99px; padding: 9px 14px; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+.edit-toggle.show, .edit-toggle.active { opacity: 1; pointer-events: auto; }
+.edit-toggle.active { background: var(--blue); color: #fff; }
+body.editing [contenteditable="true"] { outline: 1.5px dashed rgba(34, 57, 158, .35); outline-offset: 3px; cursor: text; }
+body.editing [contenteditable="true"]:focus { outline: 2px solid var(--blue); }
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+
+  <!-- ===== 01 ===== -->
+  <section class="slide cover" data-n="1">
+    <div class="ruled"></div><div class="margin-line"></div>
+    <h1 class="cover-title rv">El futuro del <span class="mark under">aprendizaje<svg viewBox="0 0 600 26" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M6 15 C 110 9, 230 6, 360 9 S 520 17, 594 8"/></svg></span> en la secundaria argentina hacia 2040</h1>
+    <figure class="cover-photo photo rv" style="--d:.3s"><img src="img/s01_1.jpg" alt="Lu desayuna mientras las gafas le muestran el plan del día"></figure>
+    <p class="cover-course rv" style="--d:.45s">Diseño de Futuros · Sección 1 · Grupo 3</p>
+    <p class="cover-names rv" style="--d:.55s"><span class="nw">Santos de los Rios</span> - <span class="nw">Lucas Ojeda Allara</span> - <span class="nw">Facundo Riedel</span> - <span class="nw">Mateo Cuello de Elizalde</span></p>
+    <aside class="notes">Integrante 1 · 0:30
+Lu tiene 15 años, vive en una ciudad y nunca tuvo una nota numérica. En estos 20 minutos contamos cómo llegamos a ese mundo y qué objeto diseñamos para él.</aside>
+  </section>
+
+  <!-- ===== 02 ===== -->
+  <section class="slide " data-n="2">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">2</span>
+    <h2 class="title rv">Marco teórico</h2>
+    <div class="flow rv" style="left:248px;top:298px;width:493px;--d:0.15s">
+      <h3 class="h-author">Sommers (2012)</h3>
+      <p class="book">Think Like a Futurist</p>
+      <ul class="dash" style="margin-top:48px"><li>El cambio es predecible; sus resultados, no.</li><li>Cuatro fuerzas: recursos, tecnología, demografía y gobernanza.</li><li>La gobernanza reacciona a las otras tres y es el cuello de botella.</li></ul>
+    </div>
+    <div class="flow rv" style="left:789px;top:298px;width:493px;--d:0.27s">
+      <h3 class="h-author">Smith y Ashby (2020)</h3>
+      <p class="book">How to Future</p>
+      <ul class="dash" style="margin-top:48px"><li>Señales que forman tendencias y drivers.</li><li>Ruedas de futuros y backcasting.</li><li>Futuros experienciales: un escenario que se puede recorrer.</li></ul>
+    </div>
+    <div class="flow rv" style="left:1330px;top:298px;width:493px;--d:0.39s">
+      <h3 class="h-author">Kolko (2011)</h3>
+      <p class="book">Exposing the Magic of Design</p>
+      <ul class="dash" style="margin-top:48px"><li>Síntesis: ordenar y recortar datos hasta que tengan sentido.</li><li>Reencuadre: mirar el problema desde otro marco.</li><li>Combinación de insights: insight + patrón conocido = idea nueva.</li></ul>
+    </div>
+    <aside class="notes">Integrante 1 · 2:30 junto con la diapo siguiente
+Texto para decir:
+"Trabajamos con tres textos. Sommers nos dio el punto de partida: el cambio es predecible, pero sus resultados no. Para leerlo propone cuatro fuerzas: recursos, tecnología, demografía y gobernanza. La gobernanza reacciona a las otras tres, por eso es la que frena los cambios. Smith y Ashby nos dieron el método: buscar señales, agruparlas en tendencias y drivers, seguir sus consecuencias con ruedas de futuros, volver desde 2040 con backcasting y convertir el escenario en algo que se pueda recorrer. Kolko nos dio la síntesis: cómo pasar de un corpus enorme a un problema bien encuadrado, y de ahí a una idea."</aside>
+  </section>
+
+  <!-- ===== 03 ===== -->
+  <section class="slide " data-n="3">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">3</span>
+    <h2 class="title rv">El marco en cada paso del proceso</h2>
+    <div class="flow rv" style="left:248px;top:298px;width:493px;--d:0.12s">
+      <h3 class="h-step">Señales y drivers</h3>
+      <p class="concept">Señales, tendencias y drivers</p>
+      <p class="author">Smith y Ashby</p>
+      <p class="small">Las ordenamos con las cuatro fuerzas de Sommers.</p>
+    </div>
+    <div class="flow rv" style="left:789px;top:298px;width:493px;--d:0.20s">
+      <h3 class="h-step">Escenarios</h3>
+      <p class="concept">Ruedas de futuros</p>
+      <p class="author">Glenn, en Smith y Ashby</p>
+      <p class="small">Unas 30 consecuencias en cadena por cuadrante.</p>
+    </div>
+    <div class="flow rv" style="left:1330px;top:298px;width:493px;--d:0.28s">
+      <h3 class="h-step">Storyboards</h3>
+      <p class="concept">Futuros experienciales</p>
+      <p class="author">Smith y Ashby</p>
+      <p class="small">Cada mundo, bajado a un día común de una persona.</p>
+    </div>
+    <div class="flow rv" style="left:248px;top:634px;width:493px;--d:0.36s">
+      <h3 class="h-step">Crítica</h3>
+      <p class="concept">“Tu utopía siempre es la distopía de otro”</p>
+      <p class="author">Ashby</p>
+      <p class="small">Preguntamos a quién deja afuera cada mundo.</p>
+    </div>
+    <div class="flow rv" style="left:789px;top:634px;width:493px;--d:0.44s">
+      <h3 class="h-step">Backcasting</h3>
+      <p class="concept">La gobernanza, cuello de botella del cambio</p>
+      <p class="author">Sommers</p>
+      <p class="small">Las bifurcaciones de 2030 y 2033 son de gobernanza.</p>
+    </div>
+    <div class="flow rv" style="left:1330px;top:634px;width:493px;--d:0.52s">
+      <h3 class="h-step">Prototipo</h3>
+      <p class="concept">Combinación de insights</p>
+      <p class="author">Kolko</p>
+      <p class="small">Escenario + dispositivos conocidos: cinco ideas.</p>
+    </div>
+    <aside class="notes">Integrante 1
+Cada concepto del marco se nombra en el paso donde lo usamos. Esta diapo también funciona como índice de lo que sigue.
+
+Texto para decir:
+"Cada concepto aparece en un paso concreto. Las señales las ordenamos con las cuatro fuerzas, para no mirar solo la tecnología. Para los escenarios usamos ruedas de futuros: unas 30 consecuencias por cuadrante. Los storyboards bajan cada mundo a un día común de una persona; eso es lo que Smith y Ashby llaman futuros experienciales. En la crítica partimos de una frase de Ashby: tu utopía siempre es la distopía de otro. Por eso preguntamos a quién deja afuera cada mundo, y eso nos hizo reencuadrar el problema, como plantea Kolko. En el backcasting, las dos bifurcaciones son de gobernanza: quién paga el tutor y qué ley de datos sale. Y para el prototipo cruzamos lo que pedía el escenario con dispositivos que ya existen, que es la combinación de insights de Kolko: de ahí salieron las cinco ideas."
+
+Si preguntan por el test de usabilidad: también es un futuro experiencial, porque deja recorrer 2040 en primera persona.</aside>
+  </section>
+
+  <!-- ===== 04 ===== -->
+  <section class="slide " data-n="4">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">4</span>
+    <h2 class="title rv">Qué <span class="mark under">investigamos<svg viewBox="0 0 600 26" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M6 15 C 110 9, 230 6, 360 9 S 520 17, 594 8"/></svg></span></h2>
+    <h3 class="h-col rv" style="left:248px;top:298px;--d:0.15s">Cómo se estudia</h3>
+    <img class="clip rv" src="img/s04_2.jpg" alt="Estudiantes en sus bancos" style="left:259px;top:430px;width:470px;height:470px;--d:0.25s">
+    <h3 class="h-col rv" style="left:789px;top:298px;--d:0.25s">Evaluación y acreditación</h3>
+    <img class="clip rv" src="img/s04_3.jpg" alt="Una A+ en rojo" style="left:835px;top:465px;width:400px;height:400px;--d:0.35s">
+    <h3 class="h-col rv" style="left:1330px;top:298px;--d:0.35s">Rol docente</h3>
+    <img class="clip rv" src="img/s04_1.png" alt="Rostro mitad humano, mitad circuito" style="left:1346px;top:435px;width:460px;height:460px;--d:0.45s">
+    <aside class="notes">Integrante 1 · 1:30
+El tema es el aprendizaje en la secundaria argentina hacia 2040. La misma herramienta que puede ayudar a aprender permite saltearse el esfuerzo de aprender. Elegimos 2040 porque quien entre a primer año ese año todavía no nació. Empezamos mirando la evaluación hacia 2050 y lo ampliamos a aprendizaje; la evaluación quedó como uno de los ejes.</aside>
+  </section>
+
+  <!-- ===== 05 ===== -->
+  <section class="slide " data-n="5">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">5</span>
+    <h2 class="title rv">Drivers y señales</h2>
+    <h3 class="h-col rv" style="left:248px;top:298px;--d:.1s">Drivers</h3>
+    <div class="big rv" style="left:248px;top:377px;--d:.2s"><span class="mark ring">14%<svg viewBox="0 0 600 250" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M330 14 C 480 12, 592 58, 588 124 C 584 196, 430 236, 278 232 C 128 228, 12 186, 14 120 C 16 56, 140 16, 300 22 L 352 26"/></svg></span></div>
+    <p class="txt rv" style="left:248px;top:538px;width:640px;--d:.25s">termina la secundaria con nivel satisfactorio en matemática</p>
+    <div class="big rv" style="left:248px;top:665px;--d:.3s">52%</div>
+    <p class="txt rv" style="left:248px;top:826px;width:640px;--d:.35s">de los estudiantes usa chatbots de IA para aprender</p>
+    <h3 class="h-col rv" style="left:1056px;top:298px;--d:.1s">Señales</h3>
+    <div class="num rv" style="left:1056px;top:360px;--d:.3s">2×</div>
+    <p class="txt rv" style="left:1344px;top:394px;width:480px;--d:.3s">aprendizaje con tutor de IA frente a una clase activa</p>
+    <div class="num rv" style="left:1056px;top:552px;--d:.4s">1.000</div>
+    <p class="txt rv" style="left:1344px;top:586px;width:480px;--d:.4s">escuelas públicas de El Salvador ya usan tutores de IA</p>
+    <div class="num rv" style="left:1056px;top:744px;--d:.5s">2025</div>
+    <p class="txt rv" style="left:1344px;top:778px;width:480px;--d:.5s">Buenos Aires elimina la repitencia en la secundaria</p>
+    <p class="sources rv" style="top:974px;--d:.6s">Fuentes: Aprender 2024; PISA 2025 (Chequeado); Kestin et al. (2025); Banco Mundial (2026); La Capital.</p>
+    <aside class="notes">Integrante 2 · 1:30
+El punto de partida es que el aprendizaje ya está en crisis: solo el 14% termina la secundaria con nivel satisfactorio en matemática, y la mitad de los estudiantes ya usa IA para estudiar. Las señales muestran que la tutoría con IA funciona, que ya se usa en escuelas públicas de El Salvador y que la evaluación empieza a cambiar con el fin de la repitencia en Buenos Aires.
+En el backcasting también aparecen la caída de la matrícula, el presupuesto educativo y Starlink: se pueden nombrar ahí.</aside>
+  </section>
+
+  <!-- ===== 06 ===== -->
+  <section class="slide " data-n="6">
+    <div class="grid-paper"></div><div class="margin-line"></div><span class="pg">6</span>
+    <h2 class="title rv">Escenarios</h2>
+    <svg class="axes rv" style="left:0;top:0;--d:.1s" width="1920" height="1080" viewBox="0 0 1920 1080" aria-hidden="true">
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#24272D" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+      <line x1="262" y1="623" x2="1790" y2="623" stroke="#24272D" stroke-width="3" marker-start="url(#arr)" marker-end="url(#arr)"/>
+      <line x1="1015" y1="238" x2="1015" y2="1030" stroke="#24272D" stroke-width="3" marker-start="url(#arr)" marker-end="url(#arr)"/>
+    </svg>
+    <p class="axis-l rv" style="left:270px;top:571px;--d:.2s">Aprendizaje estandarizado</p>
+    <p class="axis-l rv" style="right:130px;top:571px;text-align:right;--d:.2s">Aprendizaje personalizado</p>
+    <p class="axis-l rv" style="left:1037px;top:236px;--d:.2s">Evaluación puntual</p>
+    <p class="axis-l rv" style="left:1037px;top:986px;--d:.2s">Evaluación del proceso</p>
+    <p class="quad rv" style="left:248px;width:767px;top:395px;--d:.3s">Evaluación estandarizada</p>
+    <p class="quad rv" style="left:1015px;width:809px;top:395px;--d:.38s">Talento a medida</p>
+    <p class="quad rv" style="left:248px;width:767px;top:779px;--d:.46s">La trayectoria medida</p>
+    <p class="quad chosen rv" style="left:1015px;width:809px;top:779px;--d:.54s"><span class="mark ring" style="--d:1s">Tutoría permanente<svg viewBox="0 0 600 250" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M330 14 C 480 12, 592 58, 588 124 C 584 196, 430 236, 278 232 C 128 228, 12 186, 14 120 C 16 56, 140 16, 300 22 L 352 26"/></svg></span></p>
+    <aside class="notes">Integrante 2 · 1:30
+Los ejes salen de los subtemas: cómo se aprende y cómo se acredita. Cada cuadrante lo exploramos con futures wheels (unas 30 consecuencias por cuadrante) y con una matriz de consecuencias en el tiempo.
+Protagonistas: Maite (evaluación estandarizada), Lucía (talento a medida), Juan (trayectoria medida), Facu y Lu (tutoría permanente).</aside>
+  </section>
+
+  <!-- ===== 07 ===== -->
+  <section class="slide " data-n="7">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">7</span>
+    <h2 class="title rv">Evaluación estandarizada</h2>
+    <div class="board">
+      <figure class="rv"><div class="photo"><img src="img/s07_1.jpg" alt=""></div><figcaption>Maite mira el casillero vacío.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s07_2.jpg" alt=""></div><figcaption>Hermano: “Capaz llueve.” Madre: “Llueve o no llueve.”</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s07_3.jpg" alt=""></div><figcaption>La fila practica la cara de firmeza.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s07_4.jpg" alt=""></div><figcaption>Técnica: “Respondé como si no hubiera otra opción.”</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s07_5.jpg" alt=""></div><figcaption>Maite responde rápido.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s07_6.jpg" alt=""></div><figcaption>Maite reconoce la pregunta y recuerda los tubos.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s07_7.jpg" alt=""></div><figcaption>La respuesta correcta se pone gris.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s07_8.jpg" alt=""></div><figcaption>A Bruno, la misma respuesta se le pone verde.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s07_9.jpg" alt=""></div><figcaption>Nadie habla.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s07_10.jpg" alt=""></div><figcaption>Maite baja al taller.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s07_11.jpg" alt=""></div><figcaption>Los 900 se congelan. Necesito gente que sepa dudar.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s07_12.jpg" alt=""></div><figcaption>Maite, en voz baja: “No sé.”</figcaption></figure>
+    </div>
+    <aside class="notes">Integrante 2 · 0:30
+Estandarizado + puntual: todo se juega en un examen que premia la firmeza. Maite contesta rápido y sin dudar, y en el taller descubre que lo que falta es gente que sepa dudar. De este mundo rescatamos el título que vale igual en todos lados.</aside>
+  </section>
+
+  <!-- ===== 08 ===== -->
+  <section class="slide " data-n="8">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">8</span>
+    <h2 class="title rv">Talento a medida</h2>
+    <div class="board">
+      <figure class="rv"><div class="photo"><img src="img/s08_1.jpg" alt=""></div><figcaption>Lucía revisa su agenda: aprende a la mañana y trabaja a la tarde.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s08_2.jpg" alt=""></div><figcaption>Una docente la ayuda a elegir sus próximas actividades.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s08_3.jpg" alt=""></div><figcaption>Prueba carteles en el centro comunitario con los vecinos.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s08_4.jpg" alt=""></div><figcaption>Encuentra un trabajo de diseño, pero le falta una certificación.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s08_5.jpg" alt=""></div><figcaption>Se traba al presentar frente a dos evaluadores.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s08_6.jpg" alt=""></div><figcaption>“No aprobado”. Reorganiza su agenda para volver a intentar.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s08_7.jpg" alt=""></div><figcaption>Ensaya con dos compañeros: uno toma el tiempo, otro la rúbrica.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s08_8.jpg" alt=""></div><figcaption>Ve a un compañero en una tutoría paga.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s08_9.jpg" alt=""></div><figcaption>De noche hace simulacros; el proyecto del barrio queda a un lado.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s08_10.jpg" alt=""></div><figcaption>Se vuelve a presentar, ahora con más seguridad.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s08_11.jpg" alt=""></div><figcaption>“Aprobado”. Envía su postulación con la certificación.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s08_12.jpg" alt=""></div><figcaption>Ahora elige qué aprender pensando en qué le sirve para aprobar.</figcaption></figure>
+    </div>
+    <aside class="notes">Integrante 2 · 0:30
+Personalizado + puntual: Lucía elige qué aprender, pero para conseguir trabajo necesita aprobar una certificación frente a evaluadores. Reprueba, se prepara y aprueba, y en el camino deja de lado el proyecto del barrio. De este mundo rescatamos la instancia presencial.</aside>
+  </section>
+
+  <!-- ===== 09 ===== -->
+  <section class="slide " data-n="9">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">9</span>
+    <h2 class="title rv">La trayectoria medida</h2>
+    <div class="board b43">
+      <figure class="rv"><div class="photo"><img src="img/s09_1.jpg" alt=""></div><figcaption>En el campus: matemática en verde, lengua en rojo.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s09_6.jpg" alt=""></div><figcaption>En lengua tiene tareas pendientes y correcciones.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s09_7.jpg" alt=""></div><figcaption>Llega al colegio; casi todos están con el celular.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s09_8.jpg" alt=""></div><figcaption>Clase de matemática: el mismo tema para todos.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s09_9.jpg" alt=""></div><figcaption>Resuelven ejercicios y suben cómo llegaron al resultado.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s09_10.jpg" alt=""></div><figcaption>No hay nota: el campus le devuelve correcciones.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s09_2.jpg" alt=""></div><figcaption>Corrige y vuelve a subir; el campus guarda cada versión.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s09_3.jpg" alt=""></div><figcaption>Fede hace la tarea apurado para no perder “continuidad”.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s09_4.jpg" alt=""></div><figcaption>Ya no hay miedo al examen, pero sí a no mostrar progreso.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s09_11.jpg" alt=""></div><figcaption>La docente devuelve el trabajo con cada versión.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s09_12.jpg" alt=""></div><figcaption>Sofía ya lo hizo bien, pero le siguen pidiendo el proceso.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s09_5.jpg" alt=""></div><figcaption>Deja la play para hacer la tarea: si no, le baja el progreso.</figcaption></figure>
+    </div>
+    <aside class="notes">Integrante 2 · 0:30
+Estandarizado + proceso: no hay notas ni examen único, pero el campus registra todo. Desaparece el miedo al examen y aparece la presión por mostrar progreso todo el tiempo. De este mundo rescatamos el piso común.</aside>
+  </section>
+
+  <!-- ===== 10 ===== -->
+  <section class="slide " data-n="10">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">10</span>
+    <h2 class="title rv">Tutoría permanente, primera versión</h2>
+    <div class="board b43">
+      <figure class="rv"><div class="photo"><img src="img/s10_1.jpg" alt=""></div><figcaption>Facu, 15 años, se aburre en el colegio y quiere dejarlo.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s10_2.jpg" alt=""></div><figcaption>La escuela cambia: proyectos con chicos de distintas edades.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s10_3.jpg" alt=""></div><figcaption>Cada estudiante tiene un tutor de IA que sigue su progreso.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s10_4.jpg" alt=""></div><figcaption>La docente ya no dicta para todos: guía a cada uno.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s10_5.jpg" alt=""></div><figcaption>Tiene tiempo para charlar más allá de la currícula.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s10_6.jpg" alt=""></div><figcaption>No hay notas: se registra cada entrega y el proceso diario.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s10_7.jpg" alt=""></div><figcaption>La familia sigue su progreso desde el celular.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s10_8.jpg" alt=""></div><figcaption>Sin conexión en el pueblo, Facu no puede avanzar.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s10_9.jpg" alt=""></div><figcaption>En el campo aprende cosas que no se registran.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s10_10.jpg" alt=""></div><figcaption>Al egresar, su título no vale igual que el de los demás.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s10_11.jpg" alt=""></div><figcaption>Su primo, con mejor conexión, aprende más.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s10_12.jpg" alt=""></div><figcaption>Descubre que nunca vio temas básicos para la vida adulta.</figcaption></figure>
+    </div>
+    <aside class="notes">Integrante 2 · 0:30
+Personalizado + proceso, primera versión. Facu está por dejar la escuela y el sistema lo rescata con proyectos, un agente de IA y un docente que guía. Pero los días sin señal no cuentan, lo que aprende en el campo no queda registrado y egresa con un título que no vale lo mismo que el de sus compañeros.</aside>
+  </section>
+
+  <!-- ===== 11 ===== -->
+  <section class="slide " data-n="11">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">11</span>
+    <h2 class="title rv">Cómo elegimos el escenario</h2>
+    <div class="hl hl-v" style="left:1561px;top:250px;width:245px;height:452px;--d:.5s"></div>
+    <p class="th lab rv" style="left:248px;top:298px">Criterio</p>
+    <div class="layer rv" style="--d:.15s"><p class="th" style="left:700px;top:250px;width:281px">Evaluación<br>estandarizada</p><p class="th" style="left:981px;top:250px;width:281px">Talento a<br>medida</p><p class="th" style="left:1262px;top:250px;width:281px">La trayectoria<br>medida</p><p class="th" style="left:1543px;top:250px;width:281px">Tutoría<br>permanente</p><p class="td lab" style="left:248px;top:346px">Coherencia interna</p><p class="td" style="left:700px;top:346px;width:281px">2</p><p class="td" style="left:981px;top:346px;width:281px">2,8</p><p class="td" style="left:1262px;top:346px;width:281px">1</p><p class="td" style="left:1543px;top:346px;width:281px">2</p><p class="td lab" style="left:248px;top:394px">Anclaje en el corpus</p><p class="td" style="left:700px;top:394px;width:281px">1</p><p class="td" style="left:981px;top:394px;width:281px">1,67</p><p class="td" style="left:1262px;top:394px;width:281px">2</p><p class="td" style="left:1543px;top:394px;width:281px">2</p><p class="td lab" style="left:248px;top:442px">Relevancia</p><p class="td" style="left:700px;top:442px;width:281px">2</p><p class="td" style="left:981px;top:442px;width:281px">2</p><p class="td" style="left:1262px;top:442px;width:281px">3</p><p class="td" style="left:1543px;top:442px;width:281px">3</p><p class="td lab" style="left:248px;top:490px">Potencia crítica</p><p class="td" style="left:700px;top:490px;width:281px">3</p><p class="td" style="left:981px;top:490px;width:281px">2,1</p><p class="td" style="left:1262px;top:490px;width:281px">2</p><p class="td" style="left:1543px;top:490px;width:281px">2</p><p class="td lab" style="left:248px;top:538px">Densidad de dispositivos</p><p class="td" style="left:700px;top:538px;width:281px">2</p><p class="td" style="left:981px;top:538px;width:281px">2,85</p><p class="td" style="left:1262px;top:538px;width:281px">2</p><p class="td" style="left:1543px;top:538px;width:281px">2</p><p class="td lab" style="left:248px;top:586px">Crítica o pseudo-utopía</p><p class="td" style="left:700px;top:586px;width:281px">3</p><p class="td" style="left:981px;top:586px;width:281px">2,95</p><p class="td" style="left:1262px;top:586px;width:281px">2</p><p class="td" style="left:1543px;top:586px;width:281px">3</p><p class="td lab tot" style="left:248px;top:634px">Total</p><p class="td tot" style="left:700px;top:634px;width:281px">13</p><p class="td tot" style="left:981px;top:634px;width:281px">14,37</p><p class="td tot" style="left:1262px;top:634px;width:281px">12</p><p class="td tot" style="left:1543px;top:634px;width:281px">14</p></div>
+    <div class="dbl rv" style="left:248px;top:681px;width:1576px;--d:.3s"></div>
+    <span class="mark vmark" style="left:164px;top:736px;width:20px;height:90px;--d:.9s"><svg viewBox="0 0 20 200" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M10 4 C 13 50, 7 110, 11 196"/></svg></span>
+    <p class="txt rv" style="left:248px;top:730px;width:1560px;--d:.4s"><b class="lead">Por qué Tutoría permanente:</b> Talento a medida sumó apenas más (14,37 contra 14), pero Tutoría es el único mundo que cruza cómo se estudia con cómo se acredita, y además muestra quién queda afuera.</p>
+    <aside class="notes">Integrante 3 · 1:00
+Criticamos con las preguntas de la cátedra: qué da por sentado este mundo, qué queda fuera del cuadro y dónde se tensiona. Después puntuamos los cuatro con seis criterios.
+Feedback que recibió la primera versión de Tutoría permanente: “Capaz no hay suficientes profesores para tanta demanda de educación personalizada”.
+SB 1 = Evaluación estandarizada (Maite), SB 2 = Talento a medida (Lucía), SB 3 = La trayectoria medida (Juan), SB 4 = Tutoría permanente (Facu). Si preguntan por qué no elegimos el de mayor puntaje: Talento a medida sacó 14,37 y Tutoría permanente 14, prácticamente un empate. Elegimos Tutoría porque es el único mundo que pone en el centro las dos preguntas de nuestra temática, cómo se estudia y cómo se acredita, y además muestra quién queda afuera.</aside>
+  </section>
+
+  <!-- ===== 12 ===== -->
+  <section class="slide " data-n="12">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">12</span>
+    <h2 class="title rv">De Facu a Lu: qué cambió con TUTOR</h2>
+    <div class="hl hl-v soft" style="left:1214px;top:296px;width:610px;height:596px;--d:.5s"></div>
+    <div class="layer rv" style="--d:.15s"><p class="th2" style="left:660px;top:298px">Sin TUTOR: Facu</p><p class="th2" style="left:1240px;top:298px">Con TUTOR: Lu</p><p class="td2 lab" style="left:248px;top:394px">Sin señal</p><p class="td2" style="left:660px;top:394px;width:520px">Esos días no cuentan</p><p class="td2" style="left:1240px;top:394px;width:560px">El agente funciona sin señal y sincroniza al volver</p><p class="td2 lab" style="left:248px;top:538px">Lo de afuera</p><p class="td2" style="left:660px;top:538px;width:520px">No se registra</p><p class="td2" style="left:1240px;top:538px;width:560px">La bitácora suma fotos y audios</p><p class="td2 lab" style="left:248px;top:682px">Piso común</p><p class="td2" style="left:660px;top:682px;width:520px">Aprende solo lo que le interesa</p><p class="td2" style="left:1240px;top:682px;width:560px">Núcleo común obligatorio</p><p class="td2 lab" style="left:248px;top:826px">Quién decide</p><p class="td2" style="left:660px;top:826px;width:520px">El sistema</p><p class="td2" style="left:1240px;top:826px;width:560px">El agente propone, el docente decide</p></div>
+    <aside class="notes">Integrante 3 · 1:00
+Texto para decir:
+"Nuestro primer storyboard, el de Facu, mostraba el mundo que elegimos, pero todavía sin solución. La crítica nos mostró dónde fallaba, y de ahí diseñamos TUTOR. El storyboard de Lu es el mismo mundo, ya con TUTOR resolviendo cada falla."
+Recorrer las filas de arriba abajo: la falla de Facu a la izquierda, la respuesta de TUTOR a la derecha.
+Si preguntan por el cambio de lugar: las gafas y la escuela-nodo necesitan un contexto donde el producto pueda mostrarse, por eso Lu vive en una ciudad.</aside>
+  </section>
+
+  <!-- ===== 13 ===== -->
+  <section class="slide " data-n="13">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">13</span>
+    <h2 class="title rv">Escenario elegido: Tutoría permanente</h2>
+    <div class="board b13">
+      <figure class="rv"><div class="photo"><img src="img/s13_1.jpg" alt=""><span class="badge">1</span></div><figcaption><b>El plan del día</b>Las gafas le muestran el plan que armó su agente tutor.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s13_2.jpg" alt=""><span class="badge">2</span></div><figcaption><b>El taller, sin edades</b>Chicos de edades mezcladas trabajan juntos; al fondo, el NODO.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s13_3.jpg" alt=""><span class="badge">3</span></div><figcaption><b>El problema de la tienda</b>En la tienda de su familia sobran talles XL y faltan M.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s13_4.jpg" alt=""><span class="badge">4</span></div><figcaption><b>El agente insiste</b>Lu esquiva la estadística y el agente se la vuelve a poner.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s13_5.jpg" alt=""><span class="badge">5</span></div><figcaption><b>Marta decide</b>El agente propone, el docente decide.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s13_6.jpg" alt=""><span class="badge">6</span></div><figcaption><b>Salir a entrevistar</b>Los números sin la gente no alcanzan.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s13_7.jpg" alt=""><span class="badge">7</span></div><figcaption><b>Bajo el árbol</b>Sin clases que dictar, hay tiempo para conversar.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s13_8.jpg" alt=""><span class="badge">8</span></div><figcaption><b>Lo de afuera también cuenta</b>La bitácora suma lo que Lu aprende fuera de la escuela.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s13_9.jpg" alt=""><span class="badge">9</span></div><figcaption><b>Domingo en familia</b>La familia recibe el relato de la semana, en palabras.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s13_10.jpg" alt=""><span class="badge">10</span></div><figcaption><b>La muestra en la plaza</b>Quienes van a usar el trabajo son quienes lo evalúan.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s13_11.jpg" alt=""><span class="badge">11</span></div><figcaption><b>El panel de los 16</b>Lu ve todo lo que el agente sabe de ella y decide qué hacer.</figcaption></figure>
+      <figure class="rv"><div class="photo"><img src="img/s13_12.jpg" alt=""><span class="badge">12</span></div><figcaption><b>El cierre</b>Lu le muestra su primera bitácora a una chica de 12.</figcaption></figure>
+    </div>
+    <aside class="notes">Integrante 3 · 1:30
+En 2040 la secundaria enseña por proyectos, con un tutor de IA que funciona con o sin conexión, un núcleo común que nadie puede saltear y una evaluación que registra el proceso dentro y fuera del aula. Recorrer las viñetas 1, 2, 4, 5, 10 y 11. Cerrar con la idea de que Lu ve y administra sus datos (viñeta 11).</aside>
+  </section>
+
+  <!-- ===== 14 ===== -->
+  <section class="slide backcast" data-n="14">
+    <div class="grid-paper"></div><div class="margin-line"></div><span class="pg">14</span>
+    <h2 class="title rv">Backcasting: de hoy a 2040</h2>
+    <svg class="bc rv" style="left:0;top:0;--d:.1s" width="1920" height="1080" viewBox="0 0 1920 1080" aria-hidden="true"><line class="q-conn" x1="635" y1="262" x2="635" y2="400"/><line class="q-conn" x1="1027" y1="262" x2="1027" y2="628"/><line class="ln off" x1="635" y1="628" x2="635" y2="400"/><line class="ln off" x1="635" y1="400" x2="1533" y2="400"/><line class="ln off" x1="635" y1="628" x2="635" y2="856"/><line class="ln off" x1="635" y1="856" x2="1027" y2="856"/><line class="ln off" x1="1027" y1="856" x2="1533" y2="856"/><line class="ln off" x1="1027" y1="628" x2="1027" y2="856"/><line class="ln on" x1="333" y1="628" x2="635" y2="628"/><line class="ln on" x1="635" y1="628" x2="1027" y2="628"/><line class="ln on" x1="1027" y1="628" x2="1533" y2="628"/><circle class="dot on" cx="333" cy="628" r="9"/><circle class="dot on" cx="439" cy="628" r="9"/><circle class="dot on" cx="546" cy="628" r="9"/><circle class="dot on" cx="725" cy="628" r="9"/><circle class="dot on" cx="831" cy="628" r="9"/><circle class="dot on" cx="937" cy="628" r="9"/><circle class="dot on" cx="1117" cy="628" r="9"/><circle class="dot on" cx="1223" cy="628" r="9"/><circle class="dot on" cx="1329" cy="628" r="9"/><circle class="dot on" cx="1435" cy="628" r="9"/><circle class="dot off" cx="725" cy="856" r="9"/><circle class="dot off" cx="831" cy="856" r="9"/><circle class="dot off" cx="937" cy="856" r="9"/><circle class="dot off" cx="1117" cy="856" r="9"/><circle class="dot off" cx="1223" cy="856" r="9"/><circle class="dot off" cx="1329" cy="856" r="9"/><circle class="dot off" cx="1435" cy="856" r="9"/><circle class="dot off" cx="725" cy="400" r="9"/><circle class="dot off" cx="937" cy="400" r="9"/><circle class="dot off" cx="1117" cy="400" r="9"/><circle class="dot off" cx="1223" cy="400" r="9"/><circle class="dot off" cx="1329" cy="400" r="9"/><circle class="dot off" cx="1435" cy="400" r="9"/><rect class="dia on" x="621" y="614" width="28" height="28" transform="rotate(45 635 628)"/><rect class="dia on" x="1013" y="614" width="28" height="28" transform="rotate(45 1027 628)"/><circle class="endc off" cx="1533" cy="400" r="15"/><circle class="endc on" cx="1533" cy="628" r="15"/><circle class="endc off" cx="1533" cy="856" r="15"/></svg>
+    <div class="layer rv" style="--d:.25s"><p class="q on" style="left:405px;top:226px">2030 · ¿Quién paga el tutor de IA?</p><p class="q on" style="left:797px;top:226px">2033 · ¿Qué ley de datos sale?</p><p class="ev above on" style="left:241px;top:614px">Prohibir la IA fracasa: se regula su uso</p><p class="ev below on" style="left:347px;top:644px">Starlink conecta escuelas, no hogares</p><p class="ev above on" style="left:454px;top:614px">Menos alumnos: grupos por proyecto</p><p class="ev below on" style="left:633px;top:644px">Pilotos públicos de tutor IA</p><p class="ev above on" style="left:739px;top:614px">Baja el abandono; más provincias</p><p class="ev below on" style="left:845px;top:644px">Régimen federal sin repitencia</p><p class="ev above on" style="left:1025px;top:614px">Ley de datos y agente público sin conexión</p><p class="ev below on" style="left:1131px;top:644px">El docente pasa a guiar proyectos</p><p class="ev above on" style="left:1237px;top:614px">La bitácora reemplaza al boletín</p><p class="ev below on" style="left:1343px;top:644px">Se acepta el título-portfolio</p><p class="ev below off" style="left:633px;top:872px">Ley de Libertad Educativa</p><p class="ev above off" style="left:739px;top:842px">Tutor gratis, pagado con datos</p><p class="ev below off" style="left:845px;top:872px">Se pide el puntaje de proceso</p><p class="ev above off" style="left:1025px;top:842px">El agente depende de la nube</p><p class="ev below off" style="left:1131px;top:872px">La ley de datos llega tarde</p><p class="ev above off" style="left:1237px;top:842px">Un docente supervisa varias secciones</p><p class="ev below off" style="left:1343px;top:872px">El puntaje pesa más que el título</p><p class="ev below off" style="left:633px;top:416px">Pilotos pagados por empresas</p><p class="ev above off" style="left:845px;top:386px">Prohíben que la IA registre a menores de 16</p><p class="ev below off" style="left:1025px;top:416px">La evaluación del proceso se hace a mano</p><p class="ev above off" style="left:1131px;top:386px">Más tutorías humanas, en grupos chicos</p><p class="ev below off" style="left:1237px;top:416px">IA en la sombra, en casa</p><p class="ev above off" style="left:1343px;top:386px">Títulos con muestras ante tribunales</p><div class="end off" style="left:1563px;top:378px"><b>Aula sin agente</b><span>Evaluación a mano; la IA queda en casa, sin reglas</span></div><div class="end on" style="left:1563px;top:606px"><b>Tutoría permanente</b><span>Agente público sin conexión y título-portfolio</span></div><div class="end off" style="left:1563px;top:834px"><b>Tutor de mercado</b><span>Gratis, pagado con datos; se corta en el pueblo</span></div><p class="yr" style="left:293px">2027</p><p class="yr" style="left:399px">2028</p><p class="yr" style="left:506px">2029</p><p class="yr" style="left:641px">2030</p><p class="yr" style="left:791px">2031</p><p class="yr" style="left:897px">2032</p><p class="yr" style="left:1031px">2033</p><p class="yr" style="left:1183px">2035</p><p class="yr" style="left:1289px">2036</p><p class="yr" style="left:1395px">2038</p><p class="yr" style="left:1493px">2040</p></div>
+    <aside class="notes">Integrante 3 · 0:45
+Armamos la cadena desde 2040 hacia atrás, preguntando qué tuvo que pasar justo antes. El camino se abre dos veces: en 2030, según quién pague el tutor de IA, y en 2033, según qué ley de datos salga. Si el Estado pone un agente propio y la ley sale, llegamos a Tutoría permanente.</aside>
+  </section>
+
+  <!-- ===== 15 ===== -->
+  <section class="slide backcast" data-n="15">
+    <div class="grid-paper"></div><div class="margin-line"></div><span class="pg">15</span>
+    <h2 class="title rv">Backcasting: de hoy a 2040</h2>
+    <svg class="bc rv" style="left:0;top:0;--d:.1s" width="1920" height="1080" viewBox="0 0 1920 1080" aria-hidden="true"><line class="q-conn" x1="635" y1="262" x2="635" y2="400"/><line class="q-conn" x1="1027" y1="262" x2="1027" y2="628"/><line class="ln off" x1="1027" y1="628" x2="1533" y2="628"/><line class="ln off" x1="635" y1="628" x2="635" y2="400"/><line class="ln off" x1="635" y1="400" x2="1533" y2="400"/><line class="ln on" x1="333" y1="628" x2="635" y2="628"/><line class="ln on" x1="635" y1="628" x2="1027" y2="628"/><line class="ln on" x1="635" y1="628" x2="635" y2="856"/><line class="ln on" x1="635" y1="856" x2="1027" y2="856"/><line class="ln on" x1="1027" y1="856" x2="1533" y2="856"/><line class="ln on" x1="1027" y1="628" x2="1027" y2="856"/><circle class="dot on" cx="333" cy="628" r="9"/><circle class="dot on" cx="439" cy="628" r="9"/><circle class="dot on" cx="546" cy="628" r="9"/><circle class="dot on" cx="725" cy="628" r="9"/><circle class="dot on" cx="831" cy="628" r="9"/><circle class="dot on" cx="937" cy="628" r="9"/><circle class="dot off" cx="1117" cy="628" r="9"/><circle class="dot off" cx="1223" cy="628" r="9"/><circle class="dot off" cx="1329" cy="628" r="9"/><circle class="dot off" cx="1435" cy="628" r="9"/><circle class="dot on" cx="725" cy="856" r="9"/><circle class="dot on" cx="831" cy="856" r="9"/><circle class="dot on" cx="937" cy="856" r="9"/><circle class="dot on" cx="1117" cy="856" r="9"/><circle class="dot on" cx="1223" cy="856" r="9"/><circle class="dot on" cx="1329" cy="856" r="9"/><circle class="dot on" cx="1435" cy="856" r="9"/><circle class="dot off" cx="725" cy="400" r="9"/><circle class="dot off" cx="937" cy="400" r="9"/><circle class="dot off" cx="1117" cy="400" r="9"/><circle class="dot off" cx="1223" cy="400" r="9"/><circle class="dot off" cx="1329" cy="400" r="9"/><circle class="dot off" cx="1435" cy="400" r="9"/><rect class="dia on" x="621" y="614" width="28" height="28" transform="rotate(45 635 628)"/><rect class="dia on" x="1013" y="614" width="28" height="28" transform="rotate(45 1027 628)"/><circle class="endc off" cx="1533" cy="400" r="15"/><circle class="endc off" cx="1533" cy="628" r="15"/><circle class="endc on" cx="1533" cy="856" r="15"/></svg>
+    <div class="layer rv" style="--d:.25s"><p class="q on" style="left:405px;top:226px">2030 · ¿Quién paga el tutor de IA?</p><p class="q on" style="left:797px;top:226px">2033 · ¿Qué ley de datos sale?</p><p class="ev above on" style="left:241px;top:614px">Prohibir la IA fracasa: se regula su uso</p><p class="ev below on" style="left:347px;top:644px">Starlink conecta escuelas, no hogares</p><p class="ev above on" style="left:454px;top:614px">Menos alumnos: grupos por proyecto</p><p class="ev below on" style="left:633px;top:644px">Pilotos públicos de tutor IA</p><p class="ev above on" style="left:739px;top:614px">Baja el abandono; más provincias</p><p class="ev below on" style="left:845px;top:644px">Régimen federal sin repitencia</p><p class="ev above off" style="left:1025px;top:614px">Ley de datos y agente público sin conexión</p><p class="ev below off" style="left:1131px;top:644px">El docente pasa a guiar proyectos</p><p class="ev above off" style="left:1237px;top:614px">La bitácora reemplaza al boletín</p><p class="ev below off" style="left:1343px;top:644px">Se acepta el título-portfolio</p><p class="ev below on" style="left:633px;top:872px">Ley de Libertad Educativa</p><p class="ev above on" style="left:739px;top:842px">Tutor gratis, pagado con datos</p><p class="ev below on" style="left:845px;top:872px">Se pide el puntaje de proceso</p><p class="ev above on" style="left:1025px;top:842px">El agente depende de la nube</p><p class="ev below on" style="left:1131px;top:872px">La ley de datos llega tarde</p><p class="ev above on" style="left:1237px;top:842px">Un docente supervisa varias secciones</p><p class="ev below on" style="left:1343px;top:872px">El puntaje pesa más que el título</p><p class="ev below off" style="left:633px;top:416px">Pilotos pagados por empresas</p><p class="ev above off" style="left:845px;top:386px">Prohíben que la IA registre a menores de 16</p><p class="ev below off" style="left:1025px;top:416px">La evaluación del proceso se hace a mano</p><p class="ev above off" style="left:1131px;top:386px">Más tutorías humanas, en grupos chicos</p><p class="ev below off" style="left:1237px;top:416px">IA en la sombra, en casa</p><p class="ev above off" style="left:1343px;top:386px">Títulos con muestras ante tribunales</p><div class="end off" style="left:1563px;top:378px"><b>Aula sin agente</b><span>Evaluación a mano; la IA queda en casa, sin reglas</span></div><div class="end off" style="left:1563px;top:606px"><b>Tutoría permanente</b><span>Agente público sin conexión y título-portfolio</span></div><div class="end on" style="left:1563px;top:834px"><b>Tutor de mercado</b><span>Gratis, pagado con datos; se corta en el pueblo</span></div><p class="yr" style="left:293px">2027</p><p class="yr" style="left:399px">2028</p><p class="yr" style="left:506px">2029</p><p class="yr" style="left:641px">2030</p><p class="yr" style="left:791px">2031</p><p class="yr" style="left:897px">2032</p><p class="yr" style="left:1031px">2033</p><p class="yr" style="left:1183px">2035</p><p class="yr" style="left:1289px">2036</p><p class="yr" style="left:1395px">2038</p><p class="yr" style="left:1493px">2040</p></div>
+    <aside class="notes">Integrante 3 · 0:25
+A Tutor de mercado se llega por dos caminos: si en 2030 el tutor lo ponen empresas a cambio de datos, o si en 2033 la ley de datos no sale y el agente queda atado a la nube. En el pueblo se corta: en esta rama, Lu es Facu. La primera versión de Tutoría permanente no se tiró, quedó como lo que pasa si falla ese eslabón.</aside>
+  </section>
+
+  <!-- ===== 16 ===== -->
+  <section class="slide backcast" data-n="16">
+    <div class="grid-paper"></div><div class="margin-line"></div><span class="pg">16</span>
+    <h2 class="title rv">Backcasting: de hoy a 2040</h2>
+    <svg class="bc rv" style="left:0;top:0;--d:.1s" width="1920" height="1080" viewBox="0 0 1920 1080" aria-hidden="true"><line class="q-conn" x1="635" y1="262" x2="635" y2="400"/><line class="q-conn" x1="1027" y1="262" x2="1027" y2="628"/><line class="ln off" x1="635" y1="628" x2="1027" y2="628"/><line class="ln off" x1="1027" y1="628" x2="1533" y2="628"/><line class="ln off" x1="635" y1="628" x2="635" y2="856"/><line class="ln off" x1="635" y1="856" x2="1027" y2="856"/><line class="ln off" x1="1027" y1="856" x2="1533" y2="856"/><line class="ln off" x1="1027" y1="628" x2="1027" y2="856"/><line class="ln on" x1="333" y1="628" x2="635" y2="628"/><line class="ln on" x1="635" y1="628" x2="635" y2="400"/><line class="ln on" x1="635" y1="400" x2="1533" y2="400"/><circle class="dot on" cx="333" cy="628" r="9"/><circle class="dot on" cx="439" cy="628" r="9"/><circle class="dot on" cx="546" cy="628" r="9"/><circle class="dot off" cx="725" cy="628" r="9"/><circle class="dot off" cx="831" cy="628" r="9"/><circle class="dot off" cx="937" cy="628" r="9"/><circle class="dot off" cx="1117" cy="628" r="9"/><circle class="dot off" cx="1223" cy="628" r="9"/><circle class="dot off" cx="1329" cy="628" r="9"/><circle class="dot off" cx="1435" cy="628" r="9"/><circle class="dot off" cx="725" cy="856" r="9"/><circle class="dot off" cx="831" cy="856" r="9"/><circle class="dot off" cx="937" cy="856" r="9"/><circle class="dot off" cx="1117" cy="856" r="9"/><circle class="dot off" cx="1223" cy="856" r="9"/><circle class="dot off" cx="1329" cy="856" r="9"/><circle class="dot off" cx="1435" cy="856" r="9"/><circle class="dot on" cx="725" cy="400" r="9"/><circle class="dot on" cx="937" cy="400" r="9"/><circle class="dot on" cx="1117" cy="400" r="9"/><circle class="dot on" cx="1223" cy="400" r="9"/><circle class="dot on" cx="1329" cy="400" r="9"/><circle class="dot on" cx="1435" cy="400" r="9"/><rect class="dia on" x="621" y="614" width="28" height="28" transform="rotate(45 635 628)"/><rect class="dia off" x="1013" y="614" width="28" height="28" transform="rotate(45 1027 628)"/><circle class="endc on" cx="1533" cy="400" r="15"/><circle class="endc off" cx="1533" cy="628" r="15"/><circle class="endc off" cx="1533" cy="856" r="15"/></svg>
+    <div class="layer rv" style="--d:.25s"><p class="q on" style="left:405px;top:226px">2030 · ¿Quién paga el tutor de IA?</p><p class="q off" style="left:797px;top:226px">2033 · ¿Qué ley de datos sale?</p><p class="ev above on" style="left:241px;top:614px">Prohibir la IA fracasa: se regula su uso</p><p class="ev below on" style="left:347px;top:644px">Starlink conecta escuelas, no hogares</p><p class="ev above on" style="left:454px;top:614px">Menos alumnos: grupos por proyecto</p><p class="ev below off" style="left:633px;top:644px">Pilotos públicos de tutor IA</p><p class="ev above off" style="left:739px;top:614px">Baja el abandono; más provincias</p><p class="ev below off" style="left:845px;top:644px">Régimen federal sin repitencia</p><p class="ev above off" style="left:1025px;top:614px">Ley de datos y agente público sin conexión</p><p class="ev below off" style="left:1131px;top:644px">El docente pasa a guiar proyectos</p><p class="ev above off" style="left:1237px;top:614px">La bitácora reemplaza al boletín</p><p class="ev below off" style="left:1343px;top:644px">Se acepta el título-portfolio</p><p class="ev below off" style="left:633px;top:872px">Ley de Libertad Educativa</p><p class="ev above off" style="left:739px;top:842px">Tutor gratis, pagado con datos</p><p class="ev below off" style="left:845px;top:872px">Se pide el puntaje de proceso</p><p class="ev above off" style="left:1025px;top:842px">El agente depende de la nube</p><p class="ev below off" style="left:1131px;top:872px">La ley de datos llega tarde</p><p class="ev above off" style="left:1237px;top:842px">Un docente supervisa varias secciones</p><p class="ev below off" style="left:1343px;top:872px">El puntaje pesa más que el título</p><p class="ev below on" style="left:633px;top:416px">Pilotos pagados por empresas</p><p class="ev above on" style="left:845px;top:386px">Prohíben que la IA registre a menores de 16</p><p class="ev below on" style="left:1025px;top:416px">La evaluación del proceso se hace a mano</p><p class="ev above on" style="left:1131px;top:386px">Más tutorías humanas, en grupos chicos</p><p class="ev below on" style="left:1237px;top:416px">IA en la sombra, en casa</p><p class="ev above on" style="left:1343px;top:386px">Títulos con muestras ante tribunales</p><div class="end on" style="left:1563px;top:378px"><b>Aula sin agente</b><span>Evaluación a mano; la IA queda en casa, sin reglas</span></div><div class="end off" style="left:1563px;top:606px"><b>Tutoría permanente</b><span>Agente público sin conexión y título-portfolio</span></div><div class="end off" style="left:1563px;top:834px"><b>Tutor de mercado</b><span>Gratis, pagado con datos; se corta en el pueblo</span></div><p class="yr" style="left:293px">2027</p><p class="yr" style="left:399px">2028</p><p class="yr" style="left:506px">2029</p><p class="yr" style="left:641px">2030</p><p class="yr" style="left:791px">2031</p><p class="yr" style="left:897px">2032</p><p class="yr" style="left:1031px">2033</p><p class="yr" style="left:1183px">2035</p><p class="yr" style="left:1289px">2036</p><p class="yr" style="left:1395px">2038</p><p class="yr" style="left:1493px">2040</p></div>
+    <aside class="notes">Integrante 3 · 0:20
+Si los pilotos los pagan empresas y hay una filtración, una ley prohíbe que la IA registre datos de menores de 16. La escuela vuelve a evaluar el proceso a mano y la IA queda en casa, sin reglas.</aside>
+  </section>
+
+  <!-- ===== 17 ===== -->
+  <section class="slide " data-n="17">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">17</span>
+    <h2 class="title rv">Lo que pensamos primero</h2>
+    <div class="idea rv" style="left:248px;top:250px;--d:0.12s">
+      <div class="photo"><img src="img/s17_1.jpg" alt=""></div>
+      <h3>La compu</h3>
+      <p>Un tutor de IA en las computadoras que la escuela ya tiene.</p>
+    </div>
+    <div class="idea rv" style="left:570px;top:250px;--d:0.22s">
+      <div class="photo"><img src="img/s17_2.jpg" alt=""></div>
+      <h3>Un iPad</h3>
+      <p>Un tutor portátil que se lleva a casa y al barrio.</p>
+    </div>
+    <div class="idea rv" style="left:892px;top:250px;--d:0.32s">
+      <div class="photo"><img src="img/s17_3.jpg" alt=""></div>
+      <h3>Proyecciones</h3>
+      <p>Explicaciones en grande para que todo el grupo las vea.</p>
+    </div>
+    <div class="idea rv" style="left:1214px;top:250px;--d:0.42s">
+      <div class="photo"><img src="img/s17_4.jpg" alt=""></div>
+      <h3>Pizarrón inteligente</h3>
+      <p>Una superficie donde el docente y los equipos trabajan juntos.</p>
+    </div>
+    <div class="idea rv" style="left:1536px;top:250px;--d:0.52s">
+      <div class="photo"><img src="img/s17_5.jpg" alt=""></div>
+      <h3>Gafas con IA</h3>
+      <p>Un tutor propio que explica sobre el mundo real.</p>
+    </div>
+    <span class="mark box" style="left:1514px;top:226px;width:334px;height:606px;--d:1s"><svg viewBox="0 0 300 600" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M22 12 C 110 4, 220 6, 287 15 C 296 160, 298 360, 291 585 C 200 596, 92 594, 13 587 C 5 420, 4 200, 11 24 L 64 9"/></svg></span>
+    <p class="chosen-note rv" style="left:1536px;top:762px;--d:1.3s">La elegida</p>
+    <aside class="notes">Integrante 4 · 0:30
+
+Texto para decir:
+"Del escenario salieron cinco ideas de dispositivo. Las primeras cuatro ponen al tutor en una pantalla o en el aula: la compu que la escuela ya tiene, un iPad que se lleva a todos lados, proyecciones y un pizarrón inteligente para todo el grupo. Cada una resolvía una parte: la compu y el iPad daban un tutor para cada uno, las proyecciones y el pizarrón mantenían al grupo junto. Las gafas fueron la única que hacía las dos cosas, y en la diapo siguiente mostramos por qué."
+
+Las proyecciones y el pizarrón no se descartaron del todo: siguen en el ecosistema, en la escuela-nodo.</aside>
+  </section>
+
+  <!-- ===== 18 ===== -->
+  <section class="slide " data-n="18">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">18</span>
+    <h2 class="title rv">A lo que llegamos</h2>
+    <a class="glasses-link rv" href="https://drive.google.com/file/d/1nwDpN_FF2NscM_xSCfE9uelEsyd-xFLi/view" target="_blank" rel="noopener" style="--d:.2s"><figure class="glasses photo"><div class="ph-in"><img src="img/s18_1.jpg" alt="Anteojos TUTOR 2040 sobre un bloque de hormigón"><span class="mark led" style="--d:1.1s"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M52 6 C 82 6, 96 30, 94 52 C 92 78, 70 94, 46 92 C 20 90, 4 72, 6 48 C 8 24, 28 8, 60 10"/></svg></span></div></figure></a>
+    <p class="caption rv" style="left:248px;top:776px;width:800px;--d:.35s">TUTOR 2040: Anteojos comunes con el tutor de IA integrado. La luz naranja del marco avisa cuando graba.</p>
+    <a class="video-link rv" href="https://drive.google.com/file/d/1nwDpN_FF2NscM_xSCfE9uelEsyd-xFLi/view" target="_blank" rel="noopener" style="left:248px;top:874px;--d:.45s">Ver el video de presentación de TUTOR</a>
+    <div class="flow rv" style="left:1128px;top:294px;width:696px;--d:.3s">
+      <h3 class="h-product">Gafas de realidad aumentada con un tutor de IA</h3>
+      <p class="txt-f" style="margin-top:48px">La única de las cinco ideas que le da a cada estudiante un tutor propio sin sacarlo del grupo.</p>
+      <p class="txt-f" style="margin-top:48px"><b>Se maneja con la voz</b>: Lu le habla como a una persona.</p>
+      <p class="txt-f"><b>Explica sobre lo que Lu mira</b>: dibuja encima del cuaderno, la tienda o la plaza.</p>
+    </div>
+    <aside class="notes">Integrante 4 · 0:30
+Nos quedamos con el agente tutor en gafas: explica dibujando sobre el mundo real, como complemento del aula y con el docente como acompañante.
+Si preguntan por qué gafas y no una tablet: una tablet también le da un tutor a cada uno, pero deja la mirada en la pantalla y a cada chico solo con la suya. En el mundo de Lu se aprende por proyectos, en grupo y fuera del aula: en la tienda de su familia, entrevistando a vecinos, en la plaza. Con las gafas, el tutor explica sobre lo que Lu está mirando y ella sigue con la cabeza levantada, hablando con los demás. En la diapo siguiente lo comparamos punto por punto.</aside>
+  </section>
+
+  <!-- ===== 19 ===== -->
+  <section class="slide " data-n="19">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">19</span>
+    <h2 class="title rv">Por qué elegimos las gafas</h2>
+    <div class="hl hl-h" style="left:232px;top:488px;width:1600px;height:50px;--d:.6s"></div>
+    <div class="layer rv" style="--d:.15s"><p class="th c" style="left:604px;top:202px;width:244px">Un tutor para<br>cada uno</p><p class="th c" style="left:848px;top:202px;width:244px">Acompaña<br>fuera del aula</p><p class="th c" style="left:1092px;top:202px;width:244px">Explica sobre<br>el mundo real</p><p class="th c" style="left:1336px;top:202px;width:244px">No aísla del<br>grupo</p><p class="th c" style="left:1580px;top:202px;width:244px">Costo<br>potencial</p><p class="td lab" style="left:248px;top:298px">La compu</p><p class="td c" style="left:604px;top:298px;width:244px">Sí</p><p class="td c no" style="left:848px;top:298px;width:244px">No</p><p class="td c no" style="left:1092px;top:298px;width:244px">No</p><p class="td c no" style="left:1336px;top:298px;width:244px">No</p><p class="td c" style="left:1580px;top:298px;width:244px">Bajo</p><p class="td lab" style="left:248px;top:346px">Un iPad</p><p class="td c" style="left:604px;top:346px;width:244px">Sí</p><p class="td c" style="left:848px;top:346px;width:244px">Sí</p><p class="td c" style="left:1092px;top:346px;width:244px">A medias</p><p class="td c no" style="left:1336px;top:346px;width:244px">No</p><p class="td c" style="left:1580px;top:346px;width:244px">Medio</p><p class="td lab" style="left:248px;top:394px">Proyecciones</p><p class="td c no" style="left:604px;top:394px;width:244px">No</p><p class="td c no" style="left:848px;top:394px;width:244px">No</p><p class="td c" style="left:1092px;top:394px;width:244px">A medias</p><p class="td c" style="left:1336px;top:394px;width:244px">Sí</p><p class="td c" style="left:1580px;top:394px;width:244px">Bajo</p><p class="td lab" style="left:248px;top:442px">Pizarrón inteligente</p><p class="td c no" style="left:604px;top:442px;width:244px">No</p><p class="td c no" style="left:848px;top:442px;width:244px">No</p><p class="td c no" style="left:1092px;top:442px;width:244px">No</p><p class="td c" style="left:1336px;top:442px;width:244px">Sí</p><p class="td c" style="left:1580px;top:442px;width:244px">Medio</p><p class="td lab star" style="left:248px;top:490px">Gafas con IA</p><p class="td c star" style="left:604px;top:490px;width:244px">Sí</p><p class="td c star" style="left:848px;top:490px;width:244px">Sí</p><p class="td c star" style="left:1092px;top:490px;width:244px">Sí</p><p class="td c star" style="left:1336px;top:490px;width:244px">Sí</p><p class="td c star" style="left:1580px;top:490px;width:244px">Medio</p></div>
+    <p class="stat-v rv" style="left:248px;top:602px;--d:0.45s">65%</p>
+    <p class="txt rv" style="left:248px;top:682px;width:470px;--d:0.50s">se distrae con pantallas en clase de matemática (PISA 2022)</p>
+    <p class="stat-v rv" style="left:789px;top:602px;--d:0.55s">Efecto medio</p>
+    <p class="txt rv" style="left:789px;top:682px;width:470px;--d:0.60s">de la realidad aumentada en el aprendizaje (meta-análisis, 2019)</p>
+    <p class="stat-v rv" style="left:1330px;top:602px;--d:0.65s">×2</p>
+    <p class="txt rv" style="left:1330px;top:682px;width:470px;--d:0.70s">crecen las ventas de gafas inteligentes de 2026 a 2030 (IDC)</p>
+    <p class="sources rv" style="top:836px;--d:.7s">Fuentes: OCDE, PISA 2022; Garzón, Pavón y Baldiris (2019), Virtual Reality; IDC (2026).</p>
+    <aside class="notes">Integrante 4 · 0:45
+
+Texto para decir:
+"Para elegir, comparamos las cinco ideas con lo que pide el mundo de Lu. La compu y el iPad dan un tutor para cada uno, pero dejan la mirada en la pantalla: en PISA 2022, el 65% de los chicos de 15 años dice que se distrae con pantallas en matemática. Las proyecciones y el pizarrón mantienen al grupo junto, pero son iguales para todos. Las gafas son las únicas que cumplen las cuatro condiciones: un tutor propio, que acompaña también fuera del aula, que explica sobre el mundo real sin bajar la cabeza. Y la realidad aumentada tiene un efecto medio comprobado sobre el aprendizaje. El costo es lo que más se discute, pero el mercado de gafas inteligentes se duplica hacia 2030 y con más escala el precio baja: para 2040 suponemos un costo parecido al de una tablet."
+
+Si preguntan:
+- Pizarrones: en escuelas de Londres, los pizarrones interactivos no cambiaron el rendimiento de los alumnos (Moss et al., Institute of Education, 2007).
+- Compus: UNESCO (Informe GEM 2023) dice que repartir computadoras no mejora el aprendizaje si los docentes no participan. En Argentina, en un relevamiento de la UNLP sobre Conectar Igualdad, 109 de 134 escuelas dijeron que sus docentes necesitaban capacitación para usar las netbooks.
+- Realidad aumentada: meta-análisis de Garzón, Pavón y Baldiris (2019, Virtual Reality), efecto medio d = 0,64.
+- Escala: IDC proyecta que las ventas de gafas inteligentes pasen de 13,6 millones de unidades en 2026 a 27,3 millones en 2030.</aside>
+  </section>
+
+  <!-- ===== 20 ===== -->
+  <section class="slide " data-n="20">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">20</span>
+    <h2 class="title rv">El agente propone, el docente decide</h2>
+    <figure class="dash-shot photo rv" style="--d:.2s"><img src="img/s20_1.jpg" alt="Tablero docente de TUTOR: lista de estudiantes con su autonomía y la bitácora de Lu"></figure>
+    <aside class="notes">Integrante 1 · 1:00
+
+Texto para decir:
+"Hasta acá vimos TUTOR desde Lu. Pero uno de los tres ejes que investigamos fue el rol docente: si cada alumno tiene un tutor, ¿qué hace el docente? En el storyboard, Marta decide. Esto es lo que ve en su tablero. A la izquierda, cada estudiante con su autonomía: cuántas veces resolvió sin pedirle la respuesta al agente. Los puntos naranjas son alertas: alguien trabado o que dejó de participar. A la derecha, la bitácora de Lu: cómo usa el tutor, qué conceptos domina y cuáles está aprendiendo, y evidencias concretas, como una explicación con sus palabras. Esto reemplaza al boletín. El agente le muestra el proceso, pero la que decide qué hacer es Marta. Y Lu ve exactamente esta misma vista."
+
+Si preguntan si lo probaron con docentes: el test fue con estudiantes; la vista docente es lo próximo que probaríamos.
+Mockup interactivo (compartirlo antes de presentar): https://claude.ai/artifact/1LebmTVddGmJP7hoBSTXcX</aside>
+  </section>
+
+  <!-- ===== 21 ===== -->
+  <section class="slide " data-n="21">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">21</span>
+    <h2 class="title rv">El test con estudiantes</h2>
+    <h3 class="h-col big-h rv" style="left:248px;top:295px;--d:.15s">Qué probamos</h3>
+    <ul class="dash q-list rv" style="left:248px;top:394px;width:700px;--d:.25s"><li>¿Se entiende cómo hablarle?</li><li>¿Guía sin dar la respuesta?</li><li>¿Se lo puede callar?</li><li>¿Los tips suenan a órdenes?</li></ul>
+    <p class="placeholder rv" style="left:248px;top:682px;--d:.35s">[Completar con participantes] · 14 a 17 años</p>
+    <h3 class="h-col big-h rv" style="left:1056px;top:295px;--d:.2s">Qué encontramos</h3>
+    <p class="placeholder rv" style="left:1056px;top:394px;width:740px;--d:.3s">[Completar con hallazgos del test y frases textuales de los participantes]</p>
+    <aside class="notes">Integrante 4 · 0:45
+[Completar con los resultados del test: qué hipótesis se confirmaron, frases textuales y qué cambió por cada hallazgo.]</aside>
+  </section>
+
+  <!-- ===== 22 ===== -->
+  <section class="slide " data-n="22">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">22</span>
+    <h2 class="title rv">Impacto del escenario elegido</h2>
+    <div class="flow rv" style="left:248px;top:295px;width:740px;--d:0.15s">
+      <h3 class="h-col big-h">Político</h3>
+      <p class="key">¿Quién pone el agente y de quién son los datos?</p>
+      <p class="detail">Si la ley de datos de 2033 no sale, el agente lo pone una empresa.</p>
+    </div>
+    <div class="flow rv" style="left:1064px;top:295px;width:740px;--d:0.25s">
+      <h3 class="h-col big-h">Social</h3>
+      <p class="key">La brecha pasa del acceso al entorno.</p>
+      <p class="detail">Las edades se mezclan: los más grandes guían a los más chicos.</p>
+    </div>
+    <div class="flow rv" style="left:248px;top:583px;width:740px;--d:0.35s">
+      <h3 class="h-col big-h">Económico</h3>
+      <p class="key">Agente público o gratis a cambio de datos.</p>
+      <p class="detail">Starlink cubre dos años; después, la conexión depende del presupuesto.</p>
+    </div>
+    <div class="flow rv" style="left:1064px;top:583px;width:740px;--d:0.45s">
+      <h3 class="h-col big-h">Cultural</h3>
+      <p class="key">Sin notas: aprobar es dejar rastro.</p>
+      <p class="detail">La abuela todavía pregunta: «¿Pero cuánto se sacó?»</p>
+    </div>
+    <aside class="notes">Integrante 4 · 1:45
+Político: si la ley de 2033 no sale, el agente lo provee una empresa. Social: mezclar edades hace que los más grandes guíen a los más chicos. Económico: Starlink cubre dos años y después depende del presupuesto; las gafas hoy cuestan más que una tablet, aunque para 2040 suponemos un costo parecido. Cultural: la abuela que todavía pregunta “¿pero cuánto se sacó?”.</aside>
+  </section>
+
+  <!-- ===== 23 ===== -->
+  <section class="slide closing-slide" data-n="23">
+    <div class="ruled"></div><div class="margin-line"></div><span class="pg">23</span>
+    <h2 class="closing rv" style="top:362px">Una escuela para todos,<br>un tutor para cada uno.</h2>
+    <p class="txt rv" style="left:248px;top:778px;font-size:30px;--d:.4s">Test de usabilidad: <a class="ink-link" href="https://santosdelosrios.github.io/test-usabilidad-DI/" target="_blank" rel="noopener">santosdelosrios.github.io/test-usabilidad-DI</a></p>
+    <aside class="notes">Integrante 4 · 0:30
+Cerramos con el producto en una frase: un piso común para todos y un tutor propio para cada estudiante. TUTOR toma partido en las tensiones que vimos: la luz naranja avisa cuando graba, Lu controla su panel de datos y el docente decide. Dejar en pantalla el link del prototipo para quien quiera probarlo.</aside>
+  </section>
+</main>
+</div>
+
+<div class="deck-ui">
+  <div class="deck-controls" id="counter">1 / 23</div>
+  <div class="notes-box" id="notesBox" aria-live="polite"></div>
+  <div class="edit-hotzone" id="editHotzone"></div>
+  <button class="edit-toggle" id="editToggle" title="Editar textos (E)">Editar</button>
+</div>
+
+<script>
+/* =====================================================================
+   DECK CONTROLLER
+   ← → / espacio / PageUp-Down / clic (mitad derecha avanza) / swipe
+   N: notas del orador · E: editar textos · F: pantalla completa
+   #n en la URL abre la diapo n
+   ===================================================================== */
+(function () {
+  const stage = document.getElementById('deckStage');
+  const slides = [...stage.querySelectorAll('.slide')];
+  const counter = document.getElementById('counter');
+  const notesBox = document.getElementById('notesBox');
+  const editToggle = document.getElementById('editToggle');
+  const hotzone = document.getElementById('editHotzone');
+  let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1)) || 1) - 1));
+  let editing = false;
+
+  /* --- scale the fixed 1920×1080 stage to the window --- */
+  function fit() {
+    const f = Math.min(innerWidth / 1920, innerHeight / 1080);
+    stage.style.transform = `translate(${(innerWidth - 1920 * f) / 2}px, ${(innerHeight - 1080 * f) / 2}px) scale(${f})`;
+  }
+  function show(n) {
+    i = Math.max(0, Math.min(n, slides.length - 1));
+    slides.forEach((s, k) => { s.classList.toggle('active', k === i); s.classList.toggle('visible', k === i); });
+    counter.textContent = `${i + 1} / ${slides.length}   ·   ← →   ·   N notas   ·   E editar`;
+    const note = slides[i].querySelector('.notes');
+    notesBox.textContent = note ? note.textContent : '(sin notas)';
+    try { history.replaceState(null, '', '#' + (i + 1)); } catch (e) {}
+  }
+  addEventListener('resize', fit); fit(); show(i);
+
+  /* --- counter fades out when idle --- */
+  let t; const wake = () => { counter.classList.remove('hide'); clearTimeout(t); t = setTimeout(() => counter.classList.add('hide'), 2500); };
+  addEventListener('mousemove', wake); wake();
+
+  /* --- keyboard --- */
+  addEventListener('keydown', e => {
+    if (e.target.isContentEditable) { if (e.key === 'Escape') setEdit(false); return; }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveFile(); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key;
+    if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(k)) { e.preventDefault(); show(i + 1); wake(); }
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(k)) { e.preventDefault(); show(i - 1); wake(); }
+    else if (k === 'Home') show(0);
+    else if (k === 'End') show(slides.length - 1);
+    else if (k === 'n' || k === 'N') notesBox.classList.toggle('show');
+    else if (k === 'e' || k === 'E') setEdit(!editing);
+    else if (k === 'f' || k === 'F') { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }
+  });
+
+  /* --- click / tap / swipe / wheel --- */
+  let swiped = false, tx = null;
+  addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  addEventListener('touchend', e => {
+    if (tx === null) return; const d = e.changedTouches[0].clientX - tx; tx = null;
+    if (Math.abs(d) > 50 && !editing) { swiped = true; show(d < 0 ? i + 1 : i - 1); setTimeout(() => swiped = false, 400); }
+  });
+  addEventListener('click', e => {
+    if (swiped || editing || e.target.closest('a, .deck-ui')) return;
+    show(e.clientX > innerWidth / 2 ? i + 1 : i - 1);
+  });
+  let wheelLock = false;
+  addEventListener('wheel', e => {
+    if (editing || wheelLock || Math.abs(e.deltaY) < 30) return;
+    wheelLock = true; show(e.deltaY > 0 ? i + 1 : i - 1); setTimeout(() => wheelLock = false, 700);
+  }, { passive: true });
+
+  /* =====================================================================
+     INLINE EDITING — E o botón arriba a la izquierda. Se guarda solo en
+     este navegador; Ctrl+S descarga una copia del HTML con los cambios.
+     ===================================================================== */
+  const EDITABLE = 'h1, h2, h3, p, li, figcaption, .big, .num, .end b, .end span';
+  const KEY = 'cuaderno-grupo3-v1';
+  const nodes = [...stage.querySelectorAll(EDITABLE)].filter(el => !el.closest('.notes'));
+  try {
+    const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (Array.isArray(saved) && saved.length === nodes.length) nodes.forEach((el, k) => { if (saved[k] !== null) el.innerHTML = saved[k]; });
+  } catch (e) {}
+  let saveT;
+  function persist() {
+    clearTimeout(saveT);
+    saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(nodes.map(el => el.innerHTML))); } catch (e) {} }, 300);
+  }
+  function setEdit(on) {
+    editing = on;
+    document.body.classList.toggle('editing', on);
+    nodes.forEach(el => { if (on) el.setAttribute('contenteditable', 'true'); else el.removeAttribute('contenteditable'); });
+    editToggle.classList.toggle('active', on);
+    editToggle.textContent = on ? 'Listo' : 'Editar';
+    if (!on) { persist(); editToggle.classList.remove('show'); }
+  }
+  stage.addEventListener('input', persist);
+  function saveFile() {
+    const wasEditing = editing; if (wasEditing) setEdit(false);
+    const doc = document.documentElement.cloneNode(true);
+    doc.querySelectorAll('[contenteditable]').forEach(el => el.removeAttribute('contenteditable'));
+    doc.querySelector('body').classList.remove('editing');
+    doc.querySelectorAll('.slide').forEach(s => s.classList.remove('active', 'visible'));
+    doc.querySelector('#deckStage').removeAttribute('style');
+    const blob = new Blob(['<!DOCTYPE html>\n' + doc.outerHTML], { type: 'text/html' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'index.html'; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    if (wasEditing) setEdit(true);
+  }
+  let hideT = null;
+  const showBtn = () => { clearTimeout(hideT); editToggle.classList.add('show'); };
+  const hideBtn = () => { hideT = setTimeout(() => { if (!editing) editToggle.classList.remove('show'); }, 400); };
+  hotzone.addEventListener('mouseenter', showBtn); hotzone.addEventListener('mouseleave', hideBtn);
+  editToggle.addEventListener('mouseenter', showBtn); editToggle.addEventListener('mouseleave', hideBtn);
+  hotzone.addEventListener('click', e => { e.stopPropagation(); setEdit(!editing); });
+  editToggle.addEventListener('click', e => { e.stopPropagation(); setEdit(!editing); });
+})();
+</script>
+</body>
+</html>
